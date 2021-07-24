@@ -6,3 +6,9 @@ It has a major bug where the ball will just go through the brick and I dont know
 The folder structure is as I uploaded so it always builds to Game/bin.
 The program I use is Embarcadero Dev C++.
 Either build it or run the exe launcher in Game folder.
+
+Controls: <br />
+- "A" and "D" for left and right
+- "P" to pause
+- "Q" to quit
+- "R" to reset

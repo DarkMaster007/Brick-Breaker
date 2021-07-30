@@ -7,12 +7,12 @@ WINDRES  = windres.exe
 RES      = Brick_Breaker_private.res
 OBJ      = main.o $(RES)
 LINKOBJ  = main.o $(RES)
-LIBS     = -L"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/lib" -L"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/mingw32/lib" -static-libgcc -lbgi -lgdi32 -lcomdlg32 -luuid -loleaut32 -lole32 -lwinmm -m32 -mwindows -s
+LIBS     = -L"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/lib" -L"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/mingw32/lib" -static-libgcc -lbgi -lgdi32 -lcomdlg32 -luuid -loleaut32 -lole32 -lwinmm -m32
 INCS     = -I"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/include" -I"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/lib/gcc/mingw32/4.4.1/include"
 CXXINCS  = -I"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/include" -I"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/lib/gcc/mingw32/4.4.1/include" -I"D:/Programe/Dev-Cpp (Embarcadero Edition)/MinGW/lib/gcc/mingw32/4.4.1/include/c++"
 BIN      = Game/bin/Game.exe
-CXXFLAGS = $(CXXINCS) -Os -m32 -mwindows -std=c++0x
-CFLAGS   = $(INCS) -Os -m32 -mwindows -std=c++0x
+CXXFLAGS = $(CXXINCS) -Os -m32 -std=c++0x
+CFLAGS   = $(INCS) -Os -m32 -std=c++0x
 DEL      = D:\Programe\Dev-Cpp (Embarcadero Edition)\devcpp.exe INTERNAL_DEL
 
 .PHONY: all all-before all-after clean clean-custom

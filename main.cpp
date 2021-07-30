@@ -120,6 +120,9 @@ class cGameManager {
 		int quit;
 		eDir old_dir;
 		char wnd[15];
+		bool secret;
+		string pass;
+		int cheat_auto, cheat_instakill, cheat_explosion;
 	public:
 		cGameManager(int width = 650, int height = 480,string wnd_name = "Brick Breaker") {
 			w = width;
@@ -135,6 +138,8 @@ class cGameManager {
 			paddle = new cPaddle(w / 2, h - 35);
 			quit = 0;
 			pause = 0;
+			secret = 0;
+			cheat_auto = 0, cheat_instakill = 0, cheat_explosion = 0;
 			lvl_builder.clear();
 			lvl_builder.seekg(0, std::ios::beg);
 			settings.clear();
@@ -161,6 +166,24 @@ class cGameManager {
 			} else {
 				return 0;
 			}
+		}
+		void cheats() {
+			//auto
+			if(cheat_auto) {
+				cout<< cheat_auto <<endl;
+				if(ball->getX() > paddle->getX()) {
+					cout << "LEFT" << endl;
+					paddle->moveLeft();
+				} else {
+					cout << "RIGHT" << endl;
+					paddle->moveRight();
+				}
+			}
+			//instakill
+			//explosion ?
+		}
+		void secrets() {
+
 		}
 		void Draw() {
 			cleardevice();
@@ -201,30 +224,38 @@ class cGameManager {
 		}
 		void Input() {
 			ball->Move();
-			if(GetAsyncKeyState('A')) {
-				paddle->moveLeft();
-			}
-			if(GetAsyncKeyState('D')) {
-				paddle->moveRight();
-			}
-			if(GetAsyncKeyState('R')) {
-				ball->Reset();
-				paddle->Reset();
-			}
-			if(GetAsyncKeyState('Q')) {
-				quit = 1;
-			}
-			if(GetAsyncKeyState('P')) {
-				pause = !pause;
-				if(pause == 1) {
-					old_dir = ball->getDirection();
-					ball->changeDirection(STOP);
-				} else {
-					ball->changeDirection(old_dir);
+				if(GetAsyncKeyState('A')) {
+					paddle->moveLeft();
 				}
-				delay(50);
-			}
-
+				if(GetAsyncKeyState('D')) {
+					paddle->moveRight();
+				}
+				if(GetAsyncKeyState('R')) {
+					ball->Reset();
+					paddle->Reset();
+				}
+				if(GetAsyncKeyState('Q')) {
+					quit = 1;
+				}
+				if(GetAsyncKeyState('P')) {
+					pause = !pause;
+					if(pause == 1) {
+						old_dir = ball->getDirection();
+						ball->changeDirection(STOP);
+					} else {
+						ball->changeDirection(old_dir);
+					}
+					delay(50);
+				}
+				if(GetKeyState(VK_CONTROL) & GetKeyState('X')) {
+					cheat_auto = !cheat_auto;
+					delay(110);
+				}
+				if(GetKeyState(VK_CONTROL) & GetKeyState('I')) {
+					cheat_instakill = !cheat_instakill;
+					delay(110);
+					cout<< "Instakill Cheat Switched" << endl;
+				}
 		}
 		void Logic() {
 			int ballX = ball->getX();

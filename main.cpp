@@ -123,6 +123,7 @@ class cGameManager {
 		bool secret;
 		string pass;
 		int cheat_auto, cheat_instakill, cheat_explosion;
+		char cheat;
 	public:
 		cGameManager(int width = 650, int height = 480,string wnd_name = "Brick Breaker") {
 			w = width;
@@ -169,23 +170,26 @@ class cGameManager {
 		}
 		void cheats() {
 			//auto
+			int ballX = ball->getX();
+			int ballY = ball->getY();
+			int paddleX = paddle->getX();
 			if(cheat_auto) {
-				cout<< cheat_auto <<endl;
-				if(ball->getX() > paddle->getX()) {
-					cout << "LEFT" << endl;
+				if(ballX > paddleX + offset - 2 & ballY > (h - h / 3)) {
+					//cout << "Right" << endl;
+					paddle->moveRight();
+				} else if(ballX < paddleX - offset + 2 & ballY > (h - h / 3)) {
+					//cout << "Left" << endl;
 					paddle->moveLeft();
 				} else {
-					cout << "RIGHT" << endl;
-					paddle->moveRight();
+					//cout << "No action required" << endl;
 				}
 			}
 			//instakill
 			//explosion ?
 		}
-		void secrets() {
-
-		}
 		void Draw() {
+			int bar_x = (bar_w + offset);
+			int bar_y = (bar_h + offset);
 			cleardevice();
 			// Edge draw
 			bar(0,0,offset,h);
@@ -203,20 +207,31 @@ class cGameManager {
 			int ballY = ball->getY();
 			int ballRad = 10;
 			circle(ballX,ballY,ballRad);
-			/*line(ballX - 15,ballY,ballX + 15,ballY);
-			outtextxy(ballX + 25, ballY - 10,"Y");
+
+			// Guiding X and Y lines for ball
+			line(ballX - 15,ballY,ballX + 15,ballY);
+			outtextxy(ballX + 25, ballY - 10,"bY");
 			line(ballX,ballY - 15,ballX,ballY + 15);
-			outtextxy(ballX, ballY + 25,"X");*/
+			outtextxy(ballX, ballY + 25,"bX");
+			// Guiding X and Y lines for paddle
+			line(paddleX - 30,paddleY,paddleX + 30,paddleY);
+			outtextxy(paddleX + 25, paddleY - 10,"pY");
+			line(paddleX,paddleY - 30,paddleX,paddleY + 30);
+			outtextxy(paddleX, paddleY + 25,"pX");
 
 			// Brick draw
 			//	lvl_builder.clear();
 			//	lvl_builder.seekg(0);
-			int bar_x = (bar_w + offset);
-			int bar_y = (bar_h + offset);
 			for(int i = 0; i < brick_w; i++) {
 				for(int j = 0; j < brick_h; j++) {
 					if(brick[i][j]) {
-						bar(i * bar_x + (offset * 2), j * bar_y + (offset * 2), i * bar_x +(offset * 2) + bar_w, j * bar_y +(offset * 2) + bar_h);
+						bar(i * bar_x + (offset * 2), j * bar_y + (offset * 2), i * bar_x + (offset * 2) + bar_w, j * bar_y + (offset * 2) + bar_h);
+						setcolor(RED);
+						setlinestyle(SOLID_LINE,1,4);
+						line(i * bar_x + (offset * 2),j * bar_y + (offset * 2),i * bar_x + (offset * 2), j * bar_y + (offset * 2) + 40);
+						line(i * bar_x + offset * 2, j * bar_y + offset * 2, i * bar_x + offset * 2 + 40, j * bar_y + offset * 2);
+						setcolor(WHITE);
+						setlinestyle(SOLID_LINE,1,1);
 					}
 				}
 			}
@@ -224,38 +239,47 @@ class cGameManager {
 		}
 		void Input() {
 			ball->Move();
-				if(GetAsyncKeyState('A')) {
-					paddle->moveLeft();
+			if(GetAsyncKeyState('A')) {
+				paddle->moveLeft();
+			}
+			if(GetAsyncKeyState('D')) {
+				paddle->moveRight();
+			}
+			if(GetAsyncKeyState('R')) {
+				ball->Reset();
+				paddle->Reset();
+			}
+			if(GetAsyncKeyState('Q')) {
+				quit = 1;
+			}
+			if(GetAsyncKeyState('P')) {
+				pause = !pause;
+				if(pause == 1) {
+					old_dir = ball->getDirection();
+					ball->changeDirection(STOP);
+				} else {
+					ball->changeDirection(old_dir);
 				}
-				if(GetAsyncKeyState('D')) {
-					paddle->moveRight();
+				delay(50);
+			}
+			if(GetAsyncKeyState(VK_F1) & 0x8000) {
+				cheat_auto = !cheat_auto;
+				if(cheat_auto) {
+					cout << "Auto Activated" << endl;
+				} else {
+					cout << "Auto Deactivated" << endl;
 				}
-				if(GetAsyncKeyState('R')) {
-					ball->Reset();
-					paddle->Reset();
+				delay(100);
+			}
+			if(GetKeyState(VK_F2) & 0x8000) {
+				cheat_instakill = !cheat_instakill;
+				if(cheat_instakill) {
+					cout << "Instakill Activated" << endl;
+				} else {
+					cout << "Instakill Deactivated" << endl;
 				}
-				if(GetAsyncKeyState('Q')) {
-					quit = 1;
-				}
-				if(GetAsyncKeyState('P')) {
-					pause = !pause;
-					if(pause == 1) {
-						old_dir = ball->getDirection();
-						ball->changeDirection(STOP);
-					} else {
-						ball->changeDirection(old_dir);
-					}
-					delay(50);
-				}
-				if(GetKeyState(VK_CONTROL) & GetKeyState('X')) {
-					cheat_auto = !cheat_auto;
-					delay(110);
-				}
-				if(GetKeyState(VK_CONTROL) & GetKeyState('I')) {
-					cheat_instakill = !cheat_instakill;
-					delay(110);
-					cout<< "Instakill Cheat Switched" << endl;
-				}
+				delay(100);
+			}
 		}
 		void Logic() {
 			int ballX = ball->getX();
@@ -297,11 +321,10 @@ class cGameManager {
 				}
 			}*/
 			// Brick collision
-			// Note: left and top are the actual values
 			for(int i = 0; i < brick_w; i++) {
 				for(int j = 0; j < brick_h; j++) {
 					if(brick[i][j]) {
-						// Bottom edge; Ball y position, ball edge > brick
+						// Bottom edge
 						if((ballY - ballRad > j * bar_y + (offset * 2) + bar_h + 1 & ballY - ballRad < j * bar_y + (offset * 2) + bar_h + ballRad / 2 + (offset / 2 - 1)) & (ballX > i * bar_x + (offset * 2) & ballX < i * bar_x + (offset * 2) + bar_w)) {
 							ball->changeDirection(ball->getDirection() == UPLEFT ? DOWNLEFT : DOWNRIGHT);
 							brick[i][j] = 0;
@@ -319,7 +342,7 @@ class cGameManager {
 							brick[i][j] = 0;
 							PlaySoundA((LPCSTR) "..//resources//sounds//Hit_Hurt.wav",NULL,SND_FILENAME | SND_ASYNC );
 						}
-						// Right edge!
+						// Right edge
 						if((ballX - ballRad > i * bar_x + (offset * 2) + bar_w - 1 & ballX - ballRad < i * bar_x + (offset * 2) + bar_w + ballRad / 2 + (offset / 2 - 1)) & (ballY > j * bar_y + (offset * 2) & ballY < j * bar_y + (offset * 2) + bar_h)) {
 							ball->changeDirection(ball->getDirection() == DOWNLEFT ? DOWNRIGHT : UPRIGHT);
 							brick[i][j] = 0;
@@ -328,7 +351,6 @@ class cGameManager {
 					}
 				}
 			}
-
 			// Paddle collision
 			if((ballX > paddleX - 25 - 2 & ballX < paddleX + 25 + 2) & ballY > paddleY - 10) { // paddle
 				ball->changeDirection(ball->getDirection() == DOWNRIGHT ? UPRIGHT : UPLEFT);
@@ -340,6 +362,7 @@ class cGameManager {
 				if(GetForegroundWindow() == FindWindowA(NULL,wnd)) {
 					Input();
 					Logic();
+					cheats();
 				}
 				Draw();
 				if(ball->getDirection() == STOP & pause == 0) {

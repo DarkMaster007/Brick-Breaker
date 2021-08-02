@@ -11,3 +11,4 @@ Controls:
 - "P" to pause
 - "Q" to quit
 - "R" to reset
+- "F1" for auto mode (unpause first by pressing any key)

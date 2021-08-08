@@ -9,6 +9,7 @@
 	* Win Menu
 	* random number generator for the ball movement to make it slightly random
 */
+#include <tictoc.h>
 #include <iostream>
 #include <fstream>
 #include <graphics.h>
@@ -124,17 +125,23 @@ class cGameManager {
 		string pass;
 		int cheat_auto, cheat_instakill, cheat_explosion;
 		char cheat;
-	public:
+		int ballRad;
+		int EmptySpace;
+		public:
 		cGameManager(int width = 650, int height = 480,string wnd_name = "Brick Breaker") {
 			w = width;
 			h = height;
 			strcpy(wnd,wnd_name.c_str());
 			offset = 10;
 			settings>>bar_w>>bar_h;
+			
 			//bar_w = 40;
 			//bar_h = 30;
 			brick_w = (w - (bar_w + offset)) / (bar_w + offset);
 			brick_h = (h / 2) / (bar_h + offset);
+			//EmptySpace = (w - (brick_w * bar_w + offset * (brick_w - 1))) / 2;
+			EmptySpace = 0;
+			cout << "The empty space in pixels is: " << EmptySpace << endl;
 			ball = new cBall(w / 2,h - 50);
 			paddle = new cPaddle(w / 2, h - 35);
 			quit = 0;
@@ -211,27 +218,26 @@ class cGameManager {
 			// Guiding X and Y lines for ball
 			line(ballX - 15,ballY,ballX + 15,ballY);
 			outtextxy(ballX + 25, ballY - 10,"bY");
-			line(ballX,ballY - 15,ballX,ballY + 15);
-			outtextxy(ballX, ballY + 25,"bX");
+			line(ballX + ballRad,ballY - 15,ballX + ballRad,ballY + 15);
+			outtextxy(ballX + ballRad, ballY + 25,"bX");
+			
 			// Guiding X and Y lines for paddle
-			line(paddleX - 30,paddleY,paddleX + 30,paddleY);
+			/*line(paddleX - 30,paddleY,paddleX + 30,paddleY);
 			outtextxy(paddleX + 25, paddleY - 10,"pY");
 			line(paddleX,paddleY - 30,paddleX,paddleY + 30);
-			outtextxy(paddleX, paddleY + 25,"pX");
+			outtextxy(paddleX, paddleY + 25,"pX");*/
 
 			// Brick draw
-			//	lvl_builder.clear();
-			//	lvl_builder.seekg(0);
 			for(int i = 0; i < brick_w; i++) {
 				for(int j = 0; j < brick_h; j++) {
 					if(brick[i][j]) {
-						bar(i * bar_x + (offset * 2), j * bar_y + (offset * 2), i * bar_x + (offset * 2) + bar_w, j * bar_y + (offset * 2) + bar_h);
-						setcolor(RED);
+						bar(i * bar_x + (offset * 2) + EmptySpace / 3, j * bar_y + (offset * 2), i * bar_x + (offset * 2) + bar_w + EmptySpace / 3, j * bar_y + (offset * 2) + bar_h);
+						/*setcolor(RED);
 						setlinestyle(SOLID_LINE,1,4);
 						line(i * bar_x + (offset * 2),j * bar_y + (offset * 2),i * bar_x + (offset * 2), j * bar_y + (offset * 2) + 40);
 						line(i * bar_x + offset * 2, j * bar_y + offset * 2, i * bar_x + offset * 2 + 40, j * bar_y + offset * 2);
 						setcolor(WHITE);
-						setlinestyle(SOLID_LINE,1,1);
+						setlinestyle(SOLID_LINE,1,1);*/
 					}
 				}
 			}
@@ -320,8 +326,8 @@ class cGameManager {
 					}
 				}
 			}*/
-			// Brick collision
-			for(int i = 0; i < brick_w; i++) {
+			// Brick collision old
+			/*for(int i = 0; i < brick_w; i++) {
 				for(int j = 0; j < brick_h; j++) {
 					if(brick[i][j]) {
 						// Bottom edge
@@ -344,6 +350,37 @@ class cGameManager {
 						}
 						// Right edge
 						if((ballX - ballRad > i * bar_x + (offset * 2) + bar_w - 1 & ballX - ballRad < i * bar_x + (offset * 2) + bar_w + ballRad / 2 + (offset / 2 - 1)) & (ballY > j * bar_y + (offset * 2) & ballY < j * bar_y + (offset * 2) + bar_h)) {
+							ball->changeDirection(ball->getDirection() == DOWNLEFT ? DOWNRIGHT : UPRIGHT);
+							brick[i][j] = 0;
+							PlaySoundA((LPCSTR) "..//resources//sounds//Hit_Hurt.wav",NULL,SND_FILENAME | SND_ASYNC );
+						}
+					}
+				}
+			}*/
+			// Brick collision revised
+			for(int i = 0; i < brick_w; i++) {
+				for(int j = 0; j < brick_h; j++) {
+					if(brick[i][j]) {
+						// Bottom edge
+						if((ballY - ballRad < j * bar_y + (offset * 2) + bar_h & ballY - ballRad > j * bar_y + (offset * 2) + bar_h - ballRad / 2 ) & (ballX > i * bar_x + (offset * 2) + EmptySpace / 3 & ballX < i * bar_x + (offset * 2) + bar_w + EmptySpace / 2)) {
+							ball->changeDirection(ball->getDirection() == UPLEFT ? DOWNLEFT : DOWNRIGHT);
+							brick[i][j] = 0;
+							PlaySoundA((LPCSTR) "..//resources//sounds//Hit_Hurt.wav",NULL,SND_FILENAME | SND_ASYNC );
+						}
+						// Top edge
+						if((ballY + ballRad > j * bar_y + (offset * 2) & ballY + ballRad < j * bar_y + (offset * 2) + ballRad / 2) & (ballX > i * bar_x + (offset * 2) + EmptySpace & ballX < i * bar_x + (offset * 2) + bar_w + EmptySpace)) {
+							ball->changeDirection(ball->getDirection() == DOWNLEFT ? UPLEFT : UPRIGHT);
+							brick[i][j] = 0;
+							PlaySoundA((LPCSTR) "..//resources//sounds//Hit_Hurt.wav",NULL,SND_FILENAME | SND_ASYNC );
+						}
+						// Left edge
+						if((ballX + ballRad > i * bar_x + (offset * 2) + EmptySpace & ballX + ballRad < i * bar_x + (offset * 2) + ballRad / 2 + EmptySpace) & (ballY > j * bar_y + (offset * 2) & ballY < j * bar_y + (offset * 2) + bar_h)) {
+							ball->changeDirection(ball->getDirection() == DOWNRIGHT ? DOWNLEFT : UPLEFT);
+							brick[i][j] = 0;
+							PlaySoundA((LPCSTR) "..//resources//sounds//Hit_Hurt.wav",NULL,SND_FILENAME | SND_ASYNC );
+						}
+						// Right edge
+						if((ballX - ballRad < i * bar_x + (offset * 2) + bar_w + EmptySpace & ballX - ballRad > i * bar_x + (offset * 2) + bar_w - ballRad / 2 + EmptySpace) & (ballY > j * bar_y + (offset * 2) & ballY < j * bar_y + (offset * 2) + bar_h)) {
 							ball->changeDirection(ball->getDirection() == DOWNLEFT ? DOWNRIGHT : UPRIGHT);
 							brick[i][j] = 0;
 							PlaySoundA((LPCSTR) "..//resources//sounds//Hit_Hurt.wav",NULL,SND_FILENAME | SND_ASYNC );
@@ -380,6 +417,7 @@ class cGameManager {
 };
 
 int main(int argc, char** argv) {
+	tictoc::tic();
 	int error = 0; // 0 - unknown; 1 - user quit; 2 - win;
 	int width, height;
 	settings>>width>>height;
@@ -387,6 +425,14 @@ int main(int argc, char** argv) {
 	error =  c.Run();
 	lvl_builder.close();
 	settings.close();
+	if(error == 1) {
+		cout << "Player quit" << endl;
+	} else if(error == 2) {
+		cout << "Player won!" << endl;
+	} else {
+		cout << "Unknown error." << endl;
+	}
+	tictoc::toc();
 	if(error != 0) {
 		return error;
 	} else {

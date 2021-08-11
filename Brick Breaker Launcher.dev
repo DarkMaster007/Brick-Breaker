@@ -28,25 +28,25 @@ Folders=
 IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=1
-CompilerSettings=0;0;0;0;0;0;5;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+CompilerSettings=0;0;0;0;0;0;5;1;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0
 UnitCount=1
 
 [VersionInfo]
 Major=0
 Minor=1
 Release=0
-Build=155
+Build=159
 LanguageID=1033
 CharsetID=1252
 CompanyName=
-FileVersion=0.1.0.155
+FileVersion=0.1.0.159
 FileDescription=Developed using the Dev-C++ IDE
 InternalName=
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=
 ProductName=
-ProductVersion=0.1.0.155
+ProductVersion=0.1.0.159
 AutoIncBuildNr=1
 SyncProduct=1
 

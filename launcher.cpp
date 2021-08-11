@@ -7,20 +7,22 @@ using namespace std;
 
 ifstream settings("config//settings.txt");
 //ofstream settings_o("..//config//settings.txt");
-class cGameManager {
+class cLauncher {
 	private:
 		int w, h;
 		int state;
 		int mouse_x, mouse_y;
 		int quit;
 		char wnd[15];
+		int next;
 	public:
-		cGameManager(int width = 650, int height = 480, string wnd_name = "Launcher") {
+		cLauncher(int width = 650, int height = 480, string wnd_name = "Launcher") {
 			w = width;
 			h = height;
 			strcpy(wnd, wnd_name.c_str());
 			state = 1;
 			quit = 0;
+			next = 0;
 			initwindow(w,h,wnd);
 			setvisualpage(0);
 			setactivepage(1);
@@ -98,12 +100,14 @@ class cGameManager {
 				ShellExecute( NULL, "open", "Game.exe", NULL, "bin", SW_SHOWNORMAL );
 				mouse_reset();
 				PlaySoundA((LPCSTR) "resources//sounds//Blip_Select_P.wav",NULL,SND_FILENAME | SND_ASYNC );
+				next = 1;
 			}
 			// Editor screen button
 			if(state == 3 & (mouse_x > w / 2 + 80 & mouse_x < w / 2 + 220) & (mouse_y > (3 * h) / 4 + 10 & mouse_y < h / 2 + 195)) {
 				ShellExecute( NULL, "open", "Editor.exe", NULL, "bin", SW_SHOWNORMAL );
 				mouse_reset();
 				PlaySoundA((LPCSTR) "resources//sounds//Blip_Select_P.wav",NULL,SND_FILENAME | SND_ASYNC );
+				next = 1;
 			}
 			// Back button to send back to main menu
 			if(state != 1 & (mouse_x > 20 & mouse_x < 160) & (mouse_y > 20 & mouse_y < 85)) {
@@ -115,7 +119,7 @@ class cGameManager {
 			cout << FindWindowA(NULL,"Launcher") << endl;*/
 		}
 		void Run() {
-			while(!quit) {
+			while(!(quit | next)) {
 				if(GetForegroundWindow() == FindWindowA(NULL,wnd)) {
 					Input();
 					Logic();
@@ -125,12 +129,12 @@ class cGameManager {
 		}
 };
 
-
 int main(int argc, char** argv) {
 	int temp;
 	int w, h;
 	settings>>w>>h;
-	cGameManager c(w,h);
+	cout<<w<<" "<<h;
+	cLauncher c(w,h);
 	c.Run();
 	//ShellExecute( NULL, "open", "Brick Breaker.exe", NULL, NULL, SW_SHOWNORMAL );
 	return 0;

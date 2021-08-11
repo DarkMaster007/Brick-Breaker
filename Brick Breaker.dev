@@ -28,25 +28,25 @@ Folders=
 IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=1
-CompilerSettings=0;0;0;0;0;0;5;1;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0
+CompilerSettings=0;0;0;0;0;0;5;1;0;0;0;0;0;0;0;0;0;0;1;0;1;1;0;0;0;0
 UnitCount=1
 
 [VersionInfo]
 Major=1
 Minor=0
 Release=0
-Build=316
+Build=331
 LanguageID=1033
 CharsetID=1252
 CompanyName=
-FileVersion=1.0.0.316
+FileVersion=1.0.0.331
 FileDescription=Developed using the Dev-C++ IDE
 InternalName=
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=Brick Breaker
 ProductName=BrickBreaker
-ProductVersion=1.0.0.316
+ProductVersion=1.0.0.331
 AutoIncBuildNr=1
 SyncProduct=1
 

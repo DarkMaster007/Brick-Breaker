@@ -331,13 +331,15 @@ class cGameManager {
 			// Paddle draw
 			int paddleX = paddle->getX();
 			int paddleY = paddle->getY();
-			bar(paddleX - 25,paddleY,paddleX + 25,paddleY + offset);
+			//bar(paddleX - 25,paddleY,paddleX + 25,paddleY + offset);
+			readimagefile("..//resources//Breakout-Paddle.gif",paddleX - 25,paddleY,paddleX + 25,paddleY + offset);
 
 			//Ball draw
 			int ballX = ball->getX();
 			int ballY = ball->getY();
 			int ballRad = 10;
-			circle(ballX,ballY,ballRad);
+			//circle(ballX,ballY,ballRad);
+			readimagefile("..//resources//Breakout-Ball.gif",ballX - ballRad,ballY - ballRad,ballX + ballRad, ballY + ballRad);
 
 			// Guiding X and Y lines for ball
 			line(ballX - 15,ballY,ballX + 15,ballY);
@@ -356,6 +358,7 @@ class cGameManager {
 				for(int j = 0; j < brick_h; j++) {
 					if(brick[i][j]) {
 						bar(i * bar_x + (offset * 2) + EmptySpace / 3, j * bar_y + (offset * 2), i * bar_x + (offset * 2) + bar_w + EmptySpace / 3, j * bar_y + (offset * 2) + bar_h);
+						//readimagefile("..//resources//Breakout-Brick.gif",i * bar_x + (offset * 2) + EmptySpace / 3, j * bar_y + (offset * 2), i * bar_x + (offset * 2) + bar_w + EmptySpace / 3, j * bar_y + (offset * 2) + bar_h);
 						/*setcolor(RED);
 						setlinestyle(SOLID_LINE,1,4);
 						line(i * bar_x + (offset * 2),j * bar_y + (offset * 2),i * bar_x + (offset * 2), j * bar_y + (offset * 2) + 40);

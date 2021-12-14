@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Brick Breaker Level Editor" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="default">
+				<Option output="../Release/bin/Editor" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../Release/bin" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-flto" />
+					<Add option="-Os" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-flto" />
+					<Add library="raylib" />
+					<Add library="opengl32" />
+					<Add library="gdi32" />
+					<Add library="winmm" />
+					<Add directory="lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<Unit filename="editor.cpp" />
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

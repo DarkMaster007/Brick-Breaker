@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1638893665 source:c:\users\dark\desktop\c++\brick breaker raylib\editor\editor.cpp
+	<iostream>
+	"raylib.h"
+	<fstream>
+	<string>
+
+1635800772 c:\users\dark\desktop\c++\brick breaker raylib\editor\include\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+

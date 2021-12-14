@@ -1,0 +1,210 @@
+#include <iostream>
+#include "include/raylib.h"
+#include <fstream>
+#include <string>
+using std::ofstream;
+using std::ifstream;
+using std::endl;
+using std::string;
+using std::cout;
+
+/* run this program using the console pauser or add your own getch, system("pause") or input loop */
+ofstream lvl_editor("System//config//level.txt");
+ifstream settings("System//config//settings.txt");
+
+class cGameManager
+{
+private:
+    int w, h;                       // width and height of window aka playing space; loaded from settings.txt
+    int offset;                     // distance between bricks / 2 (don't ask); loaded from settings.txt
+    int brick [100][100];           // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
+    int brick_width, brick_height;  // width and height of individual bricks; loaded from settings.txt
+    int brick_columns, brick_rows;  // how many rows and how many columns of bricks there should be; calculated
+    int mouse_x, mouse_y;           // the mouse X and Y coordinates. so the editor knows where you actually click
+    string color_val;               // the bricks color; loaded from settings.txt
+    bool fullscreen;                // whether it's full-screen or not
+    int brick_centering;            // amount of pixels to offset bricks to center them (looks nice :) ); calculated
+public:
+    cGameManager(int width = 640, int height = 480)
+    {
+        //variables
+        w = width;
+        h = height;
+        offset = 5;
+        mouse_x = 0, mouse_y = 0;
+        settings>>brick_width>>brick_height;
+        settings>>fullscreen;
+        settings>>color_val;
+
+        //calculations
+        brick_columns = w / (brick_width + 10 + offset);  // amount of bricks length
+        brick_rows = (h / 2) / (brick_height + offset); // amount of bricks height
+        brick_centering = w - (brick_columns * brick_width) - ((brick_columns - 1) * offset * 2);
+
+        //cout's for testing; dev shit, remove from final
+        cout<<"Brick width: "<<brick_width<<endl;
+        cout<<"Brick height: "<<brick_height<<endl;
+        cout<<"Full-screen: "<<fullscreen<<endl;
+        cout<<"Color value: "<<color_val<<endl;
+        cout<<"Value to center bricks with: "<<brick_centering<<endl;
+        cout<<"Brick columns: "<<brick_columns<<endl<<"Brick rows: "<<brick_rows<<endl;
+        cout<<"Bricks total: "<<brick_columns*brick_rows<<endl;
+
+        InitWindow(w,h,"Editor");
+        SetTargetFPS(60);
+    }
+    void Init() // load the brick variable with only ones (meaning all bricks are visible and active)
+    {
+        for(int i = 0; i < brick_columns; i++)    // columns
+        {
+            for(int j = 0; j < brick_rows; j++)    // rows
+            {
+                brick[i][j] = 1;
+            }
+        }
+    }
+    void CheckPattern()  //output the current brick layout to...well...check it; dev shit, remove from final
+    {
+        cout<<endl;
+        for(int j = 0; j < brick_rows; j++)
+        {
+            for(int i = 0; i < brick_columns; i++)
+            {
+                cout<<brick[i][j]<<" ";
+            }
+            cout<<endl;
+        }
+    }
+    int Info()  //the info menu
+    {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        // The actual message you see on screen from here on:
+        DrawText("Level editor for Brick Breaker BGM Edition",w / 2 - 42 * 3, h / 7.6,15,WHITE);
+        DrawText("Create the model that will appear in the final game.",w / 2 - 52 * 3, h / 2.5,15,WHITE);
+        DrawText("Click on any brick to disable it and click again to re-enable it.",w / 2 - 65 * 3, h / 2.5 + 35,15,WHITE);
+        DrawText("Press Q once you are done to quit and save.",w / 2 - 43 * 3, h / 2.5 + 70,15,WHITE);
+        DrawText("Click left mouse button to continue.",w / 2 - 36 * 3, h - h / 7.6,15,WHITE);
+        EndDrawing();
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    Color colors()  //brick colors; uses string from settings.txt
+    {
+        if(color_val == "RED")
+        {
+            return RED;
+        }
+        if(color_val == "BLUE")
+        {
+            return BLUE;
+        }
+        if(color_val == "GREEN")
+        {
+            return GREEN;
+        }
+        if(color_val == "YELLOW")
+        {
+            return YELLOW;
+        }
+        else
+        {
+            return WHITE;
+        }
+        return Color{GetRandomValue(10,255),GetRandomValue(10,255),GetRandomValue(10,255),GetRandomValue(150,255)};
+    }
+    void Draw()  //draw the actual bricks only if their associated value is 1
+    {
+        ClearBackground(BLACK);
+        BeginDrawing();
+        for(int i = 0; i < brick_columns; i++)
+        {
+            for(int j = 0; j < brick_rows; j++)
+            {
+                if(brick[i][j])
+                {
+                    DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,colors());
+                }
+            }
+            // Draw border
+            DrawRectangle(0,0,offset,h,BROWN);
+            DrawRectangle(0,0,w,offset,BROWN);
+            DrawRectangle(w - offset,0, w, h,BROWN);
+            DrawRectangle(0, h - offset, w, h,BROWN);
+        }
+        EndDrawing();
+    }
+    void Logic()  //gets mouse location and sets bricks value to 0 if the click happened within the bricks confines
+    {
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            mouse_x = GetMouseX();
+            mouse_y = GetMouseY();
+
+            for(int i = 0; i < brick_columns; i++)
+            {
+                for(int j = 0; j < brick_rows; j++)
+                {
+                    if((mouse_x >= (brick_centering + offset * 2 + i * brick_width + i * offset)) & (mouse_x <= (brick_centering + offset * 2 + i * brick_width + i * offset + brick_width)) & (mouse_y >= (offset * 2 + j * brick_height + j * offset)) & (mouse_y <= (offset * 2 + j * brick_height + j * offset + brick_height)))
+                    {
+                        brick[i][j] = !brick[i][j];
+                    }
+                }
+            }
+        }
+    }
+    void Output()  //output the current brick layout to the level.txt file
+    {
+        // output brick placement to level.txt
+        for(int j = 0; j < brick_rows; j++)
+        {
+            for(int i = 0; i < brick_columns; i++)
+            {
+                lvl_editor<<brick[i][j]<<" ";
+            }
+            lvl_editor<<endl;
+        }
+
+        // close all streams
+        lvl_editor.close();
+        settings.close();
+    }
+    void Run()  //actually runs the previously made functions
+    {
+        Init();
+        CheckPattern();
+        bool info_bool = false;
+        while(!info_bool)
+        {
+            info_bool = Info();
+        }
+        while(!WindowShouldClose())
+        {
+            if(IsWindowFocused())
+            {
+                Logic();
+            }
+            Draw();
+        }
+        CheckPattern();
+        Output();
+    }
+};
+
+int main(int argc, char** argv)
+{
+    int width, height;
+    settings>>width>>height;
+    cout<<"Screen width: "<<width<<endl;
+    cout<<"Screen height: "<<height<<endl;
+    cGameManager c(width,height);
+    c.Run();
+    CloseWindow();
+    return 0;
+}

@@ -9,3 +9,15 @@
 	<stdarg.h>
 	<stdbool.h>
 
+1640894930 source:c:\users\dark\desktop\c++\brick-breaker\editor\editor.cpp
+	<iostream>
+	"raylib.h"
+	<fstream>
+	<string>
+	<stdlib.h>
+	<crtdbg.h>
+
+1635800772 c:\users\dark\desktop\c++\brick-breaker\editor\include\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+

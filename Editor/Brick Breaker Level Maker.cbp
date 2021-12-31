@@ -26,6 +26,17 @@
 				</Linker>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add option="-fpermissive" />
+			<Add directory="include" />
+		</Compiler>
+		<Linker>
+			<Add library="raylib" />
+			<Add library="opengl32" />
+			<Add library="gdi32" />
+			<Add library="winmm" />
+			<Add directory="lib" />
+		</Linker>
 		<Unit filename="editor.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

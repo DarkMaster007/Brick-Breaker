@@ -15,8 +15,9 @@ using std::strcpy;
 #define MAX_INPUT_CHARS   9
 #define MAX_INPUT_INT     4
 
-fstream lvl_editor("..//config//level.txt", ios::out);
-fstream settings("..//config//settings.txt", ios::in | ios::out);
+fstream settings;
+fstream lvl_editor;
+fstream game_settings;
 
 class cSettings
 {
@@ -29,6 +30,8 @@ private:
     Rectangle button_extra;
     Rectangle button_start;
     int quit;
+    bool update;
+    int fail_open;
 
     Rectangle colorBox;   //the box to write color to in settings
     char settings_color[MAX_INPUT_CHARS + 1];
@@ -77,6 +80,10 @@ public:
     {
         quit = 0;
         current_screen = 0; // 0 - Menu, 1 - Settings, 2 - Extra, 3 - Start
+        update = 0;
+        fail_open = 0;
+        if(!settings.is_open()){
+        settings.open("..//config//settings.txt", ios::out | ios::in);}
 
         //Color settings text box
         settings_color[MAX_INPUT_CHARS + 1] = '\0';
@@ -131,10 +138,10 @@ public:
     }
     void Settings_check()
     {
-        if(!settings.is_open())
+        if(!settings.is_open() & !update)
         {
             settings.close();
-            fstream settings("..//config//settings.txt", ios::in | ios::out | ios::app);
+            settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             export_width = 1024;
             export_height = 768;
             export_brick_width = 50;
@@ -142,7 +149,18 @@ public:
             export_fullscreen = 0;
             export_brick_color = "RED";
             settings<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
+            settings.close();
+            settings.open("..//config//settings.txt", ios::out | ios::in);
             cout<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
+        }
+        if(update){
+            settings.close();
+            settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
+            settings<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
+            settings.close();
+            cout<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
+            update = 0;
+            settings.open("..//config//settings.txt", ios::out | ios::in);
         }
     }
     void Draw()
@@ -161,7 +179,7 @@ public:
                 cout<<"TITLE!"<<endl;
             }
         }
-        if(!settings.fail())
+        if(settings.is_open() & !fail_open)
         {
             //General Menu
             if(current_screen == 0)
@@ -702,10 +720,12 @@ public:
                         settings_color[1] = 'E';
                         settings_color[2] = 'D';
                         cout<<settings_color<<endl;
+                        export_brick_color = settings_color;
                     }
                     else
                     {
                         cout<<settings_color<<endl;
+                        export_brick_color = settings_color;
                     }
                     if(letterCount_screenWidth == 0)
                     {
@@ -773,6 +793,8 @@ public:
                         cout<<export_offset<<endl;
                     }
                     current_screen = 0;
+                    update = 1;
+                    Settings_check();
                 }
             }
             //
@@ -782,14 +804,19 @@ public:
     {
         //No you
     }
-    int Run()
+    int Run(int fail)
     {
+        fail_open = fail;
         Settings_check();
         while(!quit & current_screen != 3)
         {
             Draw();
             Logic();
             Input();
+            if(settings.eof()){
+                settings.seekg(ios::beg);
+                settings.clear();
+            }
         }
         UnloadTexture(title);
         return quit;
@@ -809,11 +836,14 @@ private:
 public:
     cGameManager(int width = 640, int height = 480)
     {
+        lvl_editor.open("..//config//level.txt", ios::out);
+        game_settings.open("..//config//settings.txt", ios::in);
         //variables
         offset = 10;
-        settings>>brick_width>>brick_height;
-        settings>>fullscreen;
-        settings>>brick_color;
+        game_settings>>width>>height;
+        game_settings>>brick_width>>brick_height;
+        game_settings>>fullscreen;
+        game_settings>>brick_color;
 
         //calculations
         brick_columns = GetScreenWidth() / (brick_width + offset + 4);  // amount of bricks length
@@ -987,7 +1017,8 @@ public:
 
 int main(int argc, char** argv)
 {
-    int width, height, quit = 0, run = 1;
+    int width, height, quit = 0, run = 1, fail = 0;
+    settings.open("..//config//settings.txt", ios::out | ios::in);
     if(settings.is_open())
     {
         settings>>width>>height;
@@ -997,13 +1028,14 @@ int main(int argc, char** argv)
         cout<<"Settings failed to open!"<<endl;
         width = 640;
         height = 480;
+        fail = 1;
     }
     cout<<"Screen width: "<<width<<endl;
     cout<<"Screen height: "<<height<<endl;
     while(run)
     {
         cSettings c_settings(width,height);
-        quit = c_settings.Run();
+        quit = c_settings.Run(fail);
         cGameManager c_game(width,height);
         c_game.Run(quit);
         CloseWindow();

@@ -21,3 +21,15 @@
 	<stdarg.h>
 	<stdbool.h>
 
+1641592913 source:e:\windows folders\desktop\c++\brick-breaker\editor\editor.cpp
+	<iostream>
+	"raylib.h"
+	<fstream>
+	<string>
+	<stdio.h>
+	<cstring>
+
+1641585965 e:\windows folders\desktop\c++\brick-breaker\editor\include\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+

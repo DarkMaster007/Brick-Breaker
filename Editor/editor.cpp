@@ -795,6 +795,7 @@ public:
                     current_screen = 0;
                     update = 1;
                     Settings_check();
+                    SetWindowSize(export_width, export_height);
                 }
             }
             //

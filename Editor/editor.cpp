@@ -2,8 +2,6 @@
 #include <iostream>
 #include "raylib.h"
 #include <fstream>
-#include <string>
-#include <stdio.h>
 #include <cstring>
 using std::fstream;
 using std::endl;
@@ -839,7 +837,7 @@ private:
     bool save;                      // To save or not to save...that is the question (I had to I was listening to Hate Me)
     bool quit;
 public:
-    cGameManager(int width = 640, int height = 480)
+    cGameManager()
     {
         game_settings.open("..//config//settings.txt", ios::in);
 
@@ -847,7 +845,8 @@ public:
         save = 0;
         quit = 0;
         offset = 10;
-        game_settings>>width>>height;
+        int garbage;
+        game_settings>>garbage>>garbage;
         game_settings>>brick_width>>brick_height;
         game_settings>>fullscreen;
         game_settings>>brick_color;
@@ -1085,7 +1084,7 @@ int main(int argc, char** argv)
     {
         cSettings c_settings(width,height);
         quit = c_settings.Run(fail);
-        cGameManager c_game(width,height);
+        cGameManager c_game;
         c_game.Run(quit);
         CloseWindow();
         return 0;

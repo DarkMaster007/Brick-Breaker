@@ -27,10 +27,14 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-pg" />
+			<Add option="-Og" />
+			<Add option="-g" />
 			<Add option="-fpermissive" />
 			<Add directory="include" />
 		</Compiler>
 		<Linker>
+			<Add option="-pg -lgmon" />
 			<Add library="raylib" />
 			<Add library="opengl32" />
 			<Add library="gdi32" />

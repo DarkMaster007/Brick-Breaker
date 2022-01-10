@@ -82,8 +82,10 @@ public:
         current_screen = 0; // 0 - Menu, 1 - Settings, 2 - Extra, 3 - Start
         update = 0;
         fail_open = 0;
-        if(!settings.is_open()){
-        settings.open("..//config//settings.txt", ios::out | ios::in);}
+        if(!settings.is_open())
+        {
+            settings.open("..//config//settings.txt", ios::out | ios::in);
+        }
 
         //Color settings text box
         settings_color[MAX_INPUT_CHARS + 1] = '\0';
@@ -132,7 +134,7 @@ public:
         //
 
         InitWindow(width,height,"Editor");
-        SetTargetFPS(60);
+        SetTargetFPS(30);
         //Load Textures
         title = LoadTexture("..//resources//title_main.png");
     }
@@ -153,7 +155,8 @@ public:
             settings.open("..//config//settings.txt", ios::out | ios::in);
             cout<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
         }
-        if(update){
+        if(update)
+        {
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             settings<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
@@ -385,6 +388,7 @@ public:
     }
     void Logic()
     {
+        //Colision for the main menu buttons: settings, extra and start
         if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         {
             if(CheckCollisionPointRec(GetMousePosition(),button_settings))
@@ -801,10 +805,6 @@ public:
             //
         }
     }
-    void Input()
-    {
-        //No you
-    }
     int Run(int fail)
     {
         fail_open = fail;
@@ -813,8 +813,8 @@ public:
         {
             Draw();
             Logic();
-            Input();
-            if(settings.eof()){
+            if(settings.eof())
+            {
                 settings.seekg(ios::beg);
                 settings.clear();
             }
@@ -831,15 +831,21 @@ private:
     int brick [100][100];           // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
     int brick_width, brick_height;  // width and height of individual bricks; loaded from settings.txt
     int brick_columns, brick_rows;  // how many rows and how many columns of bricks there should be; calculated
-    string brick_color;               // the bricks color; loaded from settings.txt
+    string brick_color;             // the bricks color; loaded from settings.txt
     bool fullscreen;                // whether it's full-screen or not
     int brick_centering;            // amount of pixels to offset bricks to center them (looks nice :) ); calculated
+    Rectangle button_SaveAndQuit;   // Save and quit button
+    Rectangle button_QuitOnly;      // Quit only button
+    bool save;                      // To save or not to save...that is the question (I had to I was listening to Hate Me)
+    bool quit;
 public:
     cGameManager(int width = 640, int height = 480)
     {
-        lvl_editor.open("..//config//level.txt", ios::out);
         game_settings.open("..//config//settings.txt", ios::in);
+
         //variables
+        save = 0;
+        quit = 0;
         offset = 10;
         game_settings>>width>>height;
         game_settings>>brick_width>>brick_height;
@@ -862,7 +868,7 @@ public:
         cout<<"Bricks total: "<<brick_columns*brick_rows<<endl;
 
         //InitWindow(w,h,"Editor");
-        //SetTargetFPS(60);
+        SetTargetFPS(60);
     }
     void Init() // load the brick variable with only ones (meaning all bricks are visible and active)
     {
@@ -934,6 +940,7 @@ public:
     {
         ClearBackground(BLACK);
         BeginDrawing();
+        //Loop to draw bricks
         for(int i = 0; i < brick_columns; i++)
         {
             for(int j = 0; j < brick_rows; j++)
@@ -943,12 +950,24 @@ public:
                     DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,colors());
                 }
             }
-            // Draw border
-            DrawRectangle(0,0,offset,GetScreenHeight(),BROWN);
-            DrawRectangle(0,0,GetScreenWidth(),offset,BROWN);
-            DrawRectangle(GetScreenWidth() - offset,0, GetScreenWidth(), GetScreenHeight(),BROWN);
-            DrawRectangle(0, GetScreenHeight() - offset, GetScreenWidth(), GetScreenHeight(),BROWN);
         }
+        //
+        // Draw border
+        DrawRectangle(0,0,offset,GetScreenHeight(),BROWN);
+        DrawRectangle(0,0,GetScreenWidth(),offset,BROWN);
+        DrawRectangle(GetScreenWidth() - offset,0, GetScreenWidth(), GetScreenHeight(),BROWN);
+        DrawRectangle(0, GetScreenHeight() - offset, GetScreenWidth(), GetScreenHeight(),BROWN);
+        //
+        // Draw Quit and SaveAndQuit buttons
+        button_SaveAndQuit = {GetScreenWidth() / 2 - 160, GetScreenHeight() - 100, 150, 50};
+        button_QuitOnly = {GetScreenWidth() / 2 + 10, GetScreenHeight() - 100, 150, 50};
+        DrawRectangleRec(button_SaveAndQuit,WHITE);
+        DrawRectangleRec(button_QuitOnly,WHITE);
+        int textsize = MeasureText("Only Quit",25);
+        DrawText("Only Quit", GetScreenWidth() / 2 + 30, GetScreenHeight() - 85, 25, BLACK);
+        textsize = MeasureText("Quit and save",20);
+        DrawText("Quit and save", GetScreenWidth() / 2 - 155, GetScreenHeight() - 85, 20, BLACK);
+        //
         EndDrawing();
     }
     void Logic()  //gets mouse location and sets bricks value to 0 if the click happened within the bricks confines
@@ -967,6 +986,20 @@ public:
                 }
             }
         }
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
+            if(CheckCollisionPointRec(GetMousePosition(),button_SaveAndQuit))
+            {
+                save = 1;
+                quit = 1;
+            }
+            if(CheckCollisionPointRec(GetMousePosition(),button_QuitOnly))
+            {
+                save = 0;
+                quit = 1;
+            }
+        }
+        //Dev stuff
         if(IsKeyPressed('D'))
         {
             brick_centering++;
@@ -977,10 +1010,12 @@ public:
             brick_centering--;
             cout<<"Brick centering value: "<<brick_centering<<endl;
         }
+        //
     }
     void Output()  //output the current brick layout to the level.txt file
     {
-        // output brick placement to level.txt
+        lvl_editor.open("..//config//level.txt", ios::out);
+        // output brick layout to level.txt
         for(int j = 0; j < brick_rows; j++)
         {
             for(int i = 0; i < brick_columns; i++)
@@ -989,13 +1024,10 @@ public:
             }
             lvl_editor<<endl;
         }
-
-        // close all streams
-        lvl_editor.close();
-        settings.close();
     }
-    void Run(int quit)  //actually runs the previously made functions
+    void Run(int quit_settings)  //actually runs the previously made functions
     {
+        quit = quit_settings;
         Init();
         //CheckPattern();
         bool info_bool = false;
@@ -1012,7 +1044,23 @@ public:
             Draw();
         }
         //CheckPattern();
-        Output();
+        if(save)
+        {
+            Output();
+        }
+        // close all streams
+        if(lvl_editor.is_open())
+        {
+            lvl_editor.close();
+        }
+        if(game_settings.is_open())
+        {
+            game_settings.close();
+        }
+        if(settings.is_open())
+        {
+            settings.close();
+        }
     }
 };
 

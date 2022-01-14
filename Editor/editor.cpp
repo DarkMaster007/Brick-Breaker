@@ -1087,6 +1087,6 @@ int main(int argc, char** argv)
         cGameManager c_game;
         c_game.Run(quit);
         CloseWindow();
-        return 0;
+        return quit;
     }
 }

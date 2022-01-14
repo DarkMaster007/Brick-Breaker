@@ -7,7 +7,8 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Debug/Brick Breaker raylib" prefix_auto="1" extension_auto="1" />
+				<Option output="../Release/bin/Game" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../Release/bin/" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -30,15 +31,20 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-fpermissive" />
 			<Add directory="include" />
 		</Compiler>
 		<Linker>
+			<Add option="-static" />
 			<Add library="raylib" />
 			<Add library="opengl32" />
 			<Add library="gdi32" />
 			<Add library="winmm" />
 			<Add directory="lib" />
 		</Linker>
+		<Unit filename="icon.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1642164766 source:e:\windows folders\desktop\c++\brick-breaker\game\main.cpp
+	<iostream>
+	<fstream>
+	"include/raylib.h"
+	<string.h>
+
+1641585965 e:\windows folders\desktop\c++\brick-breaker\game\include\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+

@@ -12,12 +12,14 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-flto" />
-					<Add option="-Os" />
+					<Add option="-pg" />
+					<Add option="-Og" />
+					<Add option="-g" />
 					<Add directory="include" />
 				</Compiler>
 				<Linker>
-					<Add option="-flto" />
+					<Add option="-pg -lgmon" />
+					<Add option="-static" />
 					<Add library="raylib" />
 					<Add library="opengl32" />
 					<Add library="gdi32" />
@@ -35,6 +37,8 @@
 		</Compiler>
 		<Linker>
 			<Add option="-pg -lgmon" />
+			<Add option="-static-libstdc++" />
+			<Add option="-static-libgcc" />
 			<Add library="raylib" />
 			<Add library="opengl32" />
 			<Add library="gdi32" />
@@ -42,6 +46,9 @@
 			<Add directory="lib" />
 		</Linker>
 		<Unit filename="editor.cpp" />
+		<Unit filename="icon.rc">
+			<Option compilerVar="WINDRES" />
+		</Unit>
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

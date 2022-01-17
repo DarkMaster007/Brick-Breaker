@@ -4,8 +4,11 @@
 #include <fstream>
 #include <cstring>
 using std::fstream;
+using std::endl;
 using std::string;
+using std::cout;
 using std::ios;
+using std::strcpy;
 
 #define MAX_INPUT_CHARS   9
 #define MAX_INPUT_INT     4
@@ -124,10 +127,12 @@ public:
         mouseOnText_offset = false;
         framesCounter_offset = 0;
         //
+        //Settings fullscreen switch
+
+        //
 
         InitWindow(width,height,"Editor");
         SetTargetFPS(30);
-
         //Load Textures
         title = LoadTexture("..//resources//title_main.png");
     }
@@ -146,6 +151,7 @@ public:
             settings<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in);
+            cout<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
         }
         if(update)
         {
@@ -153,6 +159,7 @@ public:
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             settings<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
             settings.close();
+            cout<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
             update = 0;
             settings.open("..//config//settings.txt", ios::out | ios::in);
         }
@@ -166,6 +173,13 @@ public:
         BeginDrawing();
 
         DrawTexture(title, GetScreenWidth() /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
+            if(CheckCollisionPointRec(GetMousePosition(),Rectangle {GetScreenWidth() / 2 - title.width / 2, 80, title.width, title.height}))
+            {
+                cout<<"TITLE!"<<endl;
+            }
+        }
         if(settings.is_open() & !fail_open)
         {
             //General Menu
@@ -703,13 +717,16 @@ public:
                 {
                     if(letterCount_color == 0)
                     {
+                        cout<<"Empty"<<endl;
                         settings_color[0] = 'R';
                         settings_color[1] = 'E';
                         settings_color[2] = 'D';
+                        cout<<settings_color<<endl;
                         export_brick_color = settings_color;
                     }
                     else
                     {
+                        cout<<settings_color<<endl;
                         export_brick_color = settings_color;
                     }
                     if(letterCount_screenWidth == 0)
@@ -717,50 +734,65 @@ public:
                         export_width = 1024;
                         strcpy(settings_screenWidth, "1024");
                         letterCount_screenWidth = 4;
+                        cout<<export_width<<endl;
                     }
                     else
                     {
+                        cout<<settings_screenWidth<<endl;
                         export_width = atoi(settings_screenWidth);
+                        cout<<export_width<<endl;
                     }
                     if(letterCount_screenHeight == 0)
                     {
                         export_height = 760;
                         strcpy(settings_screenHeight, "760");
                         letterCount_screenHeight = 3;
+                        cout<<export_height<<endl;
                     }
                     else
                     {
+                        cout<<settings_screenHeight<<endl;
                         export_height = atoi(settings_screenHeight);
+                        cout<<export_height<<endl;
                     }
                     if(letterCount_brickWidth == 0)
                     {
                         export_brick_width = 50;
                         strcpy(settings_brickWidth, "50");
                         letterCount_brickWidth = 2;
+                        cout<<export_brick_width<<endl;
                     }
                     else
                     {
+                        cout<<settings_brickWidth<<endl;
                         export_brick_width = atoi(settings_brickWidth);
+                        cout<<export_brick_width<<endl;
                     }
                     if(letterCount_brickHeight == 0)
                     {
                         export_brick_height = 35;
                         strcpy(settings_brickHeight, "35");
                         letterCount_brickHeight = 2;
+                        cout<<export_brick_height<<endl;
                     }
                     else
                     {
+                        cout<<settings_brickHeight<<endl;
                         export_brick_height = atoi(settings_brickHeight);
+                        cout<<export_brick_height<<endl;
                     }
                     if(letterCount_offset == 0)
                     {
                         export_offset = 10;
                         strcpy(settings_offset, "10");
                         letterCount_offset = 2;
+                        cout<<export_offset<<endl;
                     }
                     else
                     {
+                        cout<<settings_offset<<endl;
                         export_offset = atoi(settings_offset);
+                        cout<<export_offset<<endl;
                     }
                     current_screen = 0;
                     update = 1;
@@ -823,7 +855,18 @@ public:
         brick_columns = GetScreenWidth() / (brick_width + offset + 4);  // amount of bricks length
         brick_rows = (GetScreenHeight() / 2) / (brick_height + offset); // amount of bricks height
         brick_centering = (GetScreenWidth() - brick_columns * brick_width - brick_columns * offset + offset) / 4;
+        //brick_centering = 0;
 
+        //cout's for testing; dev shit, remove from final
+        cout<<"Brick width: "<<brick_width<<endl;
+        cout<<"Brick height: "<<brick_height<<endl;
+        cout<<"Full-screen: "<<fullscreen<<endl;
+        cout<<"Color value: "<<brick_color<<endl;
+        cout<<"Value to center bricks with: "<<brick_centering<<endl;
+        cout<<"Brick columns: "<<brick_columns<<endl<<"Brick rows: "<<brick_rows<<endl;
+        cout<<"Bricks total: "<<brick_columns*brick_rows<<endl;
+
+        //InitWindow(w,h,"Editor");
         SetTargetFPS(60);
     }
     void Init() // load the brick variable with only ones (meaning all bricks are visible and active)
@@ -836,20 +879,29 @@ public:
             }
         }
     }
+    void CheckPattern()  //output the current brick layout to...well...check it; dev shit, remove from final
+    {
+        cout<<endl;
+        for(int j = 0; j < brick_rows; j++)
+        {
+            for(int i = 0; i < brick_columns; i++)
+            {
+                cout<<brick[i][j]<<" ";
+            }
+            cout<<endl;
+        }
+    }
     int Info()  //the info menu
     {
         BeginDrawing();
         ClearBackground(BLACK);
-
         // The actual message you see on screen from here on:
         DrawText("Level editor for Brick Breaker BGM Edition",GetScreenWidth() / 2 - 42 * 3, GetScreenHeight() / 7.6,15,WHITE);
         DrawText("Create the model that will appear in the final game.",GetScreenWidth() / 2 - 52 * 3, GetScreenHeight() / 2.5,15,WHITE);
         DrawText("Click on any brick to disable it and click again to re-enable it.",GetScreenWidth() / 2 - 65 * 3, GetScreenHeight() / 2.5 + 35,15,WHITE);
         DrawText("Press Q once you are done to quit and save.",GetScreenWidth() / 2 - 43 * 3, GetScreenHeight() / 2.5 + 70,15,WHITE);
         DrawText("Click left mouse button to continue.",GetScreenWidth() / 2 - 36 * 3, GetScreenHeight() - GetScreenHeight() / 7.6,15,WHITE);
-
         EndDrawing();
-
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             return true;
@@ -946,6 +998,18 @@ public:
                 quit = 1;
             }
         }
+        //Dev stuff
+        if(IsKeyPressed('D'))
+        {
+            brick_centering++;
+            cout<<"Brick centering value: "<<brick_centering<<endl;
+        }
+        if(IsKeyPressed('A'))
+        {
+            brick_centering--;
+            cout<<"Brick centering value: "<<brick_centering<<endl;
+        }
+        //
     }
     void Output()  //output the current brick layout to the level.txt file
     {
@@ -957,7 +1021,7 @@ public:
             {
                 lvl_editor<<brick[i][j]<<" ";
             }
-            lvl_editor<<std::endl;
+            lvl_editor<<endl;
         }
     }
     void Run(int quit_settings)  //actually runs the previously made functions
@@ -1009,10 +1073,13 @@ int main(int argc, char** argv)
     }
     else
     {
+        cout<<"Settings failed to open!"<<endl;
         width = 640;
         height = 480;
         fail = 1;
     }
+    cout<<"Screen width: "<<width<<endl;
+    cout<<"Screen height: "<<height<<endl;
     while(run)
     {
         cSettings c_settings(width,height);
@@ -1020,6 +1087,6 @@ int main(int argc, char** argv)
         cGameManager c_game;
         c_game.Run(quit);
         CloseWindow();
-        return 0;
+        return quit;
     }
 }

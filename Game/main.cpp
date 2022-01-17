@@ -10,7 +10,8 @@ using std::ios;
 
 fstream loadLevelFile;
 fstream game_settings;
-enum eDir { STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
+enum eDir
+{ STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
 
 class cBall
 {
@@ -76,8 +77,7 @@ public:
     {
         movement = (3 + rand() % 6) * frametime;
         if(movement < 1) movement = 1;
-        switch (direction)
-        {
+        switch (direction) {
         case STOP:
             break;
         case UPLEFT:
@@ -214,10 +214,8 @@ public:
     {
         loadLevelFile.open("..//config//level.txt", ios::in);
         int file;
-        for(int j = 0; j < brick_rows; j++)
-        {
-            for(int i = 0; i < brick_columns; i++)
-            {
+        for(int j = 0; j < brick_rows; j++) {
+            for(int i = 0; i < brick_columns; i++) {
                 loadLevelFile>>file;
                 brick[i][j] = file;
             }
@@ -228,10 +226,8 @@ public:
     void CheckPattern()  //output the current brick layout to...well...check it; dev shit, remove from final
     {
         cout<<endl;
-        for(int j = 0; j < brick_rows; j++)
-        {
-            for(int i = 0; i < brick_columns; i++)
-            {
+        for(int j = 0; j < brick_rows; j++) {
+            for(int i = 0; i < brick_columns; i++) {
                 cout<<brick[i][j]<<" ";
             }
             cout<<endl;
@@ -241,24 +237,18 @@ public:
 
     Color colors()  //brick colors; uses string from settings.txt
     {
-        if(brick_color == "RED")
-        {
+        if(brick_color == "RED") {
             return RED;
         }
-        if(brick_color == "BLUE")
-        {
+        if(brick_color == "BLUE") {
             return BLUE;
         }
-        if(brick_color == "GREEN")
-        {
+        if(brick_color == "GREEN") {
             return GREEN;
         }
-        if(brick_color == "YELLOW")
-        {
+        if(brick_color == "YELLOW") {
             return YELLOW;
-        }
-        else
-        {
+        } else {
             return WHITE;
         }
         return Color{GetRandomValue(10,255),GetRandomValue(10,255),GetRandomValue(10,255),GetRandomValue(150,255)};
@@ -269,12 +259,9 @@ public:
         ClearBackground(BLACK);
         BeginDrawing();
         //Loop to draw bricks
-        for(int i = 0; i < brick_columns; i++)
-        {
-            for(int j = 0; j < brick_rows; j++)
-            {
-                if(brick[i][j])
-                {
+        for(int i = 0; i < brick_columns; i++) {
+            for(int j = 0; j < brick_rows; j++) {
+                if(brick[i][j]) {
                     DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,colors());
                 }
             }
@@ -305,56 +292,42 @@ public:
 
     void Input()
     {
-        if(!auto_move)
-        {
-            if(paddle->getX() - movement_speed - 50 > offset)
-            {
-                if(paddle->getX() > GetMouseX())
-                {
+        if(!auto_move) {
+            if(paddle->getX() - movement_speed - 50 > offset) {
+                if(paddle->getX() > GetMouseX()) {
                     paddle->moveLeft(movement_speed);
                 }
-                if(IsKeyDown('A'))
-                {
+                if(IsKeyDown('A')) {
                     paddle->moveLeft(movement_speed);
                 }
             }
-            if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset)
-            {
-                if(paddle->getX() < GetMouseX())
-                {
+            if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset) {
+                if(paddle->getX() < GetMouseX()) {
                     paddle->moveRight(movement_speed);
                 }
-                if(IsKeyDown('D'))
-                {
+                if(IsKeyDown('D')) {
                     paddle->moveRight(movement_speed);
                 }
             }
         }
-        if(IsKeyPressed('W'))
-        {
+        if(IsKeyPressed('W')) {
             auto_move = 1;
         }
-        if(IsKeyPressed('R'))
-        {
+        if(IsKeyPressed('R')) {
             reset();
         }
     }
 
     void Logic()
     {
-        if(auto_move)
-        {
-            if(paddle->getX() - movement_speed - 50 > offset)
-            {
-                if(ball->getX() < paddle->getX() + 25)
-                {
+        if(auto_move) {
+            if(paddle->getX() - movement_speed - 50 > offset) {
+                if(ball->getX() < paddle->getX() + 25) {
                     paddle->moveLeft(movement_speed);
                 }
             }
-            if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset)
-            {
-                if(ball->getX() > paddle->getX() + 25)
-                {
+            if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset) {
+                if(ball->getX() > paddle->getX() + 25) {
                     paddle->moveRight(movement_speed);
                 }
             }
@@ -362,142 +335,96 @@ public:
 
         ball->setFrameTime(GetFrameTime());
         ball->Move();
-        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), borderLeft)) //left wall
-        {
-            if(ball->getDirection() == UPLEFT)
-            {
+        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), borderLeft)) { //left wall
+            if(ball->getDirection() == UPLEFT) {
                 ball->changeDirection(UPRIGHT);
             }
-            if(ball->getDirection() == DOWNLEFT)
-            {
+            if(ball->getDirection() == DOWNLEFT) {
                 ball->changeDirection(DOWNRIGHT);
             }
         }
-        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderRight))
-        {
-            if(ball->getDirection() == UPRIGHT)
-            {
+        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderRight)) {
+            if(ball->getDirection() == UPRIGHT) {
                 ball->changeDirection(UPLEFT);
             }
-            if(ball->getDirection() == DOWNRIGHT)
-            {
+            if(ball->getDirection() == DOWNRIGHT) {
                 ball->changeDirection(DOWNLEFT);
             }
         }
-        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderTop))
-        {
-            if(ball->getDirection() == UPRIGHT)
-            {
+        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderTop)) {
+            if(ball->getDirection() == UPRIGHT) {
                 ball->changeDirection(DOWNRIGHT);
             }
-            if(ball->getDirection() == UPLEFT)
-            {
+            if(ball->getDirection() == UPLEFT) {
                 ball->changeDirection(DOWNLEFT);
             }
         }
 
         //Paddle Collision
-        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), {paddle->getX() - 50, paddle->getY(),100, 10}))
-        {
-            if(ball->getDirection() == DOWNLEFT)
-            {
+        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), {paddle->getX() - 50, paddle->getY(),100, 10})) {
+            if(ball->getDirection() == DOWNLEFT) {
                 ball->changeDirection(UPLEFT);
             }
-            if(ball->getDirection() == DOWNRIGHT)
-            {
+            if(ball->getDirection() == DOWNRIGHT) {
                 ball->changeDirection(UPRIGHT);
             }
         }
 
         //Collision for bricks
-        for(int i = 0; i < brick_columns; i++)
-        {
-            for(int j = 0; j < brick_rows; j++)
-            {
-                if(brick[i][j])
-                {
+        for(int i = 0; i < brick_columns; i++) {
+            for(int j = 0; j < brick_rows; j++) {
+                if(brick[i][j]) {
                     int x = brick_centering + (offset * 2) + i * brick_width + i * offset;
                     int y = offset * 2 + j * brick_height + j * offset;
-                    if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), {x, y, brick_width, brick_height}))
-                    {
+                    if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), {x, y, brick_width, brick_height})) {
                         brick[i][j] = 0;
 
-                        if(ball->getX() < x + 5 && ball->getY() > y && ball->getY() < (y + brick_height))  //Left brick side collision
-                        {
-                            if(ball->getDirection() == UPRIGHT)
-                            {
+                        if(ball->getX() < x + 5 && ball->getY() > y && ball->getY() < (y + brick_height)) { //Left brick side collision
+                            if(ball->getDirection() == UPRIGHT) {
                                 ball->changeDirection(UPLEFT);
-                            }
-                            else
-                            {
-                                if(ball->getDirection() == DOWNRIGHT)
-                                {
+                            } else {
+                                if(ball->getDirection() == DOWNRIGHT) {
                                     ball->changeDirection(DOWNLEFT);
                                 }
                             }
-                        }
-                        else if(ball->getX() > (x + brick_width) && ball->getY() > y && ball->getY() < (y + brick_height)) //Right brick side collision
-                        {
-                            if(ball->getDirection() == UPLEFT)
-                            {
+                        } else if(ball->getX() > (x + brick_width) && ball->getY() > y && ball->getY() < (y + brick_height)) { //Right brick side collision
+                            if(ball->getDirection() == UPLEFT) {
                                 ball->changeDirection(UPRIGHT);
-                            }
-                            else
-                            {
-                                if(ball->getDirection() == DOWNLEFT)
-                                {
+                            } else {
+                                if(ball->getDirection() == DOWNLEFT) {
                                     ball->changeDirection(DOWNRIGHT);
                                 }
                             }
-                        }
-                        else if(ball->getY() < y && ball->getX() > x && ball->getX() < (x + brick_width))   //Top brick side collision
-                        {
-                            if(ball->getDirection() == DOWNLEFT)
-                            {
+                        } else if(ball->getY() < y && ball->getX() > x && ball->getX() < (x + brick_width)) { //Top brick side collision
+                            if(ball->getDirection() == DOWNLEFT) {
                                 ball->changeDirection(UPLEFT);
                             }
-                            if(ball->getDirection() == DOWNRIGHT)
-                            {
+                            if(ball->getDirection() == DOWNRIGHT) {
                                 ball->changeDirection(UPRIGHT);
                             }
-                        }
-                        else if(ball->getY() > (y + brick_height) && ball->getX() > x && ball->getX() < (x + brick_width))   //Bottom brick side collision
-                        {
-                            if(ball->getDirection() == UPLEFT)
-                            {
+                        } else if(ball->getY() > (y + brick_height) && ball->getX() > x && ball->getX() < (x + brick_width)) { //Bottom brick side collision
+                            if(ball->getDirection() == UPLEFT) {
                                 ball->changeDirection(DOWNLEFT);
                             }
-                            if(ball->getDirection() == UPRIGHT)
-                            {
+                            if(ball->getDirection() == UPRIGHT) {
                                 ball->changeDirection(DOWNRIGHT);
                             }
-                        }
-                        else
-                        {
-                            if(ball->getX() < (x + brick_width / 2) && ball->getX() > (x - ball_size - 5))
-                            {
-                                if(ball->getDirection() == DOWNRIGHT)
-                                {
+                        } else {
+                            if(ball->getX() < (x + brick_width / 2) && ball->getX() > (x - ball_size - 5)) {
+                                if(ball->getDirection() == DOWNRIGHT) {
                                     ball->changeDirection(DOWNLEFT);
                                 }
-                                if(ball->getDirection() == UPRIGHT)
-                                {
+                                if(ball->getDirection() == UPRIGHT) {
                                     ball->changeDirection(UPLEFT);
                                 }
-                            }
-                            else if(ball->getX() > (x + brick_width / 2) && ball->getX() < (x + brick_width + ball_size + 5))
-                            {
-                                if(ball->getDirection() == UPLEFT)
-                                {
+                            } else if(ball->getX() > (x + brick_width / 2) && ball->getX() < (x + brick_width + ball_size + 5)) {
+                                if(ball->getDirection() == UPLEFT) {
                                     ball->changeDirection(UPRIGHT);
                                 }
-                                if(ball->getDirection() == DOWNLEFT)
-                                {
+                                if(ball->getDirection() == DOWNLEFT) {
                                     ball->changeDirection(DOWNRIGHT);
                                 }
-                            }
-                            else
-                            {
+                            } else {
                                 ball->randomDirection();
                                 exceptions++;
                                 cout<<"Total exceptions: "<<exceptions<<endl;
@@ -522,15 +449,12 @@ public:
     void checkWin()
     {
         int sum = 0;
-        for(int i = 0; i < brick_columns; i++)
-        {
-            for(int j = 0; j < brick_rows; j++)
-            {
+        for(int i = 0; i < brick_columns; i++) {
+            for(int j = 0; j < brick_rows; j++) {
                 sum = sum + brick[i][j];
             }
         }
-        if(sum == 0)
-        {
+        if(sum == 0) {
             //win = 1;
             reset();
         }
@@ -540,10 +464,8 @@ public:
     {
         loadLevel();
         CheckPattern();
-        while(!WindowShouldClose() & !win)
-        {
-            if(IsWindowFocused())
-            {
+        while(!WindowShouldClose() & !win) {
+            if(IsWindowFocused()) {
                 Input();
                 Logic();
                 checkWin();

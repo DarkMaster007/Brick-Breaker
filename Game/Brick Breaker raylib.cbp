@@ -31,10 +31,13 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-pg" />
+			<Add option="-g" />
 			<Add option="-fpermissive" />
 			<Add directory="include" />
 		</Compiler>
 		<Linker>
+			<Add option="-pg -lgmon" />
 			<Add option="-static" />
 			<Add library="raylib" />
 			<Add library="opengl32" />

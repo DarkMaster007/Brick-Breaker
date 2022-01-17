@@ -37,7 +37,7 @@ public:
     {
         x = originalX;
         y = originalY;
-        direction = STOP;
+        direction = UPLEFT; // change back to stop in final
         current_size = originalSize;
     }
     void changeDirection(eDir d)
@@ -68,12 +68,13 @@ public:
     {
         return current_size;
     }
-    inline int setFrameTime(int frame){
-    frametime = frame;
+    inline int setFrameTime(int frame)
+    {
+        frametime = frame;
     }
     void Move()
     {
-        movement = (3 + rand() % 4) * frametime;
+        movement = (3 + rand() % 6) * frametime;
         if(movement < 1) movement = 1;
         switch (direction)
         {
@@ -160,6 +161,7 @@ private:
     int ball_size;
     int auto_move;
     int exceptions;
+    bool win;
 public:
     cGameManager()
     {
@@ -171,6 +173,7 @@ public:
         ball_size = 10;
         auto_move = 1;
         exceptions = 0;
+        win = 0;
 
         game_settings>>width>>height;
         game_settings>>brick_width>>brick_height;
@@ -219,6 +222,7 @@ public:
                 brick[i][j] = file;
             }
         }
+        loadLevelFile.close();
     }
 
     void CheckPattern()  //output the current brick layout to...well...check it; dev shit, remove from final
@@ -301,43 +305,59 @@ public:
 
     void Input()
     {
-        if(paddle->getX() - movement_speed - 50 > offset)
+        if(!auto_move)
         {
-            if(paddle->getX() > GetMouseX())
+            if(paddle->getX() - movement_speed - 50 > offset)
+            {
+                if(paddle->getX() > GetMouseX())
                 {
                     paddle->moveLeft(movement_speed);
                 }
-            if(IsKeyDown('A'))
-            {
-                paddle->moveLeft(movement_speed);
+                if(IsKeyDown('A'))
+                {
+                    paddle->moveLeft(movement_speed);
+                }
             }
-        }
-        if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset)
-        {
-            if(paddle->getX() < GetMouseX())
+            if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset)
+            {
+                if(paddle->getX() < GetMouseX())
                 {
                     paddle->moveRight(movement_speed);
                 }
-            if(IsKeyDown('D'))
-            {
-                paddle->moveRight(movement_speed);
+                if(IsKeyDown('D'))
+                {
+                    paddle->moveRight(movement_speed);
+                }
             }
         }
         if(IsKeyPressed('W'))
         {
             auto_move = 1;
         }
-        if(IsKeyPressed('S'))
+        if(IsKeyPressed('R'))
         {
-            //
+            reset();
         }
     }
 
     void Logic()
     {
-        if(auto_move == 1)
+        if(auto_move)
         {
-            //
+            if(paddle->getX() - movement_speed - 50 > offset)
+            {
+                if(ball->getX() < paddle->getX() + 25)
+                {
+                    paddle->moveLeft(movement_speed);
+                }
+            }
+            if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset)
+            {
+                if(ball->getX() > paddle->getX() + 25)
+                {
+                    paddle->moveRight(movement_speed);
+                }
+            }
         }
 
         ball->setFrameTime(GetFrameTime());
@@ -452,12 +472,39 @@ public:
                                 ball->changeDirection(DOWNRIGHT);
                             }
                         }
-                        else {ball->randomDirection();
-                        exceptions++;
-                        cout<<"Total exceptions: "<<exceptions<<endl;
-                        char test[11];
-                        sprintf(test, "Test %d.png", exceptions);
-                        TakeScreenshot(test);
+                        else
+                        {
+                            if(ball->getX() < (x + brick_width / 2) && ball->getX() > (x - ball_size - 5))
+                            {
+                                if(ball->getDirection() == DOWNRIGHT)
+                                {
+                                    ball->changeDirection(DOWNLEFT);
+                                }
+                                if(ball->getDirection() == UPRIGHT)
+                                {
+                                    ball->changeDirection(UPLEFT);
+                                }
+                            }
+                            else if(ball->getX() > (x + brick_width / 2) && ball->getX() < (x + brick_width + ball_size + 5))
+                            {
+                                if(ball->getDirection() == UPLEFT)
+                                {
+                                    ball->changeDirection(UPRIGHT);
+                                }
+                                if(ball->getDirection() == DOWNLEFT)
+                                {
+                                    ball->changeDirection(DOWNRIGHT);
+                                }
+                            }
+                            else
+                            {
+                                ball->randomDirection();
+                                exceptions++;
+                                cout<<"Total exceptions: "<<exceptions<<endl;
+                                char test[11];
+                                sprintf(test, "Test %d.png", exceptions);
+                                TakeScreenshot(test);
+                            }
                         }
                     }
                 }
@@ -465,16 +512,41 @@ public:
         }
     }
 
+    void reset()
+    {
+        paddle->Reset();
+        ball->Reset();
+        loadLevel();
+    }
+
+    void checkWin()
+    {
+        int sum = 0;
+        for(int i = 0; i < brick_columns; i++)
+        {
+            for(int j = 0; j < brick_rows; j++)
+            {
+                sum = sum + brick[i][j];
+            }
+        }
+        if(sum == 0)
+        {
+            //win = 1;
+            reset();
+        }
+    }
+
     int Run()
     {
         loadLevel();
         CheckPattern();
-        while(!WindowShouldClose())
+        while(!WindowShouldClose() & !win)
         {
             if(IsWindowFocused())
             {
                 Input();
                 Logic();
+                checkWin();
             }
             Draw();
         }

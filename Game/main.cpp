@@ -21,9 +21,7 @@ private:
     int current_size, originalSize;
     eDir direction;
 public:
-    float frametime;
-    float movement;
-    cBall(int posX, int posY, int ball_size, float frame = 1.0)
+    cBall(int posX, int posY, int ball_size)
     {
         originalX = posX;
         originalY = posY;
@@ -32,13 +30,12 @@ public:
         direction = STOP;
         originalSize = ball_size;
         current_size = ball_size;
-        frametime = frame;
     }
     void Reset()
     {
         x = originalX;
         y = originalY;
-        direction = UPLEFT; // change back to stop in final
+        direction = STOP;
         current_size = originalSize;
     }
     void changeDirection(eDir d)
@@ -69,14 +66,8 @@ public:
     {
         return current_size;
     }
-    inline int setFrameTime(int frame)
+    void Move(int movement)
     {
-        frametime = frame;
-    }
-    void Move()
-    {
-        movement = (3 + rand() % 6) * frametime;
-        if(movement < 1) movement = 1;
         switch (direction) {
         case STOP:
             break;
@@ -128,11 +119,11 @@ public:
         x = originalX;
         y = originalY;
     }
-    inline int moveLeft(int pixels)
+    inline void moveLeft(int pixels)
     {
         x -= pixels;
     }
-    inline int moveRight(int pixels)
+    inline void moveRight(int pixels)
     {
         x += pixels;
     }
@@ -149,50 +140,52 @@ private:
     string brick_color;             // the bricks color; loaded from settings.txt
     bool fullscreen;                // whether it's full-screen or not
     int brick_centering;            // amount of pixels to offset bricks to center them (looks nice :) ); calculated
-    bool quit;
-    cBall *ball;
-    cPaddle *paddle;
-    Rectangle borderLeft;
-    Rectangle borderRight;
-    Rectangle borderTop;
-    Rectangle borderBottom;
-    Rectangle recPaddle;
-    int movement_speed;
-    int ball_size;
-    int auto_move;
-    int exceptions;
-    bool win;
+    bool quit;                      // whether the game should quit or not
+    cBall *ball;                    // ball object
+    cPaddle *paddle;                // paddle object
+    Rectangle borderLeft;           // left border rectangle, for collision and drawing
+    Rectangle borderRight;          // right border rectangle, for collision and drawing
+    Rectangle borderTop;            // top border rectangle, for collision and drawing
+    Rectangle borderBottom;         // bottom border rectangle, for collision and drawing
+    int movement_speed_paddle_base; // base speed for paddle
+    int movement_speed_ball_base;   // base speed for ball
+    int ball_size;                  // ball size
+    int auto_move;                  // whether the paddle automatically moves or not. helps with testing simple stuff
+    int exceptions;                 // how many times did the collision NOT work as the code says.
+    bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
+
 public:
     cGameManager()
     {
+        //Open settings.txt file
         game_settings.open("..//config//settings.txt", ios::in);
 
+        //Initialize all vars with their proper values
         quit = 0;
         offset = 10;
-        movement_speed = 10;
+        movement_speed_paddle_base = 20;
+        movement_speed_ball_base = 3;
         ball_size = 10;
-        auto_move = 1;
+        auto_move = 0;
         exceptions = 0;
         win = 0;
 
+        //Load the settings file
         game_settings>>width>>height;
         game_settings>>brick_width>>brick_height;
         game_settings>>fullscreen;
         game_settings>>brick_color;
 
         InitWindow(width,height,"Editor");
-        SetTargetFPS(480);
+        SetTargetFPS(400);
         HideCursor();
         ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, ball_size);
         paddle = new cPaddle(GetScreenWidth() / 2, GetScreenHeight() - 35);
-        ball->changeDirection(UPRIGHT);
-        ball->frametime = 0.1;
 
-        //calculations
+        //Calculations
         brick_columns = GetScreenWidth() / (brick_width + offset + 4);  // amount of bricks length
         brick_rows = (GetScreenHeight() / 2) / (brick_height + offset); // amount of bricks height
         brick_centering = (GetScreenWidth() - brick_columns * brick_width - brick_columns * offset + offset) / 4;
-        //brick_centering = 0;
 
         //Rectangles
         borderLeft = {0, 0, offset, GetScreenHeight()};
@@ -210,6 +203,7 @@ public:
         cout<<"Bricks total: "<<brick_columns*brick_rows<<endl;
 
     }
+
     void loadLevel()
     {
         loadLevelFile.open("..//config//level.txt", ios::in);
@@ -283,58 +277,84 @@ public:
         int ballY = ball->getY();
         int ballRad = 10;
         DrawCircle(ballX,ballY,ballRad,WHITE);
-        /*line(ballX - 15,ballY,ballX + 15,ballY);
-        outtextxy(ballX + 25, ballY - 10,"Y");
-        line(ballX,ballY - 15,ballX,ballY + 15);
-        outtextxy(ballX, ballY + 25,"X");*/
         EndDrawing();
     }
 
     void Input()
     {
+        float frametime = GetFrameTime() * 100;
+        int movement_speed_paddle = movement_speed_paddle_base * frametime;
+        if(movement_speed_paddle > movement_speed_paddle_base * 1.5) {
+            movement_speed_paddle = movement_speed_paddle_base * 1.5;
+        }
+
+        //Mouse movement
         if(!auto_move) {
-            if(paddle->getX() - movement_speed - 50 > offset) {
-                if(paddle->getX() > GetMouseX()) {
-                    paddle->moveLeft(movement_speed);
+            if(paddle->getX() - movement_speed_paddle - 50 > offset) {
+                if(GetMouseDelta().x < 0) {
+                    paddle->moveLeft(movement_speed_paddle);
                 }
                 if(IsKeyDown('A')) {
-                    paddle->moveLeft(movement_speed);
+                    paddle->moveLeft(movement_speed_paddle);
                 }
             }
-            if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset) {
-                if(paddle->getX() < GetMouseX()) {
-                    paddle->moveRight(movement_speed);
+            if(paddle->getX() + movement_speed_paddle + 50 < GetScreenWidth() - offset) {
+                if(GetMouseDelta().x > 0) {
+                    paddle->moveRight(movement_speed_paddle);
                 }
                 if(IsKeyDown('D')) {
-                    paddle->moveRight(movement_speed);
+                    paddle->moveRight(movement_speed_paddle);
                 }
             }
         }
-        if(IsKeyPressed('W')) {
-            auto_move = 1;
+        SetMousePosition(GetScreenWidth() / 2,GetMousePosition().y);
+        //
+
+        if(IsKeyPressed('W')) {         // Enable auto-moving
+            auto_move = !auto_move;
         }
-        if(IsKeyPressed('R')) {
+
+        if(IsKeyPressed('R')) {         // Reset the level
             reset();
+        }
+
+        if(ball->getDirection() == STOP) {                      // Click to start the ball movement thing
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                ball->changeDirection(UPRIGHT);
+            }
         }
     }
 
     void Logic()
     {
+        float frametime = GetFrameTime() * 100;
+        int movement_speed_paddle = movement_speed_paddle_base * frametime;
+        if(movement_speed_paddle > movement_speed_paddle_base * 1.5) {
+            movement_speed_paddle = movement_speed_paddle_base * 1.5;
+        }
+
         if(auto_move) {
-            if(paddle->getX() - movement_speed - 50 > offset) {
+            if(paddle->getX() - movement_speed_paddle - 50 > offset) {
                 if(ball->getX() < paddle->getX() + 25) {
-                    paddle->moveLeft(movement_speed);
+                    paddle->moveLeft(movement_speed_paddle);
                 }
             }
-            if(paddle->getX() + movement_speed + 50 < GetScreenWidth() - offset) {
+            if(paddle->getX() + movement_speed_paddle + 50 < GetScreenWidth() - offset) {
                 if(ball->getX() > paddle->getX() + 25) {
-                    paddle->moveRight(movement_speed);
+                    paddle->moveRight(movement_speed_paddle);
                 }
             }
         }
 
-        ball->setFrameTime(GetFrameTime());
-        ball->Move();
+        int movement_speed_ball = (movement_speed_ball_base + rand() % 6) * frametime;
+        if(movement_speed_ball == 0) {
+            movement_speed_ball = 1;
+        }
+        if(movement_speed_ball > movement_speed_ball_base * 2.5) {
+            movement_speed_ball = movement_speed_ball_base * 2.5;
+        }
+        ball->Move(movement_speed_ball);
+
         if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), borderLeft)) { //left wall
             if(ball->getDirection() == UPLEFT) {
                 ball->changeDirection(UPRIGHT);

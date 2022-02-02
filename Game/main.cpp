@@ -265,6 +265,12 @@ public:
                 if(brick[i][j] == 2) {
                     DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,DARKGREEN);
                 }
+                if(brick[i][j] == 3) {
+                    DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,DARKBLUE);
+                }
+                if(brick[i][j] == 4) {
+                    DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,GOLD);
+                }
             }
         }
         //
@@ -411,7 +417,8 @@ public:
                         int x = brick_centering + (offset * 2) + i * brick_width + i * offset;
                         int y = offset * 2 + j * brick_height + j * offset;
                         if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), {x, y, brick_width, brick_height})) {
-                            brick[i][j] --;
+                            if(brick[i][j] <= 3){
+                            brick[i][j] --;}
                             collision = 0;
 
                             if(ball->getX() < x + 5 && ball->getY() > y && ball->getY() < (y + brick_height)) { //Left brick side collision
@@ -487,7 +494,8 @@ public:
         int sum = 0;
         for(int i = 0; i < brick_columns; i++) {
             for(int j = 0; j < brick_rows; j++) {
-                sum = sum + brick[i][j];
+                if(brick[i][j] <= 3){
+                sum = sum + brick[i][j];}
             }
         }
         if(sum == 0) {

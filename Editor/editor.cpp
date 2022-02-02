@@ -875,7 +875,7 @@ public:
         {
             for(int j = 0; j < brick_rows; j++)    // rows
             {
-                brick[i][j] = 1;
+                brick[i][j] = 0;
             }
         }
     }

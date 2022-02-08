@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include <fstream>
 #include <cstring>
+#include <stdlib.h>
 using std::fstream;
 using std::endl;
 using std::string;
@@ -12,6 +13,7 @@ using std::strcpy;
 
 #define MAX_INPUT_CHARS   9
 #define MAX_INPUT_INT     4
+#define MAX_BRICKS        300
 
 fstream settings;
 fstream lvl_editor;
@@ -80,8 +82,7 @@ public:
         current_screen = 0; // 0 - Menu, 1 - Settings, 2 - Extra, 3 - Start
         update = 0;
         fail_open = 0;
-        if(!settings.is_open())
-        {
+        if(!settings.is_open()) {
             settings.open("..//config//settings.txt", ios::out | ios::in);
         }
 
@@ -127,7 +128,7 @@ public:
         mouseOnText_offset = false;
         framesCounter_offset = 0;
         //
-        //Settings fullscreen switch
+        //Settings full-screen switch
 
         //
 
@@ -138,8 +139,7 @@ public:
     }
     void Settings_check()
     {
-        if(!settings.is_open() & !update)
-        {
+        if(!settings.is_open() & !update) {
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             export_width = 1024;
@@ -153,8 +153,7 @@ public:
             settings.open("..//config//settings.txt", ios::out | ios::in);
             cout<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
         }
-        if(update)
-        {
+        if(update) {
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             settings<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
@@ -173,18 +172,14 @@ public:
         BeginDrawing();
 
         DrawTexture(title, GetScreenWidth() /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-        {
-            if(CheckCollisionPointRec(GetMousePosition(),Rectangle {GetScreenWidth() / 2 - title.width / 2, 80, title.width, title.height}))
-            {
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            if(CheckCollisionPointRec(GetMousePosition(),Rectangle {GetScreenWidth() / 2 - title.width / 2, 80, title.width, title.height})) {
                 cout<<"TITLE!"<<endl;
             }
         }
-        if(settings.is_open() & !fail_open)
-        {
+        if(settings.is_open() & !fail_open) {
             //General Menu
-            if(current_screen == 0)
-            {
+            if(current_screen == 0) {
                 button_settings = { GetScreenWidth() / 2 - 90, GetScreenHeight() - 0.65 * GetScreenHeight(), 180, 60 };
                 DrawRectangleRec(button_settings, WHITE);   //Settings Button
                 textsize = MeasureText(msg_set,30);
@@ -202,31 +197,23 @@ public:
             }
 
             //Settings menu
-            if(current_screen == 1)
-            {
+            if(current_screen == 1) {
                 //Draw Color text box
                 DrawText("Color",205,200,40,BLACK);
                 DrawRectangleRec(colorBox, LIGHTGRAY);
-                if(mouseOnText_color)
-                {
+                if(mouseOnText_color) {
                     DrawRectangleLines((int)colorBox.x, (int)colorBox.y, (int)colorBox.width, (int)colorBox.height, RED);
-                }
-                else
-                {
+                } else {
                     DrawRectangleLines((int)colorBox.x, (int)colorBox.y, (int)colorBox.width, (int)colorBox.height, DARKGRAY);
                 }
                 DrawText(settings_color, (int)colorBox.x + 5, (int)colorBox.y + 15, 30, MAROON);
-                if (mouseOnText_color)
-                {
-                    if (letterCount_color < MAX_INPUT_CHARS)
-                    {
+                if (mouseOnText_color) {
+                    if (letterCount_color < MAX_INPUT_CHARS) {
                         // Draw blinking underscore char
-                        if (((framesCounter_color/20)%2) == 0)
-                        {
+                        if (((framesCounter_color/20)%2) == 0) {
                             DrawText("_", (int)colorBox.x + 8 + MeasureText(settings_color, 30), (int)colorBox.y + 15, 30, MAROON);
                         }
-                    }
-                    else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
+                    } else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
                 }
                 //
                 //Draw screen width text box
@@ -234,50 +221,36 @@ public:
                 DrawText("Width           Height",GetScreenWidth() - 390,210,30,BLACK);
                 DrawText("X",GetScreenWidth() - 250,265,20,BLACK);
                 DrawRectangleRec(screenWidthBox, LIGHTGRAY);
-                if(mouseOnText_screenWidth)
-                {
+                if(mouseOnText_screenWidth) {
                     DrawRectangleLines((int)screenWidthBox.x, (int)screenWidthBox.y, (int)screenWidthBox.width, (int)screenWidthBox.height, RED);
-                }
-                else
-                {
+                } else {
                     DrawRectangleLines((int)screenWidthBox.x, (int)screenWidthBox.y, (int)screenWidthBox.width, (int)screenWidthBox.height, DARKGRAY);
                 }
                 DrawText(settings_screenWidth, (int)screenWidthBox.x + 5, (int)screenWidthBox.y + 15, 30, MAROON);
-                if (mouseOnText_screenWidth)
-                {
-                    if (letterCount_screenWidth < MAX_INPUT_INT)
-                    {
+                if (mouseOnText_screenWidth) {
+                    if (letterCount_screenWidth < MAX_INPUT_INT) {
                         // Draw blinking underscore char
-                        if (((framesCounter_screenWidth/20)%2) == 0)
-                        {
+                        if (((framesCounter_screenWidth/20)%2) == 0) {
                             DrawText("_", (int)screenWidthBox.x + 8 + MeasureText(settings_screenWidth, 30), (int)screenWidthBox.y + 15, 30, MAROON);
                         }
-                    }
-                    else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
+                    } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
                 }
                 //
                 //Draw screen height text box
                 DrawRectangleRec(screenHeightBox, LIGHTGRAY);
-                if(mouseOnText_screenHeight)
-                {
+                if(mouseOnText_screenHeight) {
                     DrawRectangleLines((int)screenHeightBox.x, (int)screenHeightBox.y, (int)screenHeightBox.width, (int)screenHeightBox.height, RED);
-                }
-                else
-                {
+                } else {
                     DrawRectangleLines((int)screenHeightBox.x, (int)screenHeightBox.y, (int)screenHeightBox.width, (int)screenHeightBox.height, DARKGRAY);
                 }
                 DrawText(settings_screenHeight, (int)screenHeightBox.x + 5, (int)screenHeightBox.y + 15, 30, MAROON);
-                if (mouseOnText_screenHeight)
-                {
-                    if (letterCount_screenHeight < MAX_INPUT_INT)
-                    {
+                if (mouseOnText_screenHeight) {
+                    if (letterCount_screenHeight < MAX_INPUT_INT) {
                         // Draw blinking underscore char
-                        if (((framesCounter_screenHeight/20)%2) == 0)
-                        {
+                        if (((framesCounter_screenHeight/20)%2) == 0) {
                             DrawText("_", (int)screenHeightBox.x + 8 + MeasureText(settings_screenHeight, 30), (int)screenHeightBox.y + 15, 30, MAROON);
                         }
-                    }
-                    else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
+                    } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
                 }
                 //
                 //Draw brick width text box
@@ -285,75 +258,54 @@ public:
                 DrawText("Width           Height",GetScreenWidth() - 390,410,30,BLACK);
                 DrawText("X",GetScreenWidth() - 250,465,20,BLACK);
                 DrawRectangleRec(brickWBox, LIGHTGRAY);
-                if(mouseOnText_brickWidth)
-                {
+                if(mouseOnText_brickWidth) {
                     DrawRectangleLines((int)brickWBox.x, (int)brickWBox.y, (int)brickWBox.width, (int)brickWBox.height, RED);
-                }
-                else
-                {
+                } else {
                     DrawRectangleLines((int)brickWBox.x, (int)brickWBox.y, (int)brickWBox.width, (int)brickWBox.height, DARKGRAY);
                 }
                 DrawText(settings_brickWidth, (int)brickWBox.x + 5, (int)brickWBox.y + 15, 30, MAROON);
-                if (mouseOnText_brickWidth)
-                {
-                    if (letterCount_brickWidth < MAX_INPUT_INT)
-                    {
+                if (mouseOnText_brickWidth) {
+                    if (letterCount_brickWidth < MAX_INPUT_INT) {
                         // Draw blinking underscore char
-                        if (((framesCounter_brickWidth/20)%2) == 0)
-                        {
+                        if (((framesCounter_brickWidth/20)%2) == 0) {
                             DrawText("_", (int)brickWBox.x + 8 + MeasureText(settings_brickWidth, 30), (int)brickWBox.y + 15, 30, MAROON);
                         }
-                    }
-                    else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
+                    } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
                 }
                 //
                 //Draw brick height text box
                 DrawRectangleRec(brickHBox, LIGHTGRAY);
-                if(mouseOnText_brickHeight)
-                {
+                if(mouseOnText_brickHeight) {
                     DrawRectangleLines((int)brickHBox.x, (int)brickHBox.y, (int)brickHBox.width, (int)brickHBox.height, RED);
-                }
-                else
-                {
+                } else {
                     DrawRectangleLines((int)brickHBox.x, (int)brickHBox.y, (int)brickHBox.width, (int)brickHBox.height, DARKGRAY);
                 }
                 DrawText(settings_brickHeight, (int)brickHBox.x + 5, (int)brickHBox.y + 15, 30, MAROON);
-                if (mouseOnText_brickHeight)
-                {
-                    if (letterCount_brickHeight < MAX_INPUT_INT)
-                    {
+                if (mouseOnText_brickHeight) {
+                    if (letterCount_brickHeight < MAX_INPUT_INT) {
                         // Draw blinking underscore char
-                        if (((framesCounter_brickHeight/20)%2) == 0)
-                        {
+                        if (((framesCounter_brickHeight/20)%2) == 0) {
                             DrawText("_", (int)brickHBox.x + 8 + MeasureText(settings_brickHeight, 30), (int)brickHBox.y + 15, 30, MAROON);
                         }
-                    }
-                    else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
+                    } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
                 }
                 //
-                //Draw Offset text box
-                DrawText("Offset",205,395,40,BLACK);
+                //Draw offset text box
+                DrawText("10",205,395,40,BLACK);
                 DrawRectangleRec(offsetBox, LIGHTGRAY);
-                if(mouseOnText_offset)
-                {
+                if(mouseOnText_offset) {
                     DrawRectangleLines((int)offsetBox.x, (int)offsetBox.y, (int)offsetBox.width, (int)offsetBox.height, RED);
-                }
-                else
-                {
+                } else {
                     DrawRectangleLines((int)offsetBox.x, (int)offsetBox.y, (int)offsetBox.width, (int)offsetBox.height, DARKGRAY);
                 }
                 DrawText(settings_offset, (int)offsetBox.x + 5, (int)offsetBox.y + 15, 30, MAROON);
-                if (mouseOnText_offset)
-                {
-                    if (letterCount_offset < MAX_INPUT_INT)
-                    {
+                if (mouseOnText_offset) {
+                    if (letterCount_offset < MAX_INPUT_INT) {
                         // Draw blinking underscore char
-                        if (((framesCounter_offset/20)%2) == 0)
-                        {
+                        if (((framesCounter_offset/20)%2) == 0) {
                             DrawText("_", (int)offsetBox.x + 8 + MeasureText(settings_offset, 30), (int)offsetBox.y + 15, 30, MAROON);
                         }
-                    }
-                    else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
+                    } else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
                 }
                 //
                 // Draw full-screen switch
@@ -371,13 +323,10 @@ public:
             }
 
             //Extra menu
-            if(current_screen == 2)
-            {
+            if(current_screen == 2) {
 
             }
-        }
-        else
-        {
+        } else {
             textsize = MeasureText(msg_error,25);
             DrawText(msg_error, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() / 2, 25, BLACK); //Start Text
         }
@@ -386,410 +335,303 @@ public:
     }
     void Logic()
     {
-        //Colision for the main menu buttons: settings, extra and start
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-        {
-            if(CheckCollisionPointRec(GetMousePosition(),button_settings))
-            {
+        //Collision for the main menu buttons: settings, extra and start
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            if(CheckCollisionPointRec(GetMousePosition(),button_settings)) {
                 current_screen = 1;
             }
-            if(CheckCollisionPointRec(GetMousePosition(),button_extra))
-            {
+            if(CheckCollisionPointRec(GetMousePosition(),button_extra)) {
                 current_screen = 2;
             }
-            if(CheckCollisionPointRec(GetMousePosition(),button_start))
-            {
+            if(CheckCollisionPointRec(GetMousePosition(),button_start)) {
                 current_screen = 3;
             }
         }
 
-        if(WindowShouldClose())
-        {
+        if(WindowShouldClose()) {
             quit = 1;
         }
-        if(current_screen == 1)
-        {
+        if(current_screen == 1) {
             //Logic for input color
             {
-                if (CheckCollisionPointRec(GetMousePosition(), colorBox))
-                {
+                if (CheckCollisionPointRec(GetMousePosition(), colorBox)) {
                     mouseOnText_color = true;
-                }
-                else
-                {
+                } else {
                     mouseOnText_color = false;
                 }
-                if(mouseOnText_color)
-                {
+                if(mouseOnText_color) {
                     SetMouseCursor(MOUSE_CURSOR_IBEAM);
                     int key = GetCharPressed();
-                    while(key>0) //Only letters allowed
-                    {
-                        if((key >= 97) && (key <= 122) && (letterCount_color < MAX_INPUT_CHARS))
-                        {
+                    while(key>0) { //Only letters allowed
+                        if((key >= 97) && (key <= 122) && (letterCount_color < MAX_INPUT_CHARS)) {
                             key = key - 32;
                         }
-                        if((key >= 65) && (key <= 90) && (letterCount_color < MAX_INPUT_CHARS))
-                        {
+                        if((key >= 65) && (key <= 90) && (letterCount_color < MAX_INPUT_CHARS)) {
                             settings_color[letterCount_color] = (char) key;
                             settings_color[letterCount_color + 1] = '\0';
                             letterCount_color++;
                         }
                         key = GetCharPressed();
                     }
-                    if(IsKeyPressed(KEY_BACKSPACE))
-                    {
+                    if(IsKeyPressed(KEY_BACKSPACE)) {
                         letterCount_color--;
-                        if(letterCount_color < 0)
-                        {
+                        if(letterCount_color < 0) {
                             letterCount_color = 0;
                         }
                         settings_color[letterCount_color] = '\0';
                     }
-                }
-                else
-                {
+                } else {
                     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
                 }
-                if(mouseOnText_color)
-                {
+                if(mouseOnText_color) {
                     framesCounter_color++;
-                }
-                else
-                {
+                } else {
                     framesCounter_color = 0;
                 }
             }
             //
             // Logic for input screen width
             {
-                if (CheckCollisionPointRec(GetMousePosition(), screenWidthBox))
-                {
+                if (CheckCollisionPointRec(GetMousePosition(), screenWidthBox)) {
                     mouseOnText_screenWidth = true;
-                }
-                else
-                {
+                } else {
                     mouseOnText_screenWidth = false;
                 }
-                if(mouseOnText_screenWidth)
-                {
+                if(mouseOnText_screenWidth) {
                     SetMouseCursor(MOUSE_CURSOR_IBEAM);
                     int key = GetCharPressed();
-                    while(key>0)  //Only numbers allowed (to change)
-                    {
-                        if((key >= 48) && (key <= 57) && (letterCount_screenWidth < MAX_INPUT_INT))
-                        {
+                    while(key>0) { //Only numbers allowed (to change)
+                        if((key >= 48) && (key <= 57) && (letterCount_screenWidth < MAX_INPUT_INT)) {
                             settings_screenWidth[letterCount_screenWidth] = (char) key;
                             settings_screenWidth[letterCount_screenWidth + 1] = '\0';
                             letterCount_screenWidth++;
                         }
                         key = GetCharPressed();
                     }
-                    if(IsKeyPressed(KEY_BACKSPACE))
-                    {
+                    if(IsKeyPressed(KEY_BACKSPACE)) {
                         letterCount_screenWidth--;
-                        if(letterCount_screenWidth < 0)
-                        {
+                        if(letterCount_screenWidth < 0) {
                             letterCount_screenWidth = 0;
                         }
                         settings_screenWidth[letterCount_screenWidth] = '\0';
                     }
-                }
-                else
-                {
+                } else {
                     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
                 }
-                if(mouseOnText_screenWidth)
-                {
+                if(mouseOnText_screenWidth) {
                     framesCounter_screenWidth++;
-                }
-                else
-                {
+                } else {
                     framesCounter_screenWidth = 0;
                 }
             }
             //
             // Logic for input screen height
             {
-                if (CheckCollisionPointRec(GetMousePosition(), screenHeightBox))
-                {
+                if (CheckCollisionPointRec(GetMousePosition(), screenHeightBox)) {
                     mouseOnText_screenHeight = true;
-                }
-                else
-                {
+                } else {
                     mouseOnText_screenHeight = false;
                 }
-                if(mouseOnText_screenHeight)
-                {
+                if(mouseOnText_screenHeight) {
                     SetMouseCursor(MOUSE_CURSOR_IBEAM);
                     int key = GetCharPressed();
-                    while(key>0)  //Only numbers allowed (to change)
-                    {
-                        if((key >= 48) && (key <= 57) && (letterCount_screenHeight < MAX_INPUT_INT))
-                        {
+                    while(key>0) { //Only numbers allowed (to change)
+                        if((key >= 48) && (key <= 57) && (letterCount_screenHeight < MAX_INPUT_INT)) {
                             settings_screenHeight[letterCount_screenHeight] = (char) key;
                             settings_screenHeight[letterCount_screenHeight + 1] = '\0';
                             letterCount_screenHeight++;
                         }
                         key = GetCharPressed();
                     }
-                    if(IsKeyPressed(KEY_BACKSPACE))
-                    {
+                    if(IsKeyPressed(KEY_BACKSPACE)) {
                         letterCount_screenHeight--;
-                        if(letterCount_screenHeight < 0)
-                        {
+                        if(letterCount_screenHeight < 0) {
                             letterCount_screenHeight = 0;
                         }
                         settings_screenHeight[letterCount_screenHeight] = '\0';
                     }
-                }
-                else
-                {
+                } else {
                     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
                 }
-                if(mouseOnText_screenHeight)
-                {
+                if(mouseOnText_screenHeight) {
                     framesCounter_screenHeight++;
-                }
-                else
-                {
+                } else {
                     framesCounter_screenHeight = 0;
                 }
             }
             //
             // Logic for input brick width
             {
-                if (CheckCollisionPointRec(GetMousePosition(), brickWBox))
-                {
+                if (CheckCollisionPointRec(GetMousePosition(), brickWBox)) {
                     mouseOnText_brickWidth = true;
-                }
-                else
-                {
+                } else {
                     mouseOnText_brickWidth = false;
                 }
-                if(mouseOnText_brickWidth)
-                {
+                if(mouseOnText_brickWidth) {
                     SetMouseCursor(MOUSE_CURSOR_IBEAM);
                     int key = GetCharPressed();
-                    while(key>0)  //Only numbers allowed (to change)
-                    {
-                        if((key >= 48) && (key <= 57) && (letterCount_brickWidth < MAX_INPUT_INT))
-                        {
+                    while(key>0) { //Only numbers allowed (to change)
+                        if((key >= 48) && (key <= 57) && (letterCount_brickWidth < MAX_INPUT_INT)) {
                             settings_brickWidth[letterCount_brickWidth] = (char) key;
                             settings_brickWidth[letterCount_brickWidth + 1] = '\0';
                             letterCount_brickWidth++;
                         }
                         key = GetCharPressed();
                     }
-                    if(IsKeyPressed(KEY_BACKSPACE))
-                    {
+                    if(IsKeyPressed(KEY_BACKSPACE)) {
                         letterCount_brickWidth--;
-                        if(letterCount_brickWidth < 0)
-                        {
+                        if(letterCount_brickWidth < 0) {
                             letterCount_brickWidth = 0;
                         }
                         settings_brickWidth[letterCount_brickWidth] = '\0';
                     }
-                }
-                else
-                {
+                } else {
                     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
                 }
-                if(mouseOnText_brickWidth)
-                {
+                if(mouseOnText_brickWidth) {
                     framesCounter_brickWidth++;
-                }
-                else
-                {
+                } else {
                     framesCounter_brickWidth = 0;
                 }
             }
             //
             // Logic for input brick height
             {
-                if (CheckCollisionPointRec(GetMousePosition(), brickHBox))
-                {
+                if (CheckCollisionPointRec(GetMousePosition(), brickHBox)) {
                     mouseOnText_brickHeight = true;
-                }
-                else
-                {
+                } else {
                     mouseOnText_brickHeight = false;
                 }
-                if(mouseOnText_brickHeight)
-                {
+                if(mouseOnText_brickHeight) {
                     SetMouseCursor(MOUSE_CURSOR_IBEAM);
                     int key = GetCharPressed();
-                    while(key>0)  //Only numbers allowed (to change)
-                    {
-                        if((key >= 48) && (key <= 57) && (letterCount_brickHeight < MAX_INPUT_INT))
-                        {
+                    while(key>0) { //Only numbers allowed (to change)
+                        if((key >= 48) && (key <= 57) && (letterCount_brickHeight < MAX_INPUT_INT)) {
                             settings_brickHeight[letterCount_brickHeight] = (char) key;
                             settings_brickHeight[letterCount_brickHeight + 1] = '\0';
                             letterCount_brickHeight++;
                         }
                         key = GetCharPressed();
                     }
-                    if(IsKeyPressed(KEY_BACKSPACE))
-                    {
+                    if(IsKeyPressed(KEY_BACKSPACE)) {
                         letterCount_brickHeight--;
-                        if(letterCount_brickHeight < 0)
-                        {
+                        if(letterCount_brickHeight < 0) {
                             letterCount_brickHeight = 0;
                         }
                         settings_brickHeight[letterCount_brickHeight] = '\0';
                     }
-                }
-                else
-                {
+                } else {
                     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
                 }
-                if(mouseOnText_brickHeight)
-                {
+                if(mouseOnText_brickHeight) {
                     framesCounter_brickHeight++;
-                }
-                else
-                {
+                } else {
                     framesCounter_brickHeight = 0;
                 }
             }
             //
             // Logic for input offset
             {
-                if (CheckCollisionPointRec(GetMousePosition(), offsetBox))
-                {
+                if (CheckCollisionPointRec(GetMousePosition(), offsetBox)) {
                     mouseOnText_offset = true;
-                }
-                else
-                {
+                } else {
                     mouseOnText_offset = false;
                 }
-                if(mouseOnText_offset)
-                {
+                if(mouseOnText_offset) {
                     SetMouseCursor(MOUSE_CURSOR_IBEAM);
                     int key = GetCharPressed();
-                    while(key>0)  //Only numbers allowed (to change)
-                    {
-                        if((key >= 48) && (key <= 57) && (letterCount_offset < MAX_INPUT_INT))
-                        {
+                    while(key>0) { //Only numbers allowed (to change)
+                        if((key >= 48) && (key <= 57) && (letterCount_offset < MAX_INPUT_INT)) {
                             settings_offset[letterCount_offset] = (char) key;
                             settings_offset[letterCount_offset + 1] = '\0';
                             letterCount_offset++;
                         }
                         key = GetCharPressed();
                     }
-                    if(IsKeyPressed(KEY_BACKSPACE))
-                    {
+                    if(IsKeyPressed(KEY_BACKSPACE)) {
                         letterCount_offset--;
-                        if(letterCount_offset < 0)
-                        {
+                        if(letterCount_offset < 0) {
                             letterCount_offset = 0;
                         }
                         settings_offset[letterCount_offset] = '\0';
                     }
-                }
-                else
-                {
+                } else {
                     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
                 }
-                if(mouseOnText_offset)
-                {
+                if(mouseOnText_offset) {
                     framesCounter_offset++;
-                }
-                else
-                {
+                } else {
                     framesCounter_offset = 0;
                 }
             }
             //
-            // Logic for input fullscreen
-            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60}))
-            {
-                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-                {
+            // Logic for input full-screen
+            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60})) {
+                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
                     ToggleFullscreen();
                 }
             }
             //
             // Logic for save changes button and actions to do
-            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60}))
-            {
-                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-                {
-                    if(letterCount_color == 0)
-                    {
+            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60})) { //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+                    if(letterCount_color == 0) {
                         cout<<"Empty"<<endl;
                         settings_color[0] = 'R';
                         settings_color[1] = 'E';
                         settings_color[2] = 'D';
                         cout<<settings_color<<endl;
                         export_brick_color = settings_color;
-                    }
-                    else
-                    {
+                    } else {
                         cout<<settings_color<<endl;
                         export_brick_color = settings_color;
                     }
-                    if(letterCount_screenWidth == 0)
-                    {
+                    if(letterCount_screenWidth == 0) {
                         export_width = 1024;
                         strcpy(settings_screenWidth, "1024");
                         letterCount_screenWidth = 4;
                         cout<<export_width<<endl;
-                    }
-                    else
-                    {
+                    } else {
                         cout<<settings_screenWidth<<endl;
                         export_width = atoi(settings_screenWidth);
                         cout<<export_width<<endl;
                     }
-                    if(letterCount_screenHeight == 0)
-                    {
+                    if(letterCount_screenHeight == 0) {
                         export_height = 760;
                         strcpy(settings_screenHeight, "760");
                         letterCount_screenHeight = 3;
                         cout<<export_height<<endl;
-                    }
-                    else
-                    {
+                    } else {
                         cout<<settings_screenHeight<<endl;
                         export_height = atoi(settings_screenHeight);
                         cout<<export_height<<endl;
                     }
-                    if(letterCount_brickWidth == 0)
-                    {
+                    if(letterCount_brickWidth == 0) {
                         export_brick_width = 50;
                         strcpy(settings_brickWidth, "50");
                         letterCount_brickWidth = 2;
                         cout<<export_brick_width<<endl;
-                    }
-                    else
-                    {
+                    } else {
                         cout<<settings_brickWidth<<endl;
                         export_brick_width = atoi(settings_brickWidth);
                         cout<<export_brick_width<<endl;
                     }
-                    if(letterCount_brickHeight == 0)
-                    {
+                    if(letterCount_brickHeight == 0) {
                         export_brick_height = 35;
                         strcpy(settings_brickHeight, "35");
                         letterCount_brickHeight = 2;
                         cout<<export_brick_height<<endl;
-                    }
-                    else
-                    {
+                    } else {
                         cout<<settings_brickHeight<<endl;
                         export_brick_height = atoi(settings_brickHeight);
                         cout<<export_brick_height<<endl;
                     }
-                    if(letterCount_offset == 0)
-                    {
+                    if(letterCount_offset == 0) {
                         export_offset = 10;
                         strcpy(settings_offset, "10");
                         letterCount_offset = 2;
                         cout<<export_offset<<endl;
-                    }
-                    else
-                    {
+                    } else {
                         cout<<settings_offset<<endl;
                         export_offset = atoi(settings_offset);
                         cout<<export_offset<<endl;
@@ -807,12 +649,10 @@ public:
     {
         fail_open = fail;
         Settings_check();
-        while(!quit & current_screen != 3)
-        {
+        while(!quit & current_screen != 3) {
             Draw();
             Logic();
-            if(settings.eof())
-            {
+            if(settings.eof()) {
                 settings.seekg(ios::beg);
                 settings.clear();
             }
@@ -822,16 +662,22 @@ public:
     }
 };
 
+typedef struct Bricks
+{
+    Vector2 position;
+    int brickWidth;
+    int brickHeight;
+    int type;
+    bool enabled;
+} Bricks;
+
 class cGameManager
 {
 private:
-    int offset;                     // distance between bricks / 2 (don't ask); loaded from settings.txt
-    int brick [100][100];           // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
-    int brick_width, brick_height;  // width and height of individual bricks; loaded from settings.txt
-    int brick_columns, brick_rows;  // how many rows and how many columns of bricks there should be; calculated
-    string brick_color;             // the bricks color; loaded from settings.txt
+    Bricks *brick;                  // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
+    int brickCount;
+    Texture2D texBrick;
     bool fullscreen;                // whether it's full-screen or not
-    int brick_centering;            // amount of pixels to offset bricks to center them (looks nice :) ); calculated
     Rectangle button_SaveAndQuit;   // Save and quit button
     Rectangle button_QuitOnly;      // Quit only button
     bool save;                      // To save or not to save...that is the question (I had to I was listening to Hate Me)
@@ -842,55 +688,26 @@ public:
         game_settings.open("..//config//settings.txt", ios::in);
 
         //variables
+        brick = (Bricks *)malloc(MAX_BRICKS*sizeof(Bricks));
+        brickCount = 0;
+        Image imgBrick = LoadImage("../resources/Breakout-Brick.gif");
         save = 0;
         quit = 0;
-        offset = 10;
-        int garbage;
-        game_settings>>garbage>>garbage;
-        game_settings>>brick_width>>brick_height;
-        game_settings>>fullscreen;
-        game_settings>>brick_color;
+        ImageResize(&imgBrick, 50, 35);
+        texBrick = LoadTextureFromImage(imgBrick);
 
-        //calculations
-        brick_columns = GetScreenWidth() / (brick_width + offset + 4);  // amount of bricks length
-        brick_rows = (GetScreenHeight() / 2) / (brick_height + offset); // amount of bricks height
-        brick_centering = (GetScreenWidth() - brick_columns * brick_width - brick_columns * offset + offset) / 4;
-        //brick_centering = 0;
-
-        //cout's for testing; dev shit, remove from final
-        cout<<"Brick width: "<<brick_width<<endl;
-        cout<<"Brick height: "<<brick_height<<endl;
-        cout<<"Full-screen: "<<fullscreen<<endl;
-        cout<<"Color value: "<<brick_color<<endl;
-        cout<<"Value to center bricks with: "<<brick_centering<<endl;
-        cout<<"Brick columns: "<<brick_columns<<endl<<"Brick rows: "<<brick_rows<<endl;
-        cout<<"Bricks total: "<<brick_columns*brick_rows<<endl;
-
-        //InitWindow(w,h,"Editor");
         SetTargetFPS(60);
     }
+
     void Init() // load the brick variable with only ones (meaning all bricks are visible and active)
     {
-        for(int i = 0; i < brick_columns; i++)    // columns
-        {
-            for(int j = 0; j < brick_rows; j++)    // rows
-            {
-                brick[i][j] = 0;
-            }
+        for(int i = 0; i < MAX_BRICKS; i++) {
+            brick[i].brickWidth = 50;
+            brick[i].brickHeight = 35;
+            brick[i].enabled = 0;
         }
     }
-    void CheckPattern()  //output the current brick layout to...well...check it; dev shit, remove from final
-    {
-        cout<<endl;
-        for(int j = 0; j < brick_rows; j++)
-        {
-            for(int i = 0; i < brick_columns; i++)
-            {
-                cout<<brick[i][j]<<" ";
-            }
-            cout<<endl;
-        }
-    }
+
     int Info()  //the info menu
     {
         BeginDrawing();
@@ -902,60 +719,28 @@ public:
         DrawText("Press Q once you are done to quit and save.",GetScreenWidth() / 2 - 43 * 3, GetScreenHeight() / 2.5 + 70,15,WHITE);
         DrawText("Click left mouse button to continue.",GetScreenWidth() / 2 - 36 * 3, GetScreenHeight() - GetScreenHeight() / 7.6,15,WHITE);
         EndDrawing();
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        {
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
-    Color colors()  //brick colors; uses string from settings.txt
-    {
-        if(brick_color == "RED")
-        {
-            return RED;
-        }
-        if(brick_color == "BLUE")
-        {
-            return BLUE;
-        }
-        if(brick_color == "GREEN")
-        {
-            return GREEN;
-        }
-        if(brick_color == "YELLOW")
-        {
-            return YELLOW;
-        }
-        else
-        {
-            return WHITE;
-        }
-        return Color{GetRandomValue(10,255),GetRandomValue(10,255),GetRandomValue(10,255),GetRandomValue(150,255)};
-    }
     void Draw()  //draw the actual bricks only if their associated value is 1
     {
-        ClearBackground(BLACK);
         BeginDrawing();
+        ClearBackground(BLACK);
         //Loop to draw bricks
-        for(int i = 0; i < brick_columns; i++)
-        {
-            for(int j = 0; j < brick_rows; j++)
-            {
-                if(brick[i][j])
-                {
-                    DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,colors());
-                }
+        for(int i = 0; i <= brickCount; i++) {
+            if(brick[i].enabled) {
+                DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, BLUE);
             }
         }
         //
         // Draw border
-        DrawRectangle(0,0,offset,GetScreenHeight(),BROWN);
-        DrawRectangle(0,0,GetScreenWidth(),offset,BROWN);
-        DrawRectangle(GetScreenWidth() - offset,0, GetScreenWidth(), GetScreenHeight(),BROWN);
-        DrawRectangle(0, GetScreenHeight() - offset, GetScreenWidth(), GetScreenHeight(),BROWN);
+        DrawRectangle(0,0,10,GetScreenHeight(),BROWN);
+        DrawRectangle(0,0,GetScreenWidth(),10,BROWN);
+        DrawRectangle(GetScreenWidth() - 10,0, GetScreenWidth(), GetScreenHeight(),BROWN);
+        DrawRectangle(0, GetScreenHeight() - 10, GetScreenWidth(), GetScreenHeight(),BROWN);
         //
         // Draw Quit and SaveAndQuit buttons
         button_SaveAndQuit = {GetScreenWidth() / 2 - 160, GetScreenHeight() - 100, 150, 50};
@@ -971,95 +756,62 @@ public:
     }
     void Logic()  //gets mouse location and sets bricks value to 0 if the click happened within the bricks confines
     {
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        {
+        cout<<"Logic!"<<endl;
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 
-            for(int i = 0; i < brick_columns; i++)
-            {
-                for(int j = 0; j < brick_rows; j++)
-                {
-                    if((GetMouseX() >= (brick_centering + offset * 2 + i * brick_width + i * offset)) & (GetMouseX() <= (brick_centering + offset * 2 + i * brick_width + i * offset + brick_width)) & (GetMouseY() >= (offset * 2 + j * brick_height + j * offset)) & (GetMouseY() <= (offset * 2 + j * brick_height + j * offset + brick_height)))
-                    {
-                        brick[i][j] = !brick[i][j];
-                    }
-                }
-            }
+            brick[brickCount].enabled = 1;
+            brick[brickCount].position = GetMousePosition();
+            brickCount++;
         }
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-        {
-            if(CheckCollisionPointRec(GetMousePosition(),button_SaveAndQuit))
-            {
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            if(CheckCollisionPointRec(GetMousePosition(),button_SaveAndQuit)) {
                 save = 1;
                 quit = 1;
             }
-            if(CheckCollisionPointRec(GetMousePosition(),button_QuitOnly))
-            {
+            if(CheckCollisionPointRec(GetMousePosition(),button_QuitOnly)) {
                 save = 0;
                 quit = 1;
             }
         }
-        //Dev stuff
-        if(IsKeyPressed('D'))
-        {
-            brick_centering++;
-            cout<<"Brick centering value: "<<brick_centering<<endl;
-        }
-        if(IsKeyPressed('A'))
-        {
-            brick_centering--;
-            cout<<"Brick centering value: "<<brick_centering<<endl;
-        }
-        //
     }
     void Output()  //output the current brick layout to the level.txt file
     {
         lvl_editor.open("..//config//level.txt", ios::out);
         // output brick layout to level.txt
-        for(int j = 0; j < brick_rows; j++)
-        {
-            for(int i = 0; i < brick_columns; i++)
-            {
-                lvl_editor<<brick[i][j]<<" ";
-            }
-            lvl_editor<<endl;
-        }
+        //
     }
-    void Run(int quit_settings)  //actually runs the previously made functions
+    int Run(int quit_settings)  //actually runs the previously made functions
     {
         quit = quit_settings;
         Init();
-        //CheckPattern();
+
         bool info_bool = false;
-        while(!info_bool & !quit)
-        {
+        while(!info_bool & !quit) {
             info_bool = Info();
         }
-        while(!WindowShouldClose() & !quit)
-        {
-            if(IsWindowFocused())
-            {
+
+        while(!WindowShouldClose() & !quit) {
+            if(IsWindowFocused()) {
                 Logic();
             }
             Draw();
         }
-        //CheckPattern();
-        if(save)
-        {
-            Output();
+        if(save) {
+            //Output();
         }
+
         // close all streams
-        if(lvl_editor.is_open())
-        {
+        if(lvl_editor.is_open()) {
             lvl_editor.close();
         }
-        if(game_settings.is_open())
-        {
+        if(game_settings.is_open()) {
             game_settings.close();
         }
-        if(settings.is_open())
-        {
+        if(settings.is_open()) {
             settings.close();
         }
+        free(brick);
+        return quit;
     }
 };
 
@@ -1067,12 +819,9 @@ int main(int argc, char** argv)
 {
     int width, height, quit = 0, run = 1, fail = 0;
     settings.open("..//config//settings.txt", ios::out | ios::in);
-    if(settings.is_open())
-    {
+    if(settings.is_open()) {
         settings>>width>>height;
-    }
-    else
-    {
+    } else {
         cout<<"Settings failed to open!"<<endl;
         width = 640;
         height = 480;
@@ -1080,13 +829,10 @@ int main(int argc, char** argv)
     }
     cout<<"Screen width: "<<width<<endl;
     cout<<"Screen height: "<<height<<endl;
-    while(run)
-    {
         cSettings c_settings(width,height);
         quit = c_settings.Run(fail);
         cGameManager c_game;
-        c_game.Run(quit);
+        quit = !c_game.Run(quit);
         CloseWindow();
         return quit;
-    }
 }

@@ -1,9 +1,13 @@
-// TODO: Implement Delta Time for cursor blinking !!!
+//  TODO:
+//  Allow the player to load the existing level
+//  Allow the player to not replace existing level file
+//  Allow to resize the bricks at will
+//  Consolidate if's into either switch's of less if's
+
 #include <iostream>
 #include "raylib.h"
 #include <fstream>
 #include <cstring>
-#include <stdlib.h>
 using std::fstream;
 using std::endl;
 using std::string;
@@ -33,44 +37,20 @@ private:
     bool update;
     int fail_open;
 
-    Rectangle colorBox;   //the box to write color to in settings
-    char settings_color[MAX_INPUT_CHARS + 1];
-    int letterCount_color;
-    bool mouseOnText_color;
-    int framesCounter_color;
-
     Rectangle screenWidthBox;   //the box to write screen width to in settings
-    char settings_screenWidth[MAX_INPUT_CHARS + 1];
+    char settings_screenWidth[MAX_INPUT_INT + 1];
     int letterCount_screenWidth;
     bool mouseOnText_screenWidth;
     int framesCounter_screenWidth;
 
     Rectangle screenHeightBox;  //the box to write screen height to in settings
-    char settings_screenHeight[MAX_INPUT_CHARS + 1];
+    char settings_screenHeight[MAX_INPUT_INT + 1];
     int letterCount_screenHeight;
     bool mouseOnText_screenHeight;
     int framesCounter_screenHeight;
 
-    Rectangle brickWBox;  //the box to write brick width to in settings
-    char settings_brickWidth[MAX_INPUT_CHARS + 1];
-    int letterCount_brickWidth;
-    bool mouseOnText_brickWidth;
-    int framesCounter_brickWidth;
-
-    Rectangle brickHBox;  //the box to write brick height to in settings
-    char settings_brickHeight[MAX_INPUT_CHARS + 1];
-    int letterCount_brickHeight;
-    bool mouseOnText_brickHeight;
-    int framesCounter_brickHeight;
-
-    Rectangle offsetBox;  //the box to write offset between bricks to in settings
-    char settings_offset[MAX_INPUT_CHARS + 1];
-    int letterCount_offset;
-    bool mouseOnText_offset;
-    int framesCounter_offset;
-
     Rectangle fullscreen; //the box to toggle full-screen with in settings
-    char settings_fullscreen[MAX_INPUT_CHARS + 1];
+    char settings_fullscreen[MAX_INPUT_INT + 1];
     int letterCount_fullscreen;
     bool mouseOnText_fullscreen;
     int framesCounter_fullscreen;
@@ -82,17 +62,11 @@ public:
         current_screen = 0; // 0 - Menu, 1 - Settings, 2 - Extra, 3 - Start
         update = 0;
         fail_open = 0;
+        export_fullscreen = 0;
         if(!settings.is_open()) {
             settings.open("..//config//settings.txt", ios::out | ios::in);
         }
 
-        //Color settings text box
-        settings_color[MAX_INPUT_CHARS + 1] = '\0';
-        colorBox = { 150, 250, 225, 50 };
-        letterCount_color = 0;
-        mouseOnText_color = false;
-        framesCounter_color = 0;
-        //
         //Settings screen width box text box
         settings_screenWidth[MAX_INPUT_INT + 1] = '\0';
         screenWidthBox = { width - 445, 250, 180, 50 };
@@ -107,30 +81,6 @@ public:
         mouseOnText_screenHeight = false;
         framesCounter_screenHeight = 0;
         //
-        //Settings brick width box text box
-        settings_brickWidth[MAX_INPUT_INT + 1] = '\0';
-        brickWBox = { width - 445, 450, 180, 50 };
-        letterCount_brickWidth = 0;
-        mouseOnText_brickWidth = false;
-        framesCounter_brickWidth = 0;
-        //
-        //Settings brick height box text box
-        settings_brickHeight[MAX_INPUT_INT + 1] = '\0';
-        brickHBox = { width - 225, 450, 180, 50 };
-        letterCount_brickHeight = 0;
-        mouseOnText_brickHeight = false;
-        framesCounter_brickHeight = 0;
-        //
-        //Settings offset box text box
-        settings_offset[MAX_INPUT_INT + 1] = '\0';
-        offsetBox = { 150, 450, 225, 50 };
-        letterCount_offset = 0;
-        mouseOnText_offset = false;
-        framesCounter_offset = 0;
-        //
-        //Settings full-screen switch
-
-        //
 
         InitWindow(width,height,"Editor");
         SetTargetFPS(30);
@@ -144,21 +94,18 @@ public:
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             export_width = 1024;
             export_height = 768;
-            export_brick_width = 50;
-            export_brick_height = 35;
             export_fullscreen = 0;
-            export_brick_color = "RED";
-            settings<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
+            settings<<export_width<<" "<<export_height<<" "<<export_fullscreen<<" ";
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in);
-            cout<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
+            cout<<export_width<<" "<<export_height<<" "<<export_fullscreen<<endl;
         }
         if(update) {
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
-            settings<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
+            settings<<export_width<<" "<<export_height<<" "<<export_fullscreen;
             settings.close();
-            cout<<export_width<<" "<<export_height<<" "<<export_brick_width<<" "<<export_brick_height<<" "<<export_fullscreen<<" "<<export_brick_color;
+            cout<<export_width<<" "<<export_height<<" "<<export_fullscreen<<endl;
             update = 0;
             settings.open("..//config//settings.txt", ios::out | ios::in);
         }
@@ -172,23 +119,19 @@ public:
         BeginDrawing();
 
         DrawTexture(title, GetScreenWidth() /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if(CheckCollisionPointRec(GetMousePosition(),Rectangle {GetScreenWidth() / 2 - title.width / 2, 80, title.width, title.height})) {
-                cout<<"TITLE!"<<endl;
-            }
-        }
+
         if(settings.is_open() & !fail_open) {
             //General Menu
             if(current_screen == 0) {
                 button_settings = { GetScreenWidth() / 2 - 90, GetScreenHeight() - 0.65 * GetScreenHeight(), 180, 60 };
                 DrawRectangleRec(button_settings, WHITE);   //Settings Button
                 textsize = MeasureText(msg_set,30);
-                DrawText(msg_set, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 0.65 * GetScreenHeight() + 15, 30, BLACK); //Resolution Text
+                DrawText(msg_set, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 0.65 * GetScreenHeight() + 15, 30, BLACK);
 
                 button_extra = {GetScreenWidth() / 2 - 90, GetScreenHeight() - 0.55 * GetScreenHeight(), 180, 60};
                 DrawRectangleRec(button_extra, WHITE); //Extra Button
                 textsize = MeasureText(msg_ext,30);
-                DrawText(msg_ext, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 0.55 * GetScreenHeight() + 20, 30, BLACK); //Brick and paddle Text
+                DrawText(msg_ext, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 0.55 * GetScreenHeight() + 20, 30, BLACK);
 
                 button_start = {GetScreenWidth() / 2 - 90, GetScreenHeight() - 0.35 * GetScreenHeight(), 180, 60};
                 DrawRectangleRec(button_start, WHITE); //Start Button
@@ -198,24 +141,6 @@ public:
 
             //Settings menu
             if(current_screen == 1) {
-                //Draw Color text box
-                DrawText("Color",205,200,40,BLACK);
-                DrawRectangleRec(colorBox, LIGHTGRAY);
-                if(mouseOnText_color) {
-                    DrawRectangleLines((int)colorBox.x, (int)colorBox.y, (int)colorBox.width, (int)colorBox.height, RED);
-                } else {
-                    DrawRectangleLines((int)colorBox.x, (int)colorBox.y, (int)colorBox.width, (int)colorBox.height, DARKGRAY);
-                }
-                DrawText(settings_color, (int)colorBox.x + 5, (int)colorBox.y + 15, 30, MAROON);
-                if (mouseOnText_color) {
-                    if (letterCount_color < MAX_INPUT_CHARS) {
-                        // Draw blinking underscore char
-                        if (((framesCounter_color/20)%2) == 0) {
-                            DrawText("_", (int)colorBox.x + 8 + MeasureText(settings_color, 30), (int)colorBox.y + 15, 30, MAROON);
-                        }
-                    } else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
-                }
-                //
                 //Draw screen width text box
                 DrawText("Screen",GetScreenWidth() - 315,160,40,BLACK);
                 DrawText("Width           Height",GetScreenWidth() - 390,210,30,BLACK);
@@ -236,6 +161,7 @@ public:
                     } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
                 }
                 //
+
                 //Draw screen height text box
                 DrawRectangleRec(screenHeightBox, LIGHTGRAY);
                 if(mouseOnText_screenHeight) {
@@ -253,67 +179,14 @@ public:
                     } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
                 }
                 //
-                //Draw brick width text box
-                DrawText("Brick",GetScreenWidth() - 295,360,40,BLACK);
-                DrawText("Width           Height",GetScreenWidth() - 390,410,30,BLACK);
-                DrawText("X",GetScreenWidth() - 250,465,20,BLACK);
-                DrawRectangleRec(brickWBox, LIGHTGRAY);
-                if(mouseOnText_brickWidth) {
-                    DrawRectangleLines((int)brickWBox.x, (int)brickWBox.y, (int)brickWBox.width, (int)brickWBox.height, RED);
-                } else {
-                    DrawRectangleLines((int)brickWBox.x, (int)brickWBox.y, (int)brickWBox.width, (int)brickWBox.height, DARKGRAY);
-                }
-                DrawText(settings_brickWidth, (int)brickWBox.x + 5, (int)brickWBox.y + 15, 30, MAROON);
-                if (mouseOnText_brickWidth) {
-                    if (letterCount_brickWidth < MAX_INPUT_INT) {
-                        // Draw blinking underscore char
-                        if (((framesCounter_brickWidth/20)%2) == 0) {
-                            DrawText("_", (int)brickWBox.x + 8 + MeasureText(settings_brickWidth, 30), (int)brickWBox.y + 15, 30, MAROON);
-                        }
-                    } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
-                }
-                //
-                //Draw brick height text box
-                DrawRectangleRec(brickHBox, LIGHTGRAY);
-                if(mouseOnText_brickHeight) {
-                    DrawRectangleLines((int)brickHBox.x, (int)brickHBox.y, (int)brickHBox.width, (int)brickHBox.height, RED);
-                } else {
-                    DrawRectangleLines((int)brickHBox.x, (int)brickHBox.y, (int)brickHBox.width, (int)brickHBox.height, DARKGRAY);
-                }
-                DrawText(settings_brickHeight, (int)brickHBox.x + 5, (int)brickHBox.y + 15, 30, MAROON);
-                if (mouseOnText_brickHeight) {
-                    if (letterCount_brickHeight < MAX_INPUT_INT) {
-                        // Draw blinking underscore char
-                        if (((framesCounter_brickHeight/20)%2) == 0) {
-                            DrawText("_", (int)brickHBox.x + 8 + MeasureText(settings_brickHeight, 30), (int)brickHBox.y + 15, 30, MAROON);
-                        }
-                    } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
-                }
-                //
-                //Draw offset text box
-                DrawText("10",205,395,40,BLACK);
-                DrawRectangleRec(offsetBox, LIGHTGRAY);
-                if(mouseOnText_offset) {
-                    DrawRectangleLines((int)offsetBox.x, (int)offsetBox.y, (int)offsetBox.width, (int)offsetBox.height, RED);
-                } else {
-                    DrawRectangleLines((int)offsetBox.x, (int)offsetBox.y, (int)offsetBox.width, (int)offsetBox.height, DARKGRAY);
-                }
-                DrawText(settings_offset, (int)offsetBox.x + 5, (int)offsetBox.y + 15, 30, MAROON);
-                if (mouseOnText_offset) {
-                    if (letterCount_offset < MAX_INPUT_INT) {
-                        // Draw blinking underscore char
-                        if (((framesCounter_offset/20)%2) == 0) {
-                            DrawText("_", (int)offsetBox.x + 8 + MeasureText(settings_offset, 30), (int)offsetBox.y + 15, 30, MAROON);
-                        }
-                    } else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
-                }
-                //
+
                 // Draw full-screen switch
                 DrawRectangle(GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60, WHITE);
                 DrawRectangleLines(GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60, BLACK);
-                int textsize = MeasureText("Fullscreen",30);
+                textsize = MeasureText("Fullscreen",30);
                 DrawText("Fullscreen", GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 185, 30, BLACK); //Resolution Text
                 //
+
                 // Draw save button
                 DrawRectangle(GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60, WHITE);
                 DrawRectangleLines(GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60, BLACK);
@@ -324,11 +197,15 @@ public:
 
             //Extra menu
             if(current_screen == 2) {
-
+                textsize = MeasureText("Nothing but us chickens here!",25);
+                DrawText("Nothing but us chickens here!", GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() / 2, 25, BLACK);
+                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    current_screen = 0;
+                }
             }
         } else {
             textsize = MeasureText(msg_error,25);
-            DrawText(msg_error, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() / 2, 25, BLACK); //Start Text
+            DrawText(msg_error, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() / 2, 25, BLACK);
         }
 
         EndDrawing();
@@ -351,45 +228,9 @@ public:
         if(WindowShouldClose()) {
             quit = 1;
         }
+
+        //Collision for the settings input boxes and buttons
         if(current_screen == 1) {
-            //Logic for input color
-            {
-                if (CheckCollisionPointRec(GetMousePosition(), colorBox)) {
-                    mouseOnText_color = true;
-                } else {
-                    mouseOnText_color = false;
-                }
-                if(mouseOnText_color) {
-                    SetMouseCursor(MOUSE_CURSOR_IBEAM);
-                    int key = GetCharPressed();
-                    while(key>0) { //Only letters allowed
-                        if((key >= 97) && (key <= 122) && (letterCount_color < MAX_INPUT_CHARS)) {
-                            key = key - 32;
-                        }
-                        if((key >= 65) && (key <= 90) && (letterCount_color < MAX_INPUT_CHARS)) {
-                            settings_color[letterCount_color] = (char) key;
-                            settings_color[letterCount_color + 1] = '\0';
-                            letterCount_color++;
-                        }
-                        key = GetCharPressed();
-                    }
-                    if(IsKeyPressed(KEY_BACKSPACE)) {
-                        letterCount_color--;
-                        if(letterCount_color < 0) {
-                            letterCount_color = 0;
-                        }
-                        settings_color[letterCount_color] = '\0';
-                    }
-                } else {
-                    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-                }
-                if(mouseOnText_color) {
-                    framesCounter_color++;
-                } else {
-                    framesCounter_color = 0;
-                }
-            }
-            //
             // Logic for input screen width
             {
                 if (CheckCollisionPointRec(GetMousePosition(), screenWidthBox)) {
@@ -425,6 +266,7 @@ public:
                 }
             }
             //
+
             // Logic for input screen height
             {
                 if (CheckCollisionPointRec(GetMousePosition(), screenHeightBox)) {
@@ -460,132 +302,21 @@ public:
                 }
             }
             //
-            // Logic for input brick width
-            {
-                if (CheckCollisionPointRec(GetMousePosition(), brickWBox)) {
-                    mouseOnText_brickWidth = true;
-                } else {
-                    mouseOnText_brickWidth = false;
-                }
-                if(mouseOnText_brickWidth) {
-                    SetMouseCursor(MOUSE_CURSOR_IBEAM);
-                    int key = GetCharPressed();
-                    while(key>0) { //Only numbers allowed (to change)
-                        if((key >= 48) && (key <= 57) && (letterCount_brickWidth < MAX_INPUT_INT)) {
-                            settings_brickWidth[letterCount_brickWidth] = (char) key;
-                            settings_brickWidth[letterCount_brickWidth + 1] = '\0';
-                            letterCount_brickWidth++;
-                        }
-                        key = GetCharPressed();
-                    }
-                    if(IsKeyPressed(KEY_BACKSPACE)) {
-                        letterCount_brickWidth--;
-                        if(letterCount_brickWidth < 0) {
-                            letterCount_brickWidth = 0;
-                        }
-                        settings_brickWidth[letterCount_brickWidth] = '\0';
-                    }
-                } else {
-                    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-                }
-                if(mouseOnText_brickWidth) {
-                    framesCounter_brickWidth++;
-                } else {
-                    framesCounter_brickWidth = 0;
-                }
-            }
-            //
-            // Logic for input brick height
-            {
-                if (CheckCollisionPointRec(GetMousePosition(), brickHBox)) {
-                    mouseOnText_brickHeight = true;
-                } else {
-                    mouseOnText_brickHeight = false;
-                }
-                if(mouseOnText_brickHeight) {
-                    SetMouseCursor(MOUSE_CURSOR_IBEAM);
-                    int key = GetCharPressed();
-                    while(key>0) { //Only numbers allowed (to change)
-                        if((key >= 48) && (key <= 57) && (letterCount_brickHeight < MAX_INPUT_INT)) {
-                            settings_brickHeight[letterCount_brickHeight] = (char) key;
-                            settings_brickHeight[letterCount_brickHeight + 1] = '\0';
-                            letterCount_brickHeight++;
-                        }
-                        key = GetCharPressed();
-                    }
-                    if(IsKeyPressed(KEY_BACKSPACE)) {
-                        letterCount_brickHeight--;
-                        if(letterCount_brickHeight < 0) {
-                            letterCount_brickHeight = 0;
-                        }
-                        settings_brickHeight[letterCount_brickHeight] = '\0';
-                    }
-                } else {
-                    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-                }
-                if(mouseOnText_brickHeight) {
-                    framesCounter_brickHeight++;
-                } else {
-                    framesCounter_brickHeight = 0;
-                }
-            }
-            //
-            // Logic for input offset
-            {
-                if (CheckCollisionPointRec(GetMousePosition(), offsetBox)) {
-                    mouseOnText_offset = true;
-                } else {
-                    mouseOnText_offset = false;
-                }
-                if(mouseOnText_offset) {
-                    SetMouseCursor(MOUSE_CURSOR_IBEAM);
-                    int key = GetCharPressed();
-                    while(key>0) { //Only numbers allowed (to change)
-                        if((key >= 48) && (key <= 57) && (letterCount_offset < MAX_INPUT_INT)) {
-                            settings_offset[letterCount_offset] = (char) key;
-                            settings_offset[letterCount_offset + 1] = '\0';
-                            letterCount_offset++;
-                        }
-                        key = GetCharPressed();
-                    }
-                    if(IsKeyPressed(KEY_BACKSPACE)) {
-                        letterCount_offset--;
-                        if(letterCount_offset < 0) {
-                            letterCount_offset = 0;
-                        }
-                        settings_offset[letterCount_offset] = '\0';
-                    }
-                } else {
-                    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-                }
-                if(mouseOnText_offset) {
-                    framesCounter_offset++;
-                } else {
-                    framesCounter_offset = 0;
-                }
-            }
-            //
+
             // Logic for input full-screen
             if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60})) {
                 if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+                    export_fullscreen = !export_fullscreen;
                     ToggleFullscreen();
+
                 }
             }
             //
+
             // Logic for save changes button and actions to do
-            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60})) { //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60})) {
                 if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-                    if(letterCount_color == 0) {
-                        cout<<"Empty"<<endl;
-                        settings_color[0] = 'R';
-                        settings_color[1] = 'E';
-                        settings_color[2] = 'D';
-                        cout<<settings_color<<endl;
-                        export_brick_color = settings_color;
-                    } else {
-                        cout<<settings_color<<endl;
-                        export_brick_color = settings_color;
-                    }
+                    //Set Export Screen Width
                     if(letterCount_screenWidth == 0) {
                         export_width = 1024;
                         strcpy(settings_screenWidth, "1024");
@@ -596,6 +327,9 @@ public:
                         export_width = atoi(settings_screenWidth);
                         cout<<export_width<<endl;
                     }
+                    //
+
+                    //Set Export Screen Height
                     if(letterCount_screenHeight == 0) {
                         export_height = 760;
                         strcpy(settings_screenHeight, "760");
@@ -606,39 +340,12 @@ public:
                         export_height = atoi(settings_screenHeight);
                         cout<<export_height<<endl;
                     }
-                    if(letterCount_brickWidth == 0) {
-                        export_brick_width = 50;
-                        strcpy(settings_brickWidth, "50");
-                        letterCount_brickWidth = 2;
-                        cout<<export_brick_width<<endl;
-                    } else {
-                        cout<<settings_brickWidth<<endl;
-                        export_brick_width = atoi(settings_brickWidth);
-                        cout<<export_brick_width<<endl;
-                    }
-                    if(letterCount_brickHeight == 0) {
-                        export_brick_height = 35;
-                        strcpy(settings_brickHeight, "35");
-                        letterCount_brickHeight = 2;
-                        cout<<export_brick_height<<endl;
-                    } else {
-                        cout<<settings_brickHeight<<endl;
-                        export_brick_height = atoi(settings_brickHeight);
-                        cout<<export_brick_height<<endl;
-                    }
-                    if(letterCount_offset == 0) {
-                        export_offset = 10;
-                        strcpy(settings_offset, "10");
-                        letterCount_offset = 2;
-                        cout<<export_offset<<endl;
-                    } else {
-                        cout<<settings_offset<<endl;
-                        export_offset = atoi(settings_offset);
-                        cout<<export_offset<<endl;
-                    }
+                    //Set Export full-screen state
+                    cout<<export_fullscreen<<endl;
+
                     current_screen = 0;
                     update = 1;
-                    Settings_check();
+                    Settings_check();           //Export All
                     SetWindowSize(export_width, export_height);
                 }
             }
@@ -667,8 +374,9 @@ typedef struct Bricks
     Vector2 position;
     int brickWidth;
     int brickHeight;
-    int type;
+    int type;           //0 - Normal, 1 - 1HP, 2 - 2HP, 3 - Gold(Unbreakable), 4 - Explosive
     bool enabled;
+    bool selected;
 } Bricks;
 
 class cGameManager
@@ -677,6 +385,7 @@ private:
     Bricks *brick;                  // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
     int brickCount;
     Texture2D texBrick;
+    Texture2D texSelect;
     bool fullscreen;                // whether it's full-screen or not
     Rectangle button_SaveAndQuit;   // Save and quit button
     Rectangle button_QuitOnly;      // Quit only button
@@ -688,15 +397,18 @@ public:
         game_settings.open("..//config//settings.txt", ios::in);
 
         //variables
-        brick = (Bricks *)malloc(MAX_BRICKS*sizeof(Bricks));
+        brick = (Bricks *)MemAlloc(MAX_BRICKS*sizeof(Bricks)); // MemAlloc() is equivalent to malloc()
         brickCount = 0;
-        Image imgBrick = LoadImage("../resources/Breakout-Brick.gif");
+        Image imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
+        Image imgSelect = LoadImage("..//resources//Breakout-Brick-Selected.gif");
+        ImageResize(&imgBrick, 50, 35);
+        ImageResize(&imgSelect, 50, 35);
+        texBrick = LoadTextureFromImage(imgBrick);
+        texSelect = LoadTextureFromImage(imgSelect);
         save = 0;
         quit = 0;
-        ImageResize(&imgBrick, 50, 35);
-        texBrick = LoadTextureFromImage(imgBrick);
 
-        SetTargetFPS(60);
+        SetTargetFPS(240);
     }
 
     void Init() // load the brick variable with only ones (meaning all bricks are visible and active)
@@ -705,6 +417,8 @@ public:
             brick[i].brickWidth = 50;
             brick[i].brickHeight = 35;
             brick[i].enabled = 0;
+            brick[i].type = 0;
+            brick[i].selected = 0;
         }
     }
 
@@ -725,23 +439,59 @@ public:
             return false;
         }
     }
-    void Draw()  //draw the actual bricks only if their associated value is 1
+
+    int CheckBrickExists()  //Check if a brick exists at mouse location and output the bricks ID out of brickCount (only to be used in an if)
+    {
+        for(int i = 0; i <= brickCount; i++) {
+            if(GetMouseX() > brick[i].position.x - brick[i].brickWidth / 2 && GetMouseX() < brick[i].position.x + brick[i].brickWidth * 1.5) {
+                if(GetMouseY() > brick[i].position.y - brick[i].brickHeight / 2 && GetMouseY() < brick[i].position.y + brick[i].brickHeight * 1.5) {
+                    //cout<<"ID of Brick Clicked: "<<i<<endl;
+                    return i;
+                }
+            }
+        }
+        //cout<<"No brick clicked. Result: -1"<<endl;
+        return -1;
+    }
+
+    void Draw()  //draw the actual bricks only if their enabled value is 1
     {
         BeginDrawing();
         ClearBackground(BLACK);
         //Loop to draw bricks
+        Color bColor;
         for(int i = 0; i <= brickCount; i++) {
             if(brick[i].enabled) {
-                DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, BLUE);
+                if(brick[i].type == 0) {
+                    bColor = SKYBLUE;
+                }
+                if(brick[i].type == 1) {
+                    bColor = BLUE;
+                }
+                if(brick[i].type == 2) {
+                    bColor = GRAY;
+                }
+                if(brick[i].type == 3) {
+                    bColor = GOLD;
+                }
+                if(brick[i].type == 4) {
+                    bColor = ORANGE;
+                }
+                DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, bColor);
+                if(brick[i].selected) {
+                    DrawTexture(texSelect, brick[i].position.x, brick[i].position.y, WHITE);
+                }
             }
         }
         //
+
         // Draw border
         DrawRectangle(0,0,10,GetScreenHeight(),BROWN);
         DrawRectangle(0,0,GetScreenWidth(),10,BROWN);
         DrawRectangle(GetScreenWidth() - 10,0, GetScreenWidth(), GetScreenHeight(),BROWN);
         DrawRectangle(0, GetScreenHeight() - 10, GetScreenWidth(), GetScreenHeight(),BROWN);
         //
+
         // Draw Quit and SaveAndQuit buttons
         button_SaveAndQuit = {GetScreenWidth() / 2 - 160, GetScreenHeight() - 100, 150, 50};
         button_QuitOnly = {GetScreenWidth() / 2 + 10, GetScreenHeight() - 100, 150, 50};
@@ -752,32 +502,143 @@ public:
         textsize = MeasureText("Quit and save",20);
         DrawText("Quit and save", GetScreenWidth() / 2 - 155, GetScreenHeight() - 85, 20, BLACK);
         //
-        EndDrawing();
-    }
-    void Logic()  //gets mouse location and sets bricks value to 0 if the click happened within the bricks confines
-    {
-        cout<<"Logic!"<<endl;
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 
-            brick[brickCount].enabled = 1;
-            brick[brickCount].position = GetMousePosition();
-            brickCount++;
+        //Dev Stuff
+        DrawLine(0,GetScreenHeight() - 350, GetScreenWidth(), GetScreenHeight() - 350, RED);
+        DrawCircle(GetMouseX(), GetMouseY(), 5, RED);
+        DrawText(TextFormat("%i", GetMouseX()), GetMouseX() - 20, GetMouseY() + 5, 15, RED);
+        DrawText(TextFormat("%i", GetMouseY()), GetMouseX(), GetMouseY() - 15, 15, RED);
+        //
+
+        EndDrawing();
+
+    }
+    void Logic()  //
+    {
+        //Spawn bricks with Left-Click and disallow creating another on top of it
+        if(brickCount != MAX_BRICKS - 1) {
+            if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && IsKeyDown(KEY_LEFT_CONTROL)) {
+                if(GetMouseY() < GetScreenHeight() - 350) {
+                    if(CheckBrickExists() == -1) {
+                        brick[brickCount].enabled = 1;
+                        brick[brickCount].position = (Vector2) {
+                            GetMouseX() - brick[brickCount].brickWidth / 2, GetMouseY() - brick[brickCount].brickHeight / 2
+                        };
+                        brickCount++;
+                        cout<<"Brick amount on Screen: "<<brickCount<<endl;
+                    }
+                }
+            }
         }
+        //
+
+        //Code to allow to select bricks for extra options
         if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if(CheckCollisionPointRec(GetMousePosition(),button_SaveAndQuit)) {
+            int a = CheckBrickExists();
+            if(a != -1) {
+                brick[a].selected = 1;
+                cout<<"Brick selected: "<<a<<endl;
+                for(int i = 0; i < a; i++) {
+                    brick[i].selected = 0;
+                }
+                for(int i = a + 1; i < brickCount; i++) {
+                    brick[i].selected = 0;
+                }
+            } else {
+                for(int i = 0; i < brickCount; i++) {
+                    brick[i].selected = 0;
+                    cout<<"Nothing selected!"<<endl;
+                }
+            }
+        }
+        //
+
+        //Move bricks by holding Left-Click
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            int a = CheckBrickExists();
+            if(a != -1) {
+                if(brick[a].selected) {
+                    brick[a].position = (Vector2) {
+                        GetMousePosition().x - brick[a].brickWidth / 2, GetMousePosition().y - brick[a].brickHeight / 2
+                    };
+                }
+            }
+        }
+        //
+
+        //Change brick type
+        if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+            int a = CheckBrickExists();
+            if(a != -1) {
+                if(brick[a].selected) {
+                    if(brick[a].type != 4) {
+                        brick[a].type++;
+                    } else {
+                        brick[a].type = 0;
+                    }
+                    if(brick[a].type == 0) {
+                        cout<<"Normal"<<endl;
+                    }
+                    if(brick[a].type == 1) {
+                        cout<<"1HP"<<endl;
+                    }
+                    if(brick[a].type == 2) {
+                        cout<<"2HP"<<endl;
+                    }
+                    if(brick[a].type == 3) {
+                        cout<<"Gold(Unbreakable)"<<endl;
+                    }
+                    if(brick[a].type == 4) {
+                        cout<<"Explosive"<<endl;
+                    }
+                }
+            }
+        }
+        //
+
+        //The Collision for the "Quit Only" and "Save and Quit" buttons
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            if(CheckCollisionPointRec(GetMousePosition(),button_SaveAndQuit)) {     //Save and quit
                 save = 1;
                 quit = 1;
             }
-            if(CheckCollisionPointRec(GetMousePosition(),button_QuitOnly)) {
+            if(CheckCollisionPointRec(GetMousePosition(),button_QuitOnly)) {        //Quit only
                 save = 0;
                 quit = 1;
             }
         }
+        //
     }
     void Output()  //output the current brick layout to the level.txt file
     {
         lvl_editor.open("..//config//level.txt", ios::out);
         // output brick layout to level.txt
+        for(int i = 0; i <= brickCount - 1; i++) {
+            lvl_editor<<brick[i].position.x<<" "<<brick[i].position.y<<" "<<brick[i].brickWidth<<" "<<brick[i].brickHeight<<" "<<brick[i].type<<" ";
+            cout<<endl;
+            cout<<"Brick Position:"<<endl;
+            cout<<"     X: "<<brick[i].position.x<<endl;
+            cout<<"     Y: "<<brick[i].position.y<<endl;
+            cout<<"Brick Width: "<<brick[i].brickWidth<<endl;
+            cout<<"Brick Height: "<<brick[i].brickHeight<<endl;
+            cout<<"Brick type: ";
+            if(brick[i].type == 0) {
+                cout<<"Normal"<<endl;
+            }
+            if(brick[i].type == 1) {
+                cout<<"1HP"<<endl;
+            }
+            if(brick[i].type == 2) {
+                cout<<"2HP"<<endl;
+            }
+            if(brick[i].type == 3) {
+                cout<<"Gold(Unbreakable)"<<endl;
+            }
+            if(brick[i].type == 4) {
+                cout<<"Explosive"<<endl;
+            }
+            cout<<endl;
+        }
         //
     }
     int Run(int quit_settings)  //actually runs the previously made functions
@@ -797,7 +658,7 @@ public:
             Draw();
         }
         if(save) {
-            //Output();
+            Output();
         }
 
         // close all streams
@@ -810,7 +671,7 @@ public:
         if(settings.is_open()) {
             settings.close();
         }
-        free(brick);
+        MemFree(brick); //equivalent to free()
         return quit;
     }
 };
@@ -829,10 +690,10 @@ int main(int argc, char** argv)
     }
     cout<<"Screen width: "<<width<<endl;
     cout<<"Screen height: "<<height<<endl;
-        cSettings c_settings(width,height);
-        quit = c_settings.Run(fail);
-        cGameManager c_game;
-        quit = !c_game.Run(quit);
-        CloseWindow();
-        return quit;
+    cSettings c_settings(width,height);
+    quit = c_settings.Run(fail);
+    cGameManager c_game;
+    quit = !c_game.Run(quit);
+    CloseWindow();
+    return quit;
 }

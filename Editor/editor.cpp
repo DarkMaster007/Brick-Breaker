@@ -384,8 +384,13 @@ class cGameManager
 private:
     Bricks *brick;                  // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
     int brickCount;
+
+    Image imgBrick;
+    Image imgSelect;
     Texture2D texBrick;
     Texture2D texSelect;
+    bool resizeTexture;
+
     bool fullscreen;                // whether it's full-screen or not
     Rectangle button_SaveAndQuit;   // Save and quit button
     Rectangle button_QuitOnly;      // Quit only button
@@ -399,12 +404,15 @@ public:
         //variables
         brick = (Bricks *)MemAlloc(MAX_BRICKS*sizeof(Bricks)); // MemAlloc() is equivalent to malloc()
         brickCount = 0;
-        Image imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
-        Image imgSelect = LoadImage("..//resources//Breakout-Brick-Selected.gif");
+
+        imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
+        imgSelect = LoadImage("..//resources//Breakout-Brick-Selected.gif");
         ImageResize(&imgBrick, 50, 35);
         ImageResize(&imgSelect, 50, 35);
         texBrick = LoadTextureFromImage(imgBrick);
         texSelect = LoadTextureFromImage(imgSelect);
+        resizeTexture = 0;
+
         save = 0;
         quit = 0;
 

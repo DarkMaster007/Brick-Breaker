@@ -2,6 +2,7 @@
 #include <fstream>
 #include "include/raylib.h"
 #include <string.h>
+#include <cstring>
 using std::fstream;
 using std::endl;
 using std::string;
@@ -10,6 +11,7 @@ using std::ios;
 
 fstream loadLevelFile;
 fstream game_settings;
+#define MAX_BRICKS 300
 enum eDir
 { STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
 
@@ -93,6 +95,7 @@ public:
         }
     }
 };
+
 class cPaddle
 {
 private:
@@ -129,24 +132,32 @@ public:
     }
 };
 
+typedef struct Bricks
+{
+    Vector2 position;
+    int brickWidth;
+    int brickHeight;
+    int type;           //0 - Normal, 1 - 1HP, 2 - 2HP, 3 - Gold(Unbreakable), 4 - Explosive
+    int enabled;
+} Bricks;
+
 class cGameManager
 {
 private:
-    int width,height;
-    int offset;                     // distance between bricks / 2 (don't ask); loaded from settings.txt
-    int brick [100][100];           // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
-    int brick_width, brick_height;  // width and height of individual bricks; loaded from settings.txt
-    int brick_columns, brick_rows;  // how many rows and how many columns of bricks there should be; calculated
-    string brick_color;             // the bricks color; loaded from settings.txt
+    int width,height;               // Screen width and height
     bool fullscreen;                // whether it's full-screen or not
-    int brick_centering;            // amount of pixels to offset bricks to center them (looks nice :) ); calculated
     bool quit;                      // whether the game should quit or not
+
+    Bricks *brick;
+    Texture2D texBrick;
     cBall *ball;                    // ball object
     cPaddle *paddle;                // paddle object
     Rectangle borderLeft;           // left border rectangle, for collision and drawing
     Rectangle borderRight;          // right border rectangle, for collision and drawing
     Rectangle borderTop;            // top border rectangle, for collision and drawing
     Rectangle borderBottom;         // bottom border rectangle, for collision and drawing
+
+    int brickCount;
     int movement_speed_paddle_base; // base speed for paddle
     int movement_speed_ball_base;   // base speed for ball
     int ball_size;                  // ball size
@@ -163,8 +174,8 @@ public:
         game_settings.open("..//config//settings.txt", ios::in);
 
         //Initialize all vars with their proper values
+        brickCount = 0;
         quit = 0;
-        offset = 10;
         movement_speed_paddle_base = 20;
         movement_speed_ball_base = 3;
         ball_size = 10;
@@ -173,107 +184,70 @@ public:
         win = 0;
         collision = 1;
         counter = 0;
+        Image imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
+        ImageResize(&imgBrick, 50, 35);
+        texBrick = LoadTextureFromImage(imgBrick);
 
         //Load the settings file
         game_settings>>width>>height;
-        game_settings>>brick_width>>brick_height;
         game_settings>>fullscreen;
-        game_settings>>brick_color;
 
         InitWindow(width,height,"Editor");
         SetTargetFPS(400);
-        HideCursor();
+        ShowCursor();
         ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, ball_size);
         paddle = new cPaddle(GetScreenWidth() / 2, GetScreenHeight() - 35);
-
-        //Calculations
-        brick_columns = GetScreenWidth() / (brick_width + offset + 4);  // amount of bricks length
-        brick_rows = (GetScreenHeight() / 2) / (brick_height + offset); // amount of bricks height
-        brick_centering = (GetScreenWidth() - brick_columns * brick_width - brick_columns * offset + offset) / 4;
+        brick = (Bricks *)MemAlloc(MAX_BRICKS*sizeof(Bricks)); // MemAlloc() is equivalent to malloc();
 
         //Rectangles
-        borderLeft = {0, 0, offset, GetScreenHeight()};
-        borderRight = {GetScreenWidth() - offset, 0, GetScreenWidth(), GetScreenHeight()};
-        borderTop = {0, 0, GetScreenWidth(), offset};
-        borderBottom = {0, GetScreenHeight() - offset, GetScreenWidth(), offset};
-
-        //cout's for testing; dev shit, remove from final
-        cout<<"Brick width: "<<brick_width<<endl;
-        cout<<"Brick height: "<<brick_height<<endl;
-        cout<<"Full-screen: "<<fullscreen<<endl;
-        cout<<"Color value: "<<brick_color<<endl;
-        cout<<"Value to center bricks with: "<<brick_centering<<endl;
-        cout<<"Brick columns: "<<brick_columns<<endl<<"Brick rows: "<<brick_rows<<endl;
-        cout<<"Bricks total: "<<brick_columns*brick_rows<<endl;
+        borderLeft = {0, 0, 10, GetScreenHeight()};
+        borderRight = {GetScreenWidth() - 10, 0, GetScreenWidth(), GetScreenHeight()};
+        borderTop = {0, 0, GetScreenWidth(), 10};
+        borderBottom = {0, GetScreenHeight() - 10, GetScreenWidth(), 10};
 
     }
 
     void loadLevel()
     {
         loadLevelFile.open("..//config//level.txt", ios::in);
-        int file;
-        for(int j = 0; j < brick_rows; j++) {
-            for(int i = 0; i < brick_columns; i++) {
-                loadLevelFile>>file;
-                brick[i][j] = file;
+        int i;
+            while(loadLevelFile.peek() != EOF){
+                loadLevelFile>>brick[i].position.x>>brick[i].position.y>>brick[i].brickWidth>>brick[i].brickHeight>>brick[i].type;
+                brick[i].enabled = 1;
+                i++;
+                brickCount++;
             }
-        }
         loadLevelFile.close();
-    }
-
-    void CheckPattern()  //output the current brick layout to...well...check it; dev shit, remove from final
-    {
-        cout<<endl;
-        for(int j = 0; j < brick_rows; j++) {
-            for(int i = 0; i < brick_columns; i++) {
-                cout<<brick[i][j]<<" ";
-            }
-            cout<<endl;
-        }
-        cout<<endl;
-    }
-
-    Color colors()  //brick colors; uses string from settings.txt
-    {
-        if(brick_color == "RED") {
-            return RED;
-        }
-        if(brick_color == "BLUE") {
-            return BLUE;
-        }
-        if(brick_color == "GREEN") {
-            return GREEN;
-        }
-        if(brick_color == "YELLOW") {
-            return YELLOW;
-        } else {
-            return WHITE;
-        }
-        return Color{GetRandomValue(10,255),GetRandomValue(10,255),GetRandomValue(10,255),GetRandomValue(150,255)};
     }
 
     void Draw()
     {
-        ClearBackground(BLACK);
         BeginDrawing();
+        ClearBackground(BLACK);
         //Loop to draw bricks
-        for(int i = 0; i < brick_columns; i++) {
-            for(int j = 0; j < brick_rows; j++) {
-                if(brick[i][j] == 1) {
-                    DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,colors());
+        Color bColor;
+        for(int i = 0; i <= brickCount; i++) {
+            if(brick[i].enabled) {
+                if(brick[i].type == 0) {
+                    bColor = SKYBLUE;
                 }
-                if(brick[i][j] == 2) {
-                    DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,DARKGREEN);
+                if(brick[i].type == 1) {
+                    bColor = BLUE;
                 }
-                if(brick[i][j] == 3) {
-                    DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,DARKBLUE);
+                if(brick[i].type == 2) {
+                    bColor = GRAY;
                 }
-                if(brick[i][j] == 4) {
-                    DrawRectangle(brick_centering + (offset * 2) + i * brick_width + i * offset, offset * 2 + j * brick_height + j * offset, brick_width, brick_height,GOLD);
+                if(brick[i].type == 3) {
+                    bColor = GOLD;
                 }
+                if(brick[i].type == 4) {
+                    bColor = ORANGE;
+                }
+                DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, bColor);
             }
         }
         //
+
         // Draw border
         DrawRectangleRec(borderLeft,BROWN);
         DrawRectangleRec(borderRight,BROWN);
@@ -303,7 +277,7 @@ public:
 
         //Mouse movement
         if(!auto_move) {
-            if(paddle->getX() - movement_speed_paddle - 50 > offset) {
+            if(paddle->getX() - movement_speed_paddle - 50 > 10) {
                 if(GetMouseDelta().x < 0) {
                     paddle->moveLeft(movement_speed_paddle);
                 }
@@ -311,7 +285,7 @@ public:
                     paddle->moveLeft(movement_speed_paddle);
                 }
             }
-            if(paddle->getX() + movement_speed_paddle + 50 < GetScreenWidth() - offset) {
+            if(paddle->getX() + movement_speed_paddle + 50 < GetScreenWidth() - 10) {
                 if(GetMouseDelta().x > 0) {
                     paddle->moveRight(movement_speed_paddle);
                 }
@@ -347,12 +321,12 @@ public:
         }
 
         if(auto_move) {
-            if(paddle->getX() - movement_speed_paddle - 50 > offset) {
+            if(paddle->getX() - movement_speed_paddle - 50 > 10) {
                 if(ball->getX() < paddle->getX() + 25) {
                     paddle->moveLeft(movement_speed_paddle);
                 }
             }
-            if(paddle->getX() + movement_speed_paddle + 50 < GetScreenWidth() - offset) {
+            if(paddle->getX() + movement_speed_paddle + 50 < GetScreenWidth() - 10) {
                 if(ball->getX() > paddle->getX() + 25) {
                     paddle->moveRight(movement_speed_paddle);
                 }
@@ -480,6 +454,10 @@ public:
                 }
             }
         }
+
+        if(collision){
+
+        }
     }
 
     void reset()
@@ -493,10 +471,8 @@ public:
     {
         int sum = 0;
         for(int i = 0; i < brick_columns; i++) {
-            for(int j = 0; j < brick_rows; j++) {
-                if(brick[i][j] <= 3){
-                sum = sum + brick[i][j];}
-            }
+                if(brick[i].type != 3){
+                sum = sum + brick[i].enabled;}
         }
         if(sum == 0) {
             //win = 1;
@@ -516,7 +492,6 @@ public:
     int Run()
     {
         loadLevel();
-        CheckPattern();
         while(!WindowShouldClose() & !win) {
             if(IsWindowFocused()) {
                 Input();
@@ -526,6 +501,7 @@ public:
             Draw();
         }
         cout<<"Exception rate: "<<(exceptions/(float)(brick_columns*brick_rows))*100<<" %."<<endl;
+        free(brick);
         CloseWindow();
         return 0;
     }

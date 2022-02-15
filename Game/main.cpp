@@ -171,7 +171,7 @@ public:
         offset = 10;
         movement_speed = 10;
         ball_size = 10;
-        auto_move = 1;
+        auto_move = 0;
         exceptions = 0;
         win = 0;
 
@@ -180,7 +180,7 @@ public:
         game_settings>>fullscreen;
         game_settings>>brick_color;
 
-        InitWindow(width,height,"Editor");
+        InitWindow(width,height,"Game");
         SetTargetFPS(480);
         HideCursor();
         ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, ball_size);
@@ -192,22 +192,12 @@ public:
         brick_columns = GetScreenWidth() / (brick_width + offset + 4);  // amount of bricks length
         brick_rows = (GetScreenHeight() / 2) / (brick_height + offset); // amount of bricks height
         brick_centering = (GetScreenWidth() - brick_columns * brick_width - brick_columns * offset + offset) / 4;
-        //brick_centering = 0;
 
         //Rectangles
         borderLeft = {0, 0, offset, GetScreenHeight()};
         borderRight = {GetScreenWidth() - offset, 0, GetScreenWidth(), GetScreenHeight()};
         borderTop = {0, 0, GetScreenWidth(), offset};
         borderBottom = {0, GetScreenHeight() - offset, GetScreenWidth(), offset};
-
-        //cout's for testing; dev shit, remove from final
-        cout<<"Brick width: "<<brick_width<<endl;
-        cout<<"Brick height: "<<brick_height<<endl;
-        cout<<"Full-screen: "<<fullscreen<<endl;
-        cout<<"Color value: "<<brick_color<<endl;
-        cout<<"Value to center bricks with: "<<brick_centering<<endl;
-        cout<<"Brick columns: "<<brick_columns<<endl<<"Brick rows: "<<brick_rows<<endl;
-        cout<<"Bricks total: "<<brick_columns*brick_rows<<endl;
 
     }
     void loadLevel()
@@ -296,10 +286,6 @@ public:
         int ballY = ball->getY();
         int ballRad = 10;
         DrawCircle(ballX,ballY,ballRad,WHITE);
-        /*line(ballX - 15,ballY,ballX + 15,ballY);
-        outtextxy(ballX + 25, ballY - 10,"Y");
-        line(ballX,ballY - 15,ballX,ballY + 15);
-        outtextxy(ballX, ballY + 25,"X");*/
         EndDrawing();
     }
 
@@ -332,7 +318,7 @@ public:
         }
         if(IsKeyPressed('W'))
         {
-            auto_move = 1;
+            auto_move = !auto_move;
         }
         if(IsKeyPressed('R'))
         {

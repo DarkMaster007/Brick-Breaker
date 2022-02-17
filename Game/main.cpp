@@ -37,7 +37,7 @@ public:
     {
         x = originalX;
         y = originalY;
-        direction = UPLEFT; // change back to stop in final
+        direction = STOP;
         current_size = originalSize;
     }
     void changeDirection(eDir d)
@@ -185,7 +185,6 @@ public:
         HideCursor();
         ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, ball_size);
         paddle = new cPaddle(GetScreenWidth() / 2, GetScreenHeight() - 35);
-        ball->changeDirection(UPRIGHT);
         ball->frametime = 0.1;
 
         //calculations
@@ -270,6 +269,12 @@ public:
             }
         }
         //
+
+        if(ball->getDirection() == STOP){
+            DrawText("Left click to start.",GetScreenWidth() / 2 - 21*15,GetScreenHeight() - 250, 15, WHITE);
+            DrawText("W key for automatic paddle movement.",GetScreenWidth() / 2 - 21*15,GetScreenHeight() - 200, 15, WHITE);
+        }
+
         // Draw border
         DrawRectangleRec(borderLeft,BROWN);
         DrawRectangleRec(borderRight,BROWN);
@@ -359,7 +364,7 @@ public:
                 ball->changeDirection(DOWNRIGHT);
             }
         }
-        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderRight))
+        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderRight)) //Right wall
         {
             if(ball->getDirection() == UPRIGHT)
             {
@@ -370,7 +375,7 @@ public:
                 ball->changeDirection(DOWNLEFT);
             }
         }
-        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderTop))
+        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderTop)) //Top wall
         {
             if(ball->getDirection() == UPRIGHT)
             {
@@ -380,6 +385,11 @@ public:
             {
                 ball->changeDirection(DOWNLEFT);
             }
+        }
+
+        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(),borderBottom)) //Top wall
+        {
+            reset();
         }
 
         //Paddle Collision
@@ -392,6 +402,13 @@ public:
             if(ball->getDirection() == DOWNRIGHT)
             {
                 ball->changeDirection(UPRIGHT);
+            }
+        }
+
+        if(ball->getDirection() == STOP && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+            switch(GetRandomValue(0,1)){
+                case 0: ball->changeDirection(UPLEFT); break;
+                case 1: ball->changeDirection(UPRIGHT); break;
             }
         }
 

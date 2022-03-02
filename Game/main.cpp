@@ -74,7 +74,7 @@ public:
     }
     void Move()
     {
-        movement = (3 + rand() % 6) * frametime;
+        movement = (3 + GetRandomValue(0, 5)) * frametime;
         if(movement < 1) movement = 1;
         switch (direction)
         {
@@ -181,6 +181,7 @@ public:
         game_settings>>brick_color;
 
         InitWindow(width,height,"Game");
+        SetRandomSeed(time(nullptr));
         SetTargetFPS(480);
         HideCursor();
         ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, ball_size);
@@ -520,6 +521,7 @@ public:
         paddle->Reset();
         ball->Reset();
         loadLevel();
+        SetRandomSeed(time(nullptr));
     }
 
     void checkWin()
@@ -554,6 +556,8 @@ public:
             Draw();
         }
         cout<<"Exception rate: "<<(exceptions/(float)(brick_columns*brick_rows))*100<<" %."<<endl;
+        delete ball;
+        delete paddle;
         CloseWindow();
         return 0;
     }

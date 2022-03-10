@@ -171,7 +171,7 @@ public:
     cGameManager()
     {
         //Open settings.txt file
-        game_settings.open("..//config//settings.txt", ios::in);
+        game_settings.open("..\\config\\settings.txt", ios::in);
 
         //Initialize all vars with their proper values
         brickCount = 0;
@@ -184,13 +184,11 @@ public:
         win = 0;
         collision = 1;
         counter = 0;
-        Image imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
-        ImageResize(&imgBrick, 50, 35);
-        texBrick = LoadTextureFromImage(imgBrick);
 
         //Load the settings file
         game_settings>>width>>height;
         game_settings>>fullscreen;
+        cout<<"Width: "<<width<<endl<<"Height: "<<height;
 
         InitWindow(width,height,"Editor");
         SetTargetFPS(400);
@@ -209,14 +207,14 @@ public:
 
     void loadLevel()
     {
-        loadLevelFile.open("..//config//level.txt", ios::in);
-        int i;
-            while(loadLevelFile.peek() != EOF){
-                loadLevelFile>>brick[i].position.x>>brick[i].position.y>>brick[i].brickWidth>>brick[i].brickHeight>>brick[i].type;
-                brick[i].enabled = 1;
-                i++;
-                brickCount++;
-            }
+        loadLevelFile.open("..\\config\\level.txt", ios::in);
+        int i = 0;
+        while(!loadLevelFile.eof()) {
+            loadLevelFile>>brick[i].position.x>>brick[i].position.y>>brick[i].brickWidth>>brick[i].brickHeight>>brick[i].type;
+            brick[i].enabled = 1;
+            i++;
+            brickCount++;
+        }
         loadLevelFile.close();
     }
 
@@ -243,7 +241,7 @@ public:
                 if(brick[i].type == 4) {
                     bColor = ORANGE;
                 }
-                DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, bColor);
+                DrawRectangle(brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight, bColor);
             }
         }
         //
@@ -377,87 +375,86 @@ public:
             }
         }
 
-        if(collision == 0){
+        if(collision == 0) {
             timer(6);
         }
-        if(counter == 0){
+        if(counter == 0) {
             collision = 1;
         }
         //Collision for bricks
-        if(collision) {
-            for(int i = 0; i < brick_columns; i++) {
-                for(int j = 0; j < brick_rows; j++) {
-                    if(brick[i][j]) {
-                        int x = brick_centering + (offset * 2) + i * brick_width + i * offset;
-                        int y = offset * 2 + j * brick_height + j * offset;
-                        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), {x, y, brick_width, brick_height})) {
-                            if(brick[i][j] <= 3){
-                            brick[i][j] --;}
-                            collision = 0;
-
-                            if(ball->getX() < x + 5 && ball->getY() > y && ball->getY() < (y + brick_height)) { //Left brick side collision
-                                if(ball->getDirection() == UPRIGHT) {
-                                    ball->changeDirection(UPLEFT);
-                                } else {
-                                    if(ball->getDirection() == DOWNRIGHT) {
-                                        ball->changeDirection(DOWNLEFT);
-                                    }
-                                }
-                            } else if(ball->getX() > (x + brick_width) && ball->getY() > y && ball->getY() < (y + brick_height)) { //Right brick side collision
-                                if(ball->getDirection() == UPLEFT) {
-                                    ball->changeDirection(UPRIGHT);
-                                } else {
-                                    if(ball->getDirection() == DOWNLEFT) {
-                                        ball->changeDirection(DOWNRIGHT);
-                                    }
-                                }
-                            } else if(ball->getY() < y && ball->getX() > x && ball->getX() < (x + brick_width)) { //Top brick side collision
-                                if(ball->getDirection() == DOWNLEFT) {
-                                    ball->changeDirection(UPLEFT);
-                                }
-                                if(ball->getDirection() == DOWNRIGHT) {
-                                    ball->changeDirection(UPRIGHT);
-                                }
-                            } else if(ball->getY() > (y + brick_height) && ball->getX() > x && ball->getX() < (x + brick_width)) { //Bottom brick side collision
-                                if(ball->getDirection() == UPLEFT) {
-                                    ball->changeDirection(DOWNLEFT);
-                                }
-                                if(ball->getDirection() == UPRIGHT) {
-                                    ball->changeDirection(DOWNRIGHT);
-                                }
-                            } else {
-                                if(ball->getX() < (x + brick_width / 2) && ball->getX() > (x - ball_size - 5)) {
-                                    if(ball->getDirection() == DOWNRIGHT) {
-                                        ball->changeDirection(DOWNLEFT);
-                                    }
-                                    if(ball->getDirection() == UPRIGHT) {
-                                        ball->changeDirection(UPLEFT);
-                                    }
-                                } else if(ball->getX() > (x + brick_width / 2) && ball->getX() < (x + brick_width + ball_size + 5)) {
-                                    if(ball->getDirection() == UPLEFT) {
-                                        ball->changeDirection(UPRIGHT);
-                                    }
-                                    if(ball->getDirection() == DOWNLEFT) {
-                                        ball->changeDirection(DOWNRIGHT);
-                                    }
-                                } else {
-                                    ball->randomDirection();
-                                    exceptions++;
-                                    cout<<"Total exceptions: "<<exceptions<<endl;
-                                    char test[11];
-                                    sprintf(test, "Test %d.png", exceptions);
-                                    TakeScreenshot(test);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        {
+//        if(collision) {
+//            for(int i = 0; i < brick_columns; i++) {
+//                for(int j = 0; j < brick_rows; j++) {
+//                    if(brick[i][j]) {
+//                        int x = brick_centering + (offset * 2) + i * brick_width + i * offset;
+//                        int y = offset * 2 + j * brick_height + j * offset;
+//                        if(CheckCollisionCircleRec({ball->getX(), ball->getY()},ball->getSize(), {x, y, brick_width, brick_height})) {
+//                            if(brick[i][j] <= 3){
+//                            brick[i][j] --;}
+//                            collision = 0;
+//
+//                            if(ball->getX() < x + 5 && ball->getY() > y && ball->getY() < (y + brick_height)) { //Left brick side collision
+//                                if(ball->getDirection() == UPRIGHT) {
+//                                    ball->changeDirection(UPLEFT);
+//                                } else {
+//                                    if(ball->getDirection() == DOWNRIGHT) {
+//                                        ball->changeDirection(DOWNLEFT);
+//                                    }
+//                                }
+//                            } else if(ball->getX() > (x + brick_width) && ball->getY() > y && ball->getY() < (y + brick_height)) { //Right brick side collision
+//                                if(ball->getDirection() == UPLEFT) {
+//                                    ball->changeDirection(UPRIGHT);
+//                                } else {
+//                                    if(ball->getDirection() == DOWNLEFT) {
+//                                        ball->changeDirection(DOWNRIGHT);
+//                                    }
+//                                }
+//                            } else if(ball->getY() < y && ball->getX() > x && ball->getX() < (x + brick_width)) { //Top brick side collision
+//                                if(ball->getDirection() == DOWNLEFT) {
+//                                    ball->changeDirection(UPLEFT);
+//                                }
+//                                if(ball->getDirection() == DOWNRIGHT) {
+//                                    ball->changeDirection(UPRIGHT);
+//                                }
+//                            } else if(ball->getY() > (y + brick_height) && ball->getX() > x && ball->getX() < (x + brick_width)) { //Bottom brick side collision
+//                                if(ball->getDirection() == UPLEFT) {
+//                                    ball->changeDirection(DOWNLEFT);
+//                                }
+//                                if(ball->getDirection() == UPRIGHT) {
+//                                    ball->changeDirection(DOWNRIGHT);
+//                                }
+//                            } else {
+//                                if(ball->getX() < (x + brick_width / 2) && ball->getX() > (x - ball_size - 5)) {
+//                                    if(ball->getDirection() == DOWNRIGHT) {
+//                                        ball->changeDirection(DOWNLEFT);
+//                                    }
+//                                    if(ball->getDirection() == UPRIGHT) {
+//                                        ball->changeDirection(UPLEFT);
+//                                    }
+//                                } else if(ball->getX() > (x + brick_width / 2) && ball->getX() < (x + brick_width + ball_size + 5)) {
+//                                    if(ball->getDirection() == UPLEFT) {
+//                                        ball->changeDirection(UPRIGHT);
+//                                    }
+//                                    if(ball->getDirection() == DOWNLEFT) {
+//                                        ball->changeDirection(DOWNRIGHT);
+//                                    }
+//                                } else {
+//                                    ball->randomDirection();
+//                                    exceptions++;
+//                                    cout<<"Total exceptions: "<<exceptions<<endl;
+//                                    char test[11];
+//                                    sprintf(test, "Test %d.png", exceptions);
+//                                    TakeScreenshot(test);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
         }
-
-        if(collision){
-
-        }
+        //
     }
 
     void reset()
@@ -470,9 +467,10 @@ public:
     void checkWin()
     {
         int sum = 0;
-        for(int i = 0; i < brick_columns; i++) {
-                if(brick[i].type != 3){
-                sum = sum + brick[i].enabled;}
+        for(int i = 0; i < brickCount; i++) {
+            if(brick[i].type != 3) {
+                sum = sum + brick[i].enabled;
+            }
         }
         if(sum == 0) {
             //win = 1;
@@ -480,11 +478,11 @@ public:
         }
     }
 
-    void timer(int delayframes){
-        if(counter<delayframes){
+    void timer(int delayframes)
+    {
+        if(counter<delayframes) {
             counter++;
-        }
-        else{
+        } else {
             counter = 0;
         }
     }
@@ -493,14 +491,12 @@ public:
     {
         loadLevel();
         while(!WindowShouldClose() & !win) {
-            if(IsWindowFocused()) {
                 Input();
                 Logic();
-                checkWin();
-            }
+                //checkWin();
             Draw();
         }
-        cout<<"Exception rate: "<<(exceptions/(float)(brick_columns*brick_rows))*100<<" %."<<endl;
+        cout<<"Exception rate: "<<(float)exceptions/brickCount*100<<" %."<<endl;
         free(brick);
         CloseWindow();
         return 0;

@@ -12,3 +12,16 @@
 
 1642424984 source:e:\windows folders\desktop\c++\brick-breaker\game\icon.rc
 
+1647465019 source:c:\users\dark\documents\github\brick-breaker\game\icon.rc
+
+1647504608 source:c:\users\dark\documents\github\brick-breaker\game\main.cpp
+	<iostream>
+	<fstream>
+	"include/raylib.h"
+	<string.h>
+	<cstring>
+
+1647465019 c:\users\dark\documents\github\brick-breaker\game\include\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+

@@ -33,3 +33,15 @@
 
 1642424984 source:e:\windows folders\desktop\c++\brick-breaker\editor\icon.rc
 
+1647505485 source:c:\users\dark\documents\github\brick-breaker\editor\editor.cpp
+	<iostream>
+	"raylib.h"
+	<fstream>
+	<cstring>
+
+1647465019 c:\users\dark\documents\github\brick-breaker\editor\include\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+
+1647465019 source:c:\users\dark\documents\github\brick-breaker\editor\icon.rc
+

@@ -103,14 +103,14 @@ private:
     int originalX, originalY;
     int paddle_width, paddle_height;
 public:
-    cPaddle(int posX, int posY)
+    cPaddle(int posX, int posY, int width, int height)
     {
         originalX = posX;
         originalY = posY;
         x = posX;
         y = posY;
-        paddle_width = 100;
-        paddle_height = 10;
+        paddle_width = width;
+        paddle_height = height;
     }
     inline int getX()
     {
@@ -133,7 +133,8 @@ public:
     {
         x += pixels;
     }
-    inline Vector2 getPaddleSize(){
+    inline Vector2 getPaddleSize()
+    {
         return {paddle_width, paddle_height};
     }
 };
@@ -169,10 +170,8 @@ private:
     int movement_speed_ball_base;   // base speed for ball
     int ball_size;                  // ball size
     bool auto_move;                  // whether the paddle automatically moves or not. helps with testing simple stuff
-    int exceptions;                 // how many times did the collision NOT work as the code says.
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
     bool collision;                 // whether collision is on or not
-    int counter;
     bool pause;
 
 public:
@@ -184,7 +183,7 @@ public:
         //Initialize all vars with their proper values
         brickCount = 0;
         quit = 0;
-        movement_speed_paddle_base = 20;
+        movement_speed_paddle_base = 5;
         movement_speed_ball_base = 3;
         ball_size = 10;
         auto_move = 0;
@@ -200,14 +199,15 @@ public:
         SetTargetFPS(400);
         ShowCursor();
         ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, ball_size);
-        paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35);
+        paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
         brick = (Bricks *)MemAlloc(MAX_BRICKS*sizeof(Bricks)); // MemAlloc() is equivalent to malloc();
 
+        //Load and resize image and then convert it to texture
         imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
         ImageResize(&imgBrick, 50, 35);
         texBrick = LoadTextureFromImage(imgBrick);
 
-        //Rectangles
+        //Rectangles that will be used for collision
         borderLeft = {0, 0, 10, GetScreenHeight()};
         borderRight = {GetScreenWidth() - 10, 0, GetScreenWidth(), GetScreenHeight()};
         borderTop = {0, 0, GetScreenWidth(), 10};
@@ -219,12 +219,14 @@ public:
     {
         loadLevelFile.open("..\\config\\level.txt", ios::in);
         int i = 0;
+        brickCount = 0;
         while(!loadLevelFile.eof()) {
             loadLevelFile>>brick[i].position.x>>brick[i].position.y>>brick[i].brickWidth>>brick[i].brickHeight>>brick[i].type;
             brick[i].enabled = 1;
             i++;
             brickCount++;
         }
+        cout<<"Brick Count: "<<brickCount<<endl;
         loadLevelFile.close();
     }
 
@@ -232,9 +234,10 @@ public:
     {
         BeginDrawing();
         ClearBackground(BLACK);
+
         //Loop to draw bricks
         Color bColor;
-        for(int i = 0; i <= brickCount; i++) {
+        for(int i = 0; i < brickCount - 1; i++) {
             if(brick[i].enabled) {
                 if(brick[i].type == 0) {
                     bColor = SKYBLUE;
@@ -251,31 +254,25 @@ public:
                 if(brick[i].type == 4) {
                     bColor = ORANGE;
                 }
-                //DrawRectangle(brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight, bColor);
                 DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, bColor);
-                DrawLine(brick[i].position.x, brick[i].position.y - 50,brick[i].position.x, brick[i].position.y + 50,RED);
-                DrawLine(brick[i].position.x - 50, brick[i].position.y,brick[i].position.x + 50, brick[i].position.y,RED);
-
             }
         }
         //
 
-        DrawRectangle(0,0,100,100,BLACK);
+        //For a bug(?) where the brick texture is spawned at 0,0 for some reason
+        //DrawRectangle(0,0,50,50,BLACK);
 
         // Draw border
+        DrawRectangleRec(borderTop,BROWN);
+        DrawRectangleRec(borderBottom,RED);
         DrawRectangleRec(borderLeft,BROWN);
         DrawRectangleRec(borderRight,BROWN);
-        DrawRectangleRec(borderTop,BROWN);
-        DrawRectangleRec(borderBottom,BROWN);
 
         // Paddle draw
         DrawRectangle(paddle->getX(),paddle->getY(),paddle->getPaddleSize().x,paddle->getPaddleSize().y,WHITE);
 
         //Ball draw
-        int ballX = ball->getX();
-        int ballY = ball->getY();
-        int ballRad = 10;
-        DrawCircle(ballX,ballY,ballRad,WHITE);
+        DrawCircle(ball->getX(),ball->getY(),ball->getSize(),WHITE);
         EndDrawing();
     }
 
@@ -288,40 +285,43 @@ public:
         }
 
         //Mouse movement
-        if(!auto_move) {
-            if(paddle->getX() - movement_speed_paddle - 50 > 10) {
-                if(GetMouseDelta().x < 0) {
-                    paddle->moveLeft(movement_speed_paddle);
-                }
-                if(IsKeyDown('A')) {
-                    paddle->moveLeft(movement_speed_paddle);
+        if(!auto_move && !pause) {
+            if(paddle->getX() - movement_speed_paddle >= 10) {
+                if(GetMouseDelta().x < 0 || IsKeyDown('A')) {
+                    paddle->moveLeft(movement_speed_paddle + abs(GetMouseDelta().x));
                 }
             }
-            if(paddle->getX() + movement_speed_paddle + 50 < GetScreenWidth() - 10) {
-                if(GetMouseDelta().x > 0) {
-                    paddle->moveRight(movement_speed_paddle);
-                }
-                if(IsKeyDown('D')) {
-                    paddle->moveRight(movement_speed_paddle);
+            if(paddle->getX() + movement_speed_paddle + paddle->getPaddleSize().x <= GetScreenWidth() - 10) {
+                if(GetMouseDelta().x > 0 || IsKeyDown('D')) {
+                    paddle->moveRight(movement_speed_paddle + abs(GetMouseDelta().x));
                 }
             }
         }
-        SetMousePosition(GetScreenWidth() / 2,GetMousePosition().y);
         //
 
-        if(IsKeyPressed('W')) {         // Enable auto-moving
+        //Lock mouse position so it doesn't go outside of screen
+        if(!pause) {
+            SetMousePosition(GetScreenWidth() / 2,GetMousePosition().y);
+        }
+
+
+        // Enable auto-moving
+        if(IsKeyPressed('W')) {
             auto_move = !auto_move;
         }
 
-        if(IsKeyPressed('R')) {         // Reset the level
+        // Reset the level
+        if(IsKeyPressed('R')) {
             reset();
         }
 
-        if(IsKeyPressed('P')){
+        //Pause the game
+        if(IsKeyPressed('P')) {
             pause = !pause;
         }
 
-        if(ball->getDirection() == STOP) {                      // Click to start the ball movement thing
+        // Click to start the ball movement thing
+        if(ball->getDirection() == STOP) {
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 ball->changeDirection(UPRIGHT);
             }
@@ -338,6 +338,7 @@ public:
             movement_speed_paddle = movement_speed_paddle_base * 1.5;
         }
 
+        //Auto-movement for the paddle (doesn't work well anymore since I added the ability to send the ball back in same direction)
         if(auto_move) {
             if(paddle->getX() - movement_speed_paddle > 10) {
                 if(ball->getX() < paddle->getX() + 25) {
@@ -352,6 +353,7 @@ public:
         }
 
 
+        //Try to do ball movement based on frame-time (dunno if ti works)
         int movement_speed_ball = (movement_speed_ball_base + rand() % 6) * frametime;
         if(movement_speed_ball == 0) {
             movement_speed_ball = 1;
@@ -359,11 +361,15 @@ public:
         if(movement_speed_ball > movement_speed_ball_base * 2.5) {
             movement_speed_ball = movement_speed_ball_base * 2.5;
         }
-        if(!pause){
-        ball->Move(movement_speed_ball);}
 
+        //Move only if game is NOT paused
+        if(!pause) {
+            ball->Move(movement_speed_ball);
+        }
+
+        //Left wall collision
         ball_collision = {ball->getX(), ball->getY()};
-        if(CheckCollisionCircleRec(ball_collision,ball->getSize(), borderLeft)) {         //left wall
+        if(CheckCollisionCircleRec(ball_collision,ball->getSize(), borderLeft)) {
             if(ball->getDirection() == UPLEFT) {
                 ball->changeDirection(UPRIGHT);
             }
@@ -372,8 +378,9 @@ public:
             }
         }
 
+        //Right wall collision
         ball_collision = {ball->getX(), ball->getY()};
-        if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderRight)) {         //right wall
+        if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderRight)) {
             if(ball->getDirection() == UPRIGHT) {
                 ball->changeDirection(UPLEFT);
             }
@@ -382,8 +389,9 @@ public:
             }
         }
 
+        //Top wall collision
         ball_collision = {ball->getX(), ball->getY()};
-        if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderTop)) {           //top wall
+        if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderTop)) {
             if(ball->getDirection() == UPRIGHT) {
                 ball->changeDirection(DOWNRIGHT);
             }
@@ -392,65 +400,64 @@ public:
             }
         }
 
+        //Bottom wall collision
+        ball_collision = {ball->getX(), ball->getY()};
+        if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderBottom)) {
+            cout<<"You Lose!"<<endl;
+            reset();
+        }
+
         //Paddle Collision
         ball_collision = {ball->getX(), ball->getY()};
         Rectangle paddle_collision = {paddle->getX(), paddle->getY(),paddle->getPaddleSize().x, paddle->getPaddleSize().y};
         if(CheckCollisionCircleRec(ball_collision,ball->getSize(), paddle_collision)) {
-            if(ball->getX() < paddle->getX() + paddle->getPaddleSize().x / 2){
-                if(ball->getDirection() == DOWNLEFT){
+            if(ball->getX() < paddle->getX() + paddle->getPaddleSize().x / 2) {
+                if(ball->getDirection() == DOWNLEFT) {
+                    ball->changeDirection(UPLEFT);
+                } else if(ball->getDirection() == DOWNRIGHT) {
                     ball->changeDirection(UPLEFT);
                 }
-                else if(ball->getDirection() == DOWNRIGHT){
-                    ball->changeDirection(UPLEFT);
-                }
-            }
-            else {
-                if(ball->getDirection() == DOWNRIGHT){
+            } else {
+                if(ball->getDirection() == DOWNRIGHT) {
                     ball->changeDirection(UPRIGHT);
-                }
-                else if(ball->getDirection() == DOWNLEFT){
+                } else if(ball->getDirection() == DOWNLEFT) {
                     ball->changeDirection(UPRIGHT);
                 }
             }
         }
 
-        if(collision == 0) {
-            timer(6);
-        }
-        if(counter == 0) {
-            collision = 1;
-        }
         ball_collision = {ball->getX(), ball->getY()};
         Rectangle brick_collision;
-        for(int i = 0; i <= brickCount; i++){
-        brick_collision = {brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight};
-        if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && brick[i].enabled){
-                if(ball->getX() <= brick[i].position.x){
-                    if(ball->getDirection() == UPRIGHT){
+        for(int i = 0; i < brickCount - 1; i++) {
+            brick_collision = {brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight};
+            if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && brick[i].enabled) {
+                if(ball->getX() <= brick[i].position.x) {
+                    if(ball->getDirection() == UPRIGHT) {
                         ball->changeDirection(UPLEFT);
+                    } else {
+                        ball->changeDirection(DOWNLEFT);
                     }
-                    else {ball->changeDirection(DOWNLEFT);}
-                }
-                else if(ball->getX() >= brick[i].position.x + brick[i].brickWidth){
-                    if(ball->getDirection() == UPLEFT){
+                } else if(ball->getX() >= brick[i].position.x + brick[i].brickWidth) {
+                    if(ball->getDirection() == UPLEFT) {
                         ball->changeDirection(UPRIGHT);
-                    }
-                    else {ball->changeDirection(DOWNRIGHT);}
-                }
-                else if(ball->getY() <= brick[i].position.y){
-                    if(ball->getDirection() == DOWNLEFT){
-                        ball->changeDirection(UPLEFT);
-                    }
-                    else {ball->changeDirection(UPRIGHT);}
-                }
-                else if(ball->getY() >= brick[i].position.y + brick[i].brickHeight){
-                    if(ball->getDirection() == UPRIGHT){
+                    } else {
                         ball->changeDirection(DOWNRIGHT);
                     }
-                    else {ball->changeDirection(DOWNLEFT);}
+                } else if(ball->getY() <= brick[i].position.y) {
+                    if(ball->getDirection() == DOWNLEFT) {
+                        ball->changeDirection(UPLEFT);
+                    } else {
+                        ball->changeDirection(UPRIGHT);
+                    }
+                } else if(ball->getY() >= brick[i].position.y + brick[i].brickHeight) {
+                    if(ball->getDirection() == UPRIGHT) {
+                        ball->changeDirection(DOWNRIGHT);
+                    } else {
+                        ball->changeDirection(DOWNLEFT);
+                    }
                 }
                 brick[i].enabled = 0;
-           }
+            }
         }
     }
 
@@ -463,17 +470,15 @@ public:
 
     void checkWin()
     {
-        if(brickCount == 0){
-            win = 1;
+        int a = 0;
+        for(int i = 0; i <= brickCount; i++) {
+            a = a + brick[i].enabled;
         }
-    }
-
-    void timer(int delayframes)
-    {
-        if(counter<delayframes) {
-            counter++;
-        } else {
-            counter = 0;
+        a -= 1;
+        if(a == 0) {
+            //win = 1;
+            cout<<"WIN!!!!"<<endl;
+            reset();
         }
     }
 
@@ -481,12 +486,11 @@ public:
     {
         loadLevel();
         while(!WindowShouldClose() & !win) {
-                Input();
-                Logic();
-                checkWin();
+            Input();
+            Logic();
+            checkWin();
             Draw();
         }
-        cout<<"Exception rate: "<<(float)exceptions/brickCount*100<<" %."<<endl;
         MemFree(brick);
         CloseWindow();
         return 0;

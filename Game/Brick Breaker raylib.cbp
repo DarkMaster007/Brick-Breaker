@@ -43,6 +43,7 @@
 			<Add option="-Og" />
 			<Add option="-g" />
 			<Add option="-fpermissive" />
+			<Add option="-Wnarrowing" />
 			<Add directory="include" />
 		</Compiler>
 		<Linker>

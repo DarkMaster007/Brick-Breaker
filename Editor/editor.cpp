@@ -30,6 +30,7 @@ private:
     int export_width, export_height, export_brick_width, export_brick_height, export_fullscreen, export_offset;
     string export_brick_color;
     int current_screen;
+    int fullscreen;
     Rectangle button_settings;
     Rectangle button_extra;
     Rectangle button_start;
@@ -49,21 +50,16 @@ private:
     bool mouseOnText_screenHeight;
     int framesCounter_screenHeight;
 
-    Rectangle fullscreen; //the box to toggle full-screen with in settings
-    char settings_fullscreen[MAX_INPUT_INT + 1];
-    int letterCount_fullscreen;
-    bool mouseOnText_fullscreen;
-    int framesCounter_fullscreen;
-
 public:
-    cSettings(int width, int height)
+    cSettings(int width, int height, int fullscreen_loaded)
     {
+        fullscreen = fullscreen_loaded;
         quit = 0;
         current_screen = 0; // 0 - Menu, 1 - Settings, 2 - Extra, 3 - Start
         update = 0;
         fail_open = 0;
-        export_fullscreen = 0;
-        if(!settings.is_open()) {
+        if(!settings.is_open())
+        {
             settings.open("..//config//settings.txt", ios::out | ios::in);
         }
 
@@ -84,12 +80,17 @@ public:
 
         InitWindow(width,height,"Editor");
         SetTargetFPS(30);
+        if(fullscreen && !IsWindowFullscreen()){
+            ToggleFullscreen();
+        }
+
         //Load Textures
         title = LoadTexture("..//resources//title_main.png");
     }
     void Settings_check()
     {
-        if(!settings.is_open() & !update) {
+        if(!settings.is_open() && !update)
+        {
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             export_width = 1024;
@@ -100,7 +101,8 @@ public:
             settings.open("..//config//settings.txt", ios::out | ios::in);
             cout<<export_width<<" "<<export_height<<" "<<export_fullscreen<<endl;
         }
-        if(update) {
+        if(update)
+        {
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             settings<<export_width<<" "<<export_height<<" "<<export_fullscreen;
@@ -120,9 +122,11 @@ public:
 
         DrawTexture(title, GetScreenWidth() /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
 
-        if(settings.is_open() & !fail_open) {
+        if(settings.is_open() & !fail_open)
+        {
             //General Menu
-            if(current_screen == 0) {
+            if(current_screen == 0)
+            {
                 button_settings = { GetScreenWidth() / 2 - 90, GetScreenHeight() - 0.65 * GetScreenHeight(), 180, 60 };
                 DrawRectangleRec(button_settings, WHITE);   //Settings Button
                 textsize = MeasureText(msg_set,30);
@@ -140,43 +144,58 @@ public:
             }
 
             //Settings menu
-            if(current_screen == 1) {
+            if(current_screen == 1)
+            {
                 //Draw screen width text box
                 DrawText("Screen",GetScreenWidth() - 315,160,40,BLACK);
                 DrawText("Width           Height",GetScreenWidth() - 390,210,30,BLACK);
                 DrawText("X",GetScreenWidth() - 250,265,20,BLACK);
                 DrawRectangleRec(screenWidthBox, LIGHTGRAY);
-                if(mouseOnText_screenWidth) {
+                if(mouseOnText_screenWidth)
+                {
                     DrawRectangleLines((int)screenWidthBox.x, (int)screenWidthBox.y, (int)screenWidthBox.width, (int)screenWidthBox.height, RED);
-                } else {
+                }
+                else
+                {
                     DrawRectangleLines((int)screenWidthBox.x, (int)screenWidthBox.y, (int)screenWidthBox.width, (int)screenWidthBox.height, DARKGRAY);
                 }
                 DrawText(settings_screenWidth, (int)screenWidthBox.x + 5, (int)screenWidthBox.y + 15, 30, MAROON);
-                if (mouseOnText_screenWidth) {
-                    if (letterCount_screenWidth < MAX_INPUT_INT) {
+                if (mouseOnText_screenWidth)
+                {
+                    if (letterCount_screenWidth < MAX_INPUT_INT)
+                    {
                         // Draw blinking underscore char
-                        if (((framesCounter_screenWidth/20)%2) == 0) {
+                        if (((framesCounter_screenWidth/20)%2) == 0)
+                        {
                             DrawText("_", (int)screenWidthBox.x + 8 + MeasureText(settings_screenWidth, 30), (int)screenWidthBox.y + 15, 30, MAROON);
                         }
-                    } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
+                    }
+                    else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
                 }
                 //
 
                 //Draw screen height text box
                 DrawRectangleRec(screenHeightBox, LIGHTGRAY);
-                if(mouseOnText_screenHeight) {
+                if(mouseOnText_screenHeight)
+                {
                     DrawRectangleLines((int)screenHeightBox.x, (int)screenHeightBox.y, (int)screenHeightBox.width, (int)screenHeightBox.height, RED);
-                } else {
+                }
+                else
+                {
                     DrawRectangleLines((int)screenHeightBox.x, (int)screenHeightBox.y, (int)screenHeightBox.width, (int)screenHeightBox.height, DARKGRAY);
                 }
                 DrawText(settings_screenHeight, (int)screenHeightBox.x + 5, (int)screenHeightBox.y + 15, 30, MAROON);
-                if (mouseOnText_screenHeight) {
-                    if (letterCount_screenHeight < MAX_INPUT_INT) {
+                if (mouseOnText_screenHeight)
+                {
+                    if (letterCount_screenHeight < MAX_INPUT_INT)
+                    {
                         // Draw blinking underscore char
-                        if (((framesCounter_screenHeight/20)%2) == 0) {
+                        if (((framesCounter_screenHeight/20)%2) == 0)
+                        {
                             DrawText("_", (int)screenHeightBox.x + 8 + MeasureText(settings_screenHeight, 30), (int)screenHeightBox.y + 15, 30, MAROON);
                         }
-                    } else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
+                    }
+                    else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
                 }
                 //
 
@@ -196,14 +215,18 @@ public:
             }
 
             //Extra menu
-            if(current_screen == 2) {
+            if(current_screen == 2)
+            {
                 textsize = MeasureText("Nothing but us chickens here!",25);
                 DrawText("Nothing but us chickens here!", GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() / 2, 25, BLACK);
-                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+                {
                     current_screen = 0;
                 }
             }
-        } else {
+        }
+        else
+        {
             textsize = MeasureText(msg_error,25);
             DrawText(msg_error, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() / 2, 25, BLACK);
         }
@@ -213,55 +236,74 @@ public:
     void Logic()
     {
         //Collision for the main menu buttons: settings, extra and start
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if(CheckCollisionPointRec(GetMousePosition(),button_settings)) {
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
+            if(CheckCollisionPointRec(GetMousePosition(),button_settings))
+            {
                 current_screen = 1;
             }
-            if(CheckCollisionPointRec(GetMousePosition(),button_extra)) {
+            if(CheckCollisionPointRec(GetMousePosition(),button_extra))
+            {
                 current_screen = 2;
             }
-            if(CheckCollisionPointRec(GetMousePosition(),button_start)) {
+            if(CheckCollisionPointRec(GetMousePosition(),button_start))
+            {
                 current_screen = 3;
             }
         }
 
-        if(WindowShouldClose()) {
+        if(WindowShouldClose())
+        {
             quit = 1;
         }
 
         //Collision for the settings input boxes and buttons
-        if(current_screen == 1) {
+        if(current_screen == 1)
+        {
             // Logic for input screen width
             {
-                if (CheckCollisionPointRec(GetMousePosition(), screenWidthBox)) {
+                if (CheckCollisionPointRec(GetMousePosition(), screenWidthBox))
+                {
                     mouseOnText_screenWidth = true;
-                } else {
+                }
+                else
+                {
                     mouseOnText_screenWidth = false;
                 }
-                if(mouseOnText_screenWidth) {
+                if(mouseOnText_screenWidth)
+                {
                     SetMouseCursor(MOUSE_CURSOR_IBEAM);
                     int key = GetCharPressed();
-                    while(key>0) { //Only numbers allowed (to change)
-                        if((key >= 48) && (key <= 57) && (letterCount_screenWidth < MAX_INPUT_INT)) {
+                    while(key>0)   //Only numbers allowed (to change)
+                    {
+                        if((key >= 48) && (key <= 57) && (letterCount_screenWidth < MAX_INPUT_INT))
+                        {
                             settings_screenWidth[letterCount_screenWidth] = (char) key;
                             settings_screenWidth[letterCount_screenWidth + 1] = '\0';
                             letterCount_screenWidth++;
                         }
                         key = GetCharPressed();
                     }
-                    if(IsKeyPressed(KEY_BACKSPACE)) {
+                    if(IsKeyPressed(KEY_BACKSPACE))
+                    {
                         letterCount_screenWidth--;
-                        if(letterCount_screenWidth < 0) {
+                        if(letterCount_screenWidth < 0)
+                        {
                             letterCount_screenWidth = 0;
                         }
                         settings_screenWidth[letterCount_screenWidth] = '\0';
                     }
-                } else {
+                }
+                else
+                {
                     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
                 }
-                if(mouseOnText_screenWidth) {
+                if(mouseOnText_screenWidth)
+                {
                     framesCounter_screenWidth++;
-                } else {
+                }
+                else
+                {
                     framesCounter_screenWidth = 0;
                 }
             }
@@ -269,43 +311,58 @@ public:
 
             // Logic for input screen height
             {
-                if (CheckCollisionPointRec(GetMousePosition(), screenHeightBox)) {
+                if (CheckCollisionPointRec(GetMousePosition(), screenHeightBox))
+                {
                     mouseOnText_screenHeight = true;
-                } else {
+                }
+                else
+                {
                     mouseOnText_screenHeight = false;
                 }
-                if(mouseOnText_screenHeight) {
+                if(mouseOnText_screenHeight)
+                {
                     SetMouseCursor(MOUSE_CURSOR_IBEAM);
                     int key = GetCharPressed();
-                    while(key>0) { //Only numbers allowed (to change)
-                        if((key >= 48) && (key <= 57) && (letterCount_screenHeight < MAX_INPUT_INT)) {
+                    while(key>0)   //Only numbers allowed (to change)
+                    {
+                        if((key >= 48) && (key <= 57) && (letterCount_screenHeight < MAX_INPUT_INT))
+                        {
                             settings_screenHeight[letterCount_screenHeight] = (char) key;
                             settings_screenHeight[letterCount_screenHeight + 1] = '\0';
                             letterCount_screenHeight++;
                         }
                         key = GetCharPressed();
                     }
-                    if(IsKeyPressed(KEY_BACKSPACE)) {
+                    if(IsKeyPressed(KEY_BACKSPACE))
+                    {
                         letterCount_screenHeight--;
-                        if(letterCount_screenHeight < 0) {
+                        if(letterCount_screenHeight < 0)
+                        {
                             letterCount_screenHeight = 0;
                         }
                         settings_screenHeight[letterCount_screenHeight] = '\0';
                     }
-                } else {
+                }
+                else
+                {
                     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
                 }
-                if(mouseOnText_screenHeight) {
+                if(mouseOnText_screenHeight)
+                {
                     framesCounter_screenHeight++;
-                } else {
+                }
+                else
+                {
                     framesCounter_screenHeight = 0;
                 }
             }
             //
 
             // Logic for input full-screen
-            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60})) {
-                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60}))
+            {
+                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+                {
                     export_fullscreen = !export_fullscreen;
                     ToggleFullscreen();
 
@@ -314,15 +371,20 @@ public:
             //
 
             // Logic for save changes button and actions to do
-            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60})) {
-                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60}))
+            {
+                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+                {
                     //Set Export Screen Width
-                    if(letterCount_screenWidth == 0) {
+                    if(letterCount_screenWidth == 0)
+                    {
                         export_width = 1024;
                         strcpy(settings_screenWidth, "1024");
                         letterCount_screenWidth = 4;
                         cout<<export_width<<endl;
-                    } else {
+                    }
+                    else
+                    {
                         cout<<settings_screenWidth<<endl;
                         export_width = atoi(settings_screenWidth);
                         cout<<export_width<<endl;
@@ -330,17 +392,21 @@ public:
                     //
 
                     //Set Export Screen Height
-                    if(letterCount_screenHeight == 0) {
+                    if(letterCount_screenHeight == 0)
+                    {
                         export_height = 760;
                         strcpy(settings_screenHeight, "760");
                         letterCount_screenHeight = 3;
                         cout<<export_height<<endl;
-                    } else {
+                    }
+                    else
+                    {
                         cout<<settings_screenHeight<<endl;
                         export_height = atoi(settings_screenHeight);
                         cout<<export_height<<endl;
                     }
                     //Set Export full-screen state
+                    export_fullscreen = fullscreen;
                     cout<<export_fullscreen<<endl;
 
                     current_screen = 0;
@@ -356,10 +422,12 @@ public:
     {
         fail_open = fail;
         Settings_check();
-        while(!quit & current_screen != 3) {
+        while(!quit & current_screen != 3)
+        {
             Draw();
             Logic();
-            if(settings.eof()) {
+            if(settings.eof())
+            {
                 settings.seekg(ios::beg);
                 settings.clear();
             }
@@ -391,7 +459,6 @@ private:
     Texture2D texSelect;
     bool resizeTexture;
 
-    bool fullscreen;                // whether it's full-screen or not
     Rectangle button_SaveAndQuit;   // Save and quit button
     Rectangle button_QuitOnly;      // Quit only button
     bool save;                      // To save or not to save...that is the question (I had to I was listening to Hate Me)
@@ -421,7 +488,8 @@ public:
 
     void Init() // load the brick variable with only ones (meaning all bricks are visible and active)
     {
-        for(int i = 0; i < MAX_BRICKS; i++) {
+        for(int i = 0; i < MAX_BRICKS; i++)
+        {
             brick[i].brickWidth = 50;
             brick[i].brickHeight = 35;
             brick[i].enabled = 0;
@@ -441,18 +509,24 @@ public:
         DrawText("Press Q once you are done to quit and save.",GetScreenWidth() / 2 - 43 * 3, GetScreenHeight() / 2.5 + 70,15,WHITE);
         DrawText("Click left mouse button to continue.",GetScreenWidth() / 2 - 36 * 3, GetScreenHeight() - GetScreenHeight() / 7.6,15,WHITE);
         EndDrawing();
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
 
     int CheckBrickExists()  //Check if a brick exists at mouse location and output the bricks ID out of brickCount (only to be used in an if)
     {
-        for(int i = 0; i <= brickCount; i++) {
-            if(GetMouseX() > brick[i].position.x - brick[i].brickWidth / 2 && GetMouseX() < brick[i].position.x + brick[i].brickWidth * 1.5) {
-                if(GetMouseY() > brick[i].position.y - brick[i].brickHeight / 2 && GetMouseY() < brick[i].position.y + brick[i].brickHeight * 1.5) {
+        for(int i = 0; i <= brickCount; i++)
+        {
+            if(GetMouseX() > brick[i].position.x - brick[i].brickWidth / 2 && GetMouseX() < brick[i].position.x + brick[i].brickWidth * 1.5)
+            {
+                if(GetMouseY() > brick[i].position.y - brick[i].brickHeight / 2 && GetMouseY() < brick[i].position.y + brick[i].brickHeight * 1.5)
+                {
                     //cout<<"ID of Brick Clicked: "<<i<<endl;
                     return i;
                 }
@@ -468,25 +542,33 @@ public:
         ClearBackground(BLACK);
         //Loop to draw bricks
         Color bColor;
-        for(int i = 0; i <= brickCount; i++) {
-            if(brick[i].enabled) {
-                if(brick[i].type == 0) {
+        for(int i = 0; i <= brickCount; i++)
+        {
+            if(brick[i].enabled)
+            {
+                if(brick[i].type == 0)
+                {
                     bColor = SKYBLUE;
                 }
-                if(brick[i].type == 1) {
+                if(brick[i].type == 1)
+                {
                     bColor = BLUE;
                 }
-                if(brick[i].type == 2) {
+                if(brick[i].type == 2)
+                {
                     bColor = GRAY;
                 }
-                if(brick[i].type == 3) {
+                if(brick[i].type == 3)
+                {
                     bColor = GOLD;
                 }
-                if(brick[i].type == 4) {
+                if(brick[i].type == 4)
+                {
                     bColor = ORANGE;
                 }
                 DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, bColor);
-                if(brick[i].selected) {
+                if(brick[i].selected)
+                {
                     DrawTexture(texSelect, brick[i].position.x, brick[i].position.y, WHITE);
                 }
             }
@@ -524,12 +606,17 @@ public:
     void Logic()  //
     {
         //Spawn bricks with Left-Click and disallow creating another on top of it
-        if(brickCount != MAX_BRICKS - 1) {
-            if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && IsKeyDown(KEY_LEFT_CONTROL)) {
-                if(GetMouseY() < GetScreenHeight() - 350) {
-                    if(CheckBrickExists() == -1) {
+        if(brickCount != MAX_BRICKS - 1)
+        {
+            if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && IsKeyDown(KEY_LEFT_CONTROL))
+            {
+                if(GetMouseY() < GetScreenHeight() - 350)
+                {
+                    if(CheckBrickExists() == -1)
+                    {
                         brick[brickCount].enabled = 1;
-                        brick[brickCount].position = (Vector2) {
+                        brick[brickCount].position = (Vector2)
+                        {
                             GetMouseX() - brick[brickCount].brickWidth / 2, GetMouseY() - brick[brickCount].brickHeight / 2
                         };
                         brickCount++;
@@ -541,19 +628,26 @@ public:
         //
 
         //Code to allow to select bricks for extra options
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
             int a = CheckBrickExists();
-            if(a != -1) {
+            if(a != -1)
+            {
                 brick[a].selected = 1;
                 cout<<"Brick selected: "<<a<<endl;
-                for(int i = 0; i < a; i++) {
+                for(int i = 0; i < a; i++)
+                {
                     brick[i].selected = 0;
                 }
-                for(int i = a + 1; i < brickCount; i++) {
+                for(int i = a + 1; i < brickCount; i++)
+                {
                     brick[i].selected = 0;
                 }
-            } else {
-                for(int i = 0; i < brickCount; i++) {
+            }
+            else
+            {
+                for(int i = 0; i < brickCount; i++)
+                {
                     brick[i].selected = 0;
                     cout<<"Nothing selected!"<<endl;
                 }
@@ -562,11 +656,15 @@ public:
         //
 
         //Move bricks by holding Left-Click
-        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
             int a = CheckBrickExists();
-            if(a != -1) {
-                if(brick[a].selected) {
-                    brick[a].position = (Vector2) {
+            if(a != -1)
+            {
+                if(brick[a].selected)
+                {
+                    brick[a].position = (Vector2)
+                    {
                         GetMousePosition().x - brick[a].brickWidth / 2, GetMousePosition().y - brick[a].brickHeight / 2
                     };
                 }
@@ -575,28 +673,39 @@ public:
         //
 
         //Change brick type
-        if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+        {
             int a = CheckBrickExists();
-            if(a != -1) {
-                if(brick[a].selected) {
-                    if(brick[a].type != 4) {
+            if(a != -1)
+            {
+                if(brick[a].selected)
+                {
+                    if(brick[a].type != 4)
+                    {
                         brick[a].type++;
-                    } else {
+                    }
+                    else
+                    {
                         brick[a].type = 0;
                     }
-                    if(brick[a].type == 0) {
+                    if(brick[a].type == 0)
+                    {
                         cout<<"Normal"<<endl;
                     }
-                    if(brick[a].type == 1) {
+                    if(brick[a].type == 1)
+                    {
                         cout<<"1HP"<<endl;
                     }
-                    if(brick[a].type == 2) {
+                    if(brick[a].type == 2)
+                    {
                         cout<<"2HP"<<endl;
                     }
-                    if(brick[a].type == 3) {
+                    if(brick[a].type == 3)
+                    {
                         cout<<"Gold(Unbreakable)"<<endl;
                     }
-                    if(brick[a].type == 4) {
+                    if(brick[a].type == 4)
+                    {
                         cout<<"Explosive"<<endl;
                     }
                 }
@@ -605,12 +714,15 @@ public:
         //
 
         //The Collision for the "Quit Only" and "Save and Quit" buttons
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if(CheckCollisionPointRec(GetMousePosition(),button_SaveAndQuit)) {     //Save and quit
+        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+        {
+            if(CheckCollisionPointRec(GetMousePosition(),button_SaveAndQuit))       //Save and quit
+            {
                 save = 1;
                 quit = 1;
             }
-            if(CheckCollisionPointRec(GetMousePosition(),button_QuitOnly)) {        //Quit only
+            if(CheckCollisionPointRec(GetMousePosition(),button_QuitOnly))          //Quit only
+            {
                 save = 0;
                 quit = 1;
             }
@@ -621,8 +733,9 @@ public:
     {
         lvl_editor.open("..//config//level.txt", ios::out);
         // output brick layout to level.txt
-        for(int i = 0; i <= brickCount - 1; i++) {
-            lvl_editor<<brick[i].position.x<<" "<<brick[i].position.y<<" "<<brick[i].brickWidth<<" "<<brick[i].brickHeight<<" "<<brick[i].type<<" ";
+        for(int i = 0; i <= brickCount - 1; i++)
+        {
+            lvl_editor<<GetScreenWidth()<<" "<<brick[i].position.x<<" "<<brick[i].position.y<<" "<<brick[i].brickWidth<<" "<<brick[i].brickHeight<<" "<<brick[i].type<<" ";
             cout<<endl;
             cout<<"Brick Position:"<<endl;
             cout<<"     X: "<<brick[i].position.x<<endl;
@@ -630,19 +743,24 @@ public:
             cout<<"Brick Width: "<<brick[i].brickWidth<<endl;
             cout<<"Brick Height: "<<brick[i].brickHeight<<endl;
             cout<<"Brick type: ";
-            if(brick[i].type == 0) {
+            if(brick[i].type == 0)
+            {
                 cout<<"Normal"<<endl;
             }
-            if(brick[i].type == 1) {
+            if(brick[i].type == 1)
+            {
                 cout<<"1HP"<<endl;
             }
-            if(brick[i].type == 2) {
+            if(brick[i].type == 2)
+            {
                 cout<<"2HP"<<endl;
             }
-            if(brick[i].type == 3) {
+            if(brick[i].type == 3)
+            {
                 cout<<"Gold(Unbreakable)"<<endl;
             }
-            if(brick[i].type == 4) {
+            if(brick[i].type == 4)
+            {
                 cout<<"Explosive"<<endl;
             }
             cout<<endl;
@@ -655,28 +773,35 @@ public:
         Init();
 
         bool info_bool = false;
-        while(!info_bool & !quit) {
+        while(!info_bool & !quit)
+        {
             info_bool = Info();
         }
 
-        while(!WindowShouldClose() & !quit) {
-            if(IsWindowFocused()) {
+        while(!WindowShouldClose() & !quit)
+        {
+            if(IsWindowFocused())
+            {
                 Logic();
             }
             Draw();
         }
-        if(save) {
+        if(save)
+        {
             Output();
         }
 
         // close all streams
-        if(lvl_editor.is_open()) {
+        if(lvl_editor.is_open())
+        {
             lvl_editor.close();
         }
-        if(game_settings.is_open()) {
+        if(game_settings.is_open())
+        {
             game_settings.close();
         }
-        if(settings.is_open()) {
+        if(settings.is_open())
+        {
             settings.close();
         }
         MemFree(brick); //equivalent to free()
@@ -686,11 +811,14 @@ public:
 
 int main(int argc, char** argv)
 {
-    int width, height, quit = 0, run = 1, fail = 0;
+    int width, height, fullscreen, quit = 0, run = 1, fail = 0;
     settings.open("..//config//settings.txt", ios::out | ios::in);
-    if(settings.is_open()) {
-        settings>>width>>height;
-    } else {
+    if(settings.is_open())
+    {
+        settings>>width>>height>>fullscreen;
+    }
+    else
+    {
         cout<<"Settings failed to open!"<<endl;
         width = 640;
         height = 480;
@@ -698,7 +826,9 @@ int main(int argc, char** argv)
     }
     cout<<"Screen width: "<<width<<endl;
     cout<<"Screen height: "<<height<<endl;
-    cSettings c_settings(width,height);
+    cout<<"Fullscreen: "<<fullscreen<<endl;
+
+    cSettings c_settings(width,height,fullscreen);
     quit = c_settings.Run(fail);
     cGameManager c_game;
     quit = !c_game.Run(quit);

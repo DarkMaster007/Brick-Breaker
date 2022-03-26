@@ -25,3 +25,16 @@
 	<stdarg.h>
 	<stdbool.h>
 
+1647465019 source:d:\c++\brick-breaker\game\icon.rc
+
+1648023737 source:d:\c++\brick-breaker\game\main.cpp
+	<iostream>
+	<fstream>
+	"include/raylib.h"
+	<string.h>
+	<cstring>
+
+1647465019 d:\c++\brick-breaker\game\include\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+

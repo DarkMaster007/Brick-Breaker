@@ -113,7 +113,7 @@ public:
         y = posY;
         paddle_width = width;
         paddle_height = height;
-        paddle_width_reverse = paddle_width * 0.1;
+        paddle_width_reverse = 13;
     }
     inline int getX()
     {
@@ -159,13 +159,15 @@ class cGameManager
 {
 private:
     int width,height;               // Screen width and height
-    int level_width;
     bool fullscreen;                // whether it's full-screen or not
     bool quit;                      // whether the game should quit or not
-
     Bricks *brick;
     Image imgBrick;
     Texture2D texBrick;
+    Texture2D texBall;
+    Texture2D texPaddleEdge_L;
+    Texture2D texPaddleEdge_R;
+    Texture2D texPaddleBody;
     cBall *ball;                    // ball object
     cPaddle *paddle;                // paddle object
     Rectangle borderLeft;           // left border rectangle, for collision and drawing
@@ -176,7 +178,6 @@ private:
     int brickCount;
     int movement_speed_paddle_base; // base speed for paddle
     int movement_speed_ball_base;   // base speed for ball
-    int ball_size;                  // ball size
     bool auto_move;                  // whether the paddle automatically moves or not. helps with testing simple stuff
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
     bool collision;                 // whether collision is on or not
@@ -191,31 +192,36 @@ public:
         //Initialize all vars with their proper values
         brickCount = 0;
         quit = 0;
-        movement_speed_paddle_base = 5;
+        movement_speed_paddle_base = 8;
         movement_speed_ball_base = 3;
-        ball_size = 10;
         auto_move = 0;
         win = 0;
         pause = 0;
 
         //Load the settings file
-        game_settings>>width>>height;
-        game_settings>>fullscreen;
+        game_settings>>width>>height>>fullscreen;
         cout<<"Width: "<<width<<endl<<"Height: "<<height<<"Fullscreen: "<<fullscreen;
 
         InitWindow(width,height,"Editor");
         SetTargetFPS(400);
         HideCursor();
-        if(fullscreen == 1){
-        ToggleFullscreen();}
-        ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, ball_size);
+        if(fullscreen == 1)
+        {
+            ToggleFullscreen();
+        }
+        ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10);
         paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
         brick = (Bricks *)MemAlloc(MAX_BRICKS*sizeof(Bricks)); // MemAlloc() is equivalent to malloc();
 
         //Load and resize image and then convert it to texture
         imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
-        ImageResize(&imgBrick, 50, 35);
-        texBrick = LoadTextureFromImage(imgBrick);
+        Image imgBall = LoadImage("..//resources//Breakout-Ball.gif");
+        ImageResize(&imgBall, ball->getSize() * 2, ball->getSize() * 2);
+        texBall = LoadTextureFromImage(imgBall);
+        texPaddleEdge_L = LoadTexture("..//resources//Breakout-Paddle_L.png");
+        texPaddleEdge_R = LoadTexture("..//resources//Breakout-Paddle_R.png");
+        texPaddleBody = LoadTexture("..//resources//Breakout-Paddle_middle.png");
+
 
         //Rectangles that will be used for collision
         borderLeft = {0, 0, 10, GetScreenHeight()};
@@ -229,24 +235,66 @@ public:
     {
         loadLevelFile.open("..\\config\\level.txt", ios::in);
         int i = 0;
+        float temp, temp2;
+        float level_width, level_height;
         brickCount = 0;
         while(!loadLevelFile.eof())
         {
-            loadLevelFile>>level_width>>brick[i].position.x>>brick[i].position.y>>brick[i].brickWidth>>brick[i].brickHeight>>brick[i].type;
-            if(width != level_width){
-                int temp = width - level_width;
-                if(temp > 0){
-                    brick[i].position.x += temp / 2;
-                }
-                else {
-                    brick[i].position.x -= temp / 2;
+            loadLevelFile>>level_width>>level_height>>brick[i].position.x>>brick[i].position.y>>brick[i].brickWidth>>brick[i].brickHeight>>brick[i].type;
+            if(width != level_width || height != level_height)
+            {
+                temp = width / level_width;
+                temp2 = height / level_height;
+                brick[i].position.x *= temp;
+                brick[i].position.y *= temp2;
+                brick[i].brickWidth *= (temp*1.5);
+                brick[i].brickHeight *= (temp2*1.2);
+                cout<<"X mod: "<<temp<<endl<<"Y mod: "<<temp2<<endl;
+                cout<<"Level res to game res ratio is: "<<temp<<" to "<<temp2<<endl;
+            }
+            //X clamping
+            if(brick[i].position.x < 10)
+            {
+                brick[i].position.x += 50;
+                if(brick[i].position.x < 10)
+                {
+                    brick[i].position.x = 11;
                 }
             }
+            if(brick[i].position.x + brick[i].brickWidth > width - 10)
+            {
+                brick[i].position.x -= 50;
+                if(brick[i].position.x < 10)
+                {
+                    brick[i].position.x = width - 11 - brick[i].brickWidth;
+                }
+            }
+            //
+            //Y clamping
+            if(brick[i].position.y + brick[i].brickHeight > GetScreenHeight() - 350)
+            {
+                brick[i].position.y -= 25;
+                if(brick[i].position.y > GetScreenHeight() - 350)
+                {
+                    brick[i].position.y = GetScreenHeight() - 351 - brick[i].brickHeight;
+                }
+            }
+            if(brick[i].position.y < 0)
+            {
+                brick[i].position.y += 50;
+                if(brick[i].position.y < 0)
+                {
+                    brick[i].position.y = 11;
+                }
+            }
+            //
             brick[i].type++;
             brick[i].enabled = 1;
             i++;
             brickCount++;
         }
+        ImageResize(&imgBrick, brick[0].brickWidth, brick[0].brickHeight);
+        texBrick = LoadTextureFromImage(imgBrick);
         loadLevelFile.close();
     }
 
@@ -254,6 +302,8 @@ public:
     {
         BeginDrawing();
         ClearBackground(BLACK);
+
+        DrawFPS(10,10);
 
         //Loop to draw bricks
         Color bColor;
@@ -286,9 +336,6 @@ public:
         }
         //
 
-        //For a bug(?) where the brick texture is spawned at 0,0 for some reason
-        //DrawRectangle(0,0,50,50,BLACK);
-
         // Draw border
         DrawRectangleRec(borderTop,BROWN);
         DrawRectangleRec(borderBottom,RED);
@@ -297,12 +344,24 @@ public:
 
         // Paddle draw
         DrawRectangle(paddle->getX(),paddle->getY(),paddle->getSize().x,paddle->getSize().y,WHITE);
-        //Dev
-        DrawLine(paddle->getX() + paddle->getPaddleWidthReverse(),paddle->getY() - 5, paddle->getX() + paddle->getPaddleWidthReverse(), paddle->getY() + paddle->getSize().y + 5, RED);
-        DrawLine(paddle->getX() + paddle->getSize().x - paddle->getPaddleWidthReverse(),paddle->getY() - 5, paddle->getX() + paddle->getSize().x - paddle->getPaddleWidthReverse(), paddle->getY() + paddle->getSize().y + 5, RED);
+
+        DrawRectangle(paddle->getX(), paddle->getY(), paddle->getPaddleWidthReverse(), paddle->getSize().y, YELLOW);
+        DrawRectangle(paddle->getX() + paddle->getSize().x - paddle->getPaddleWidthReverse(), paddle->getY(), paddle->getPaddleWidthReverse(), paddle->getSize().y, YELLOW);
+
+        Rectangle Source = {0,0,texPaddleEdge_L.width,texPaddleEdge_L.height};
+        Rectangle Destination = {paddle->getX(), paddle->getY(), paddle->getPaddleWidthReverse(), paddle->getSize().y};
+        DrawTexturePro(texPaddleEdge_L, Source, Destination, {0,0}, 0, WHITE);
+
+        Source = {0,0,texPaddleEdge_R.width,texPaddleEdge_R.height};
+        Destination = {paddle->getX() + paddle->getSize().x - paddle->getPaddleWidthReverse(), paddle->getY(), paddle->getPaddleWidthReverse(), paddle->getSize().y};
+        DrawTexturePro(texPaddleEdge_R, Source, Destination, {0,0}, 0, WHITE);
+
+        Source = {0,0,texPaddleBody.width,texPaddleBody.height};
+        Destination = {paddle->getX() + paddle->getPaddleWidthReverse(), paddle->getY(), paddle->getSize().x -  2 * paddle->getPaddleWidthReverse(), paddle->getSize().y};
+        DrawTexturePro(texPaddleBody, Source, Destination, {0,0}, 0, WHITE);
 
         //Ball draw
-        DrawCircle(ball->getX(),ball->getY(),ball->getSize(),WHITE);
+        DrawTexture(texBall, ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), WHITE);
         EndDrawing();
     }
 
@@ -370,7 +429,8 @@ public:
         }
     }
 
-    Vector2 BrickCollision(){
+    Vector2 BrickCollision()
+    {
         //Brick Collision
         Vector2 ball_collision = {ball->getX(), ball->getY()};
         Rectangle brick_collision;
@@ -604,7 +664,10 @@ public:
         int a = 0;
         for(int i = 0; i <= brickCount; i++)
         {
-            a = a + brick[i].enabled;
+            if(brick[i].type != 5)
+            {
+                a = a + brick[i].enabled;
+            }
         }
         a -= 1;
         if(a == 0)

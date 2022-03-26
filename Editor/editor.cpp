@@ -8,6 +8,7 @@
 #include "raylib.h"
 #include <fstream>
 #include <cstring>
+#include <math.h>
 using std::fstream;
 using std::endl;
 using std::string;
@@ -30,6 +31,7 @@ private:
     int export_width, export_height, export_brick_width, export_brick_height, export_fullscreen, export_offset;
     string export_brick_color;
     int current_screen;
+    int global_width, global_height;
     int fullscreen;
     Rectangle button_settings;
     Rectangle button_extra;
@@ -53,6 +55,8 @@ private:
 public:
     cSettings(int width, int height, int fullscreen_loaded)
     {
+        global_width = width;
+        global_height = height;
         fullscreen = fullscreen_loaded;
         quit = 0;
         current_screen = 0; // 0 - Menu, 1 - Settings, 2 - Extra, 3 - Start
@@ -65,15 +69,17 @@ public:
 
         //Settings screen width box text box
         settings_screenWidth[MAX_INPUT_INT + 1] = '\0';
-        screenWidthBox = { width - 445, 250, 180, 50 };
-        letterCount_screenWidth = 0;
+        sprintf(settings_screenWidth,"%ld", width);
+        screenWidthBox = { width / 2 - 190, global_height / 2 - 80, 180, 50 };
+        letterCount_screenWidth = log10(width) + 1;
         mouseOnText_screenWidth = false;
         framesCounter_screenWidth = 0;
         //
         //Settings screen height box text box
         settings_screenHeight[MAX_INPUT_INT + 1] = '\0';
-        screenHeightBox = { width - 225, 250, 180, 50 };
-        letterCount_screenHeight = 0;
+        sprintf(settings_screenHeight,"%ld", height);
+        screenHeightBox = { width / 2 + 10, global_height / 2 - 80, 180, 50 };
+        letterCount_screenHeight = log10(height) + 1;
         mouseOnText_screenHeight = false;
         framesCounter_screenHeight = 0;
         //
@@ -93,8 +99,8 @@ public:
         {
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
-            export_width = 1024;
-            export_height = 768;
+            export_width = GetMonitorWidth(0);
+            export_height = GetMonitorHeight(0);
             export_fullscreen = 0;
             settings<<export_width<<" "<<export_height<<" "<<export_fullscreen<<" ";
             settings.close();
@@ -120,36 +126,36 @@ public:
         ClearBackground(SKYBLUE);
         BeginDrawing();
 
-        DrawTexture(title, GetScreenWidth() /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
+        DrawTexture(title, global_width /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
 
         if(settings.is_open() & !fail_open)
         {
             //General Menu
             if(current_screen == 0)
             {
-                button_settings = { GetScreenWidth() / 2 - 90, GetScreenHeight() - 0.65 * GetScreenHeight(), 180, 60 };
+                button_settings = { global_width / 2 - 90, global_height * 0.35, 180, 60 };
                 DrawRectangleRec(button_settings, WHITE);   //Settings Button
                 textsize = MeasureText(msg_set,30);
-                DrawText(msg_set, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 0.65 * GetScreenHeight() + 15, 30, BLACK);
+                DrawText(msg_set, global_width / 2 - textsize / 2, global_height * 0.35 + 15, 30, BLACK);
 
-                button_extra = {GetScreenWidth() / 2 - 90, GetScreenHeight() - 0.55 * GetScreenHeight(), 180, 60};
+                button_extra = {global_width / 2 - 90, global_height * 0.45, 180, 60};
                 DrawRectangleRec(button_extra, WHITE); //Extra Button
                 textsize = MeasureText(msg_ext,30);
-                DrawText(msg_ext, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 0.55 * GetScreenHeight() + 20, 30, BLACK);
+                DrawText(msg_ext, global_width / 2 - textsize / 2, global_height * 0.45 + 15, 30, BLACK);
 
-                button_start = {GetScreenWidth() / 2 - 90, GetScreenHeight() - 0.35 * GetScreenHeight(), 180, 60};
+                button_start = {global_width / 2 - 90, global_height * 0.65, 180, 60};
                 DrawRectangleRec(button_start, WHITE); //Start Button
                 textsize = MeasureText(msg_start,30);
-                DrawText(msg_start, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 0.35 * GetScreenHeight() + 15, 30, BLACK); //Start Text
+                DrawText(msg_start, global_width / 2 - textsize / 2, global_height * 0.65 + 15, 30, BLACK); //Start Text
             }
 
             //Settings menu
             if(current_screen == 1)
             {
                 //Draw screen width text box
-                DrawText("Screen",GetScreenWidth() - 315,160,40,BLACK);
-                DrawText("Width           Height",GetScreenWidth() - 390,210,30,BLACK);
-                DrawText("X",GetScreenWidth() - 250,265,20,BLACK);
+                DrawText("Screen",global_width / 2 - 70,global_height / 2 - 200,40,BLACK);
+                DrawText("Width           Height",global_width / 2 - 155,global_height / 2 - 140,30,BLACK);
+                DrawText("X",global_width / 2,global_height / 2 - 135,20,BLACK);
                 DrawRectangleRec(screenWidthBox, LIGHTGRAY);
                 if(mouseOnText_screenWidth)
                 {
@@ -170,7 +176,7 @@ public:
                             DrawText("_", (int)screenWidthBox.x + 8 + MeasureText(settings_screenWidth, 30), (int)screenWidthBox.y + 15, 30, MAROON);
                         }
                     }
-                    else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
+                    else DrawText("Press BACKSPACE to delete chars...", global_width / 2 - 180, global_height / 2, 20, GRAY);
                 }
                 //
 
@@ -195,22 +201,22 @@ public:
                             DrawText("_", (int)screenHeightBox.x + 8 + MeasureText(settings_screenHeight, 30), (int)screenHeightBox.y + 15, 30, MAROON);
                         }
                     }
-                    else DrawText("Press BACKSPACE to delete chars...", 150, 300, 20, GRAY);
+                    else DrawText("Press BACKSPACE to delete chars...", global_width / 2 - 180, global_height / 2, 20, GRAY);
                 }
                 //
 
                 // Draw full-screen switch
-                DrawRectangle(GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60, WHITE);
-                DrawRectangleLines(GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60, BLACK);
+                DrawRectangle(global_width / 2 - 90, global_height - 200, 180, 60, WHITE);
+                DrawRectangleLines(global_width / 2 - 90, global_height - 200, 180, 60, BLACK);
                 textsize = MeasureText("Fullscreen",30);
-                DrawText("Fullscreen", GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 185, 30, BLACK); //Resolution Text
+                DrawText("Fullscreen", global_width / 2 - textsize / 2, global_height - 185, 30, BLACK); //Resolution Text
                 //
 
                 // Draw save button
-                DrawRectangle(GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60, WHITE);
-                DrawRectangleLines(GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60, BLACK);
+                DrawRectangle(global_width / 2 - 90, global_height - 100, 180, 60, WHITE);
+                DrawRectangleLines(global_width / 2 - 90, global_height - 100, 180, 60, BLACK);
                 textsize = MeasureText("Save",30);
-                DrawText("Save", GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() - 85, 30, BLACK); //Resolution Text
+                DrawText("Save", global_width / 2 - textsize / 2, global_height - 85, 30, BLACK); //Resolution Text
                 //
             }
 
@@ -218,7 +224,7 @@ public:
             if(current_screen == 2)
             {
                 textsize = MeasureText("Nothing but us chickens here!",25);
-                DrawText("Nothing but us chickens here!", GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() / 2, 25, BLACK);
+                DrawText("Nothing but us chickens here!", global_width / 2 - textsize / 2, global_height / 2, 25, BLACK);
                 if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
                 {
                     current_screen = 0;
@@ -228,13 +234,16 @@ public:
         else
         {
             textsize = MeasureText(msg_error,25);
-            DrawText(msg_error, GetScreenWidth() / 2 - textsize / 2, GetScreenHeight() / 2, 25, BLACK);
+            DrawText(msg_error, global_width / 2 - textsize / 2, global_height / 2, 25, BLACK);
         }
 
         EndDrawing();
     }
     void Logic()
     {
+        if(IsKeyPressed('F')){
+            ToggleFullscreen();
+        }
         //Collision for the main menu buttons: settings, extra and start
         if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
         {
@@ -359,7 +368,7 @@ public:
             //
 
             // Logic for input full-screen
-            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 200, 180, 60}))
+            if(CheckCollisionPointRec(GetMousePosition(), {global_width / 2 - 90, global_height - 200, 180, 60}))
             {
                 if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
                 {
@@ -371,7 +380,7 @@ public:
             //
 
             // Logic for save changes button and actions to do
-            if(CheckCollisionPointRec(GetMousePosition(), {GetScreenWidth() / 2 - 90, GetScreenHeight() - 100, 180, 60}))
+            if(CheckCollisionPointRec(GetMousePosition(), {global_width / 2 - 90, global_height - 100, 180, 60}))
             {
                 if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
                 {
@@ -388,6 +397,7 @@ public:
                         cout<<settings_screenWidth<<endl;
                         export_width = atoi(settings_screenWidth);
                         cout<<export_width<<endl;
+                        global_width = export_width;
                     }
                     //
 
@@ -404,6 +414,7 @@ public:
                         cout<<settings_screenHeight<<endl;
                         export_height = atoi(settings_screenHeight);
                         cout<<export_height<<endl;
+                        global_height = export_height;
                     }
                     //Set Export full-screen state
                     export_fullscreen = fullscreen;
@@ -413,6 +424,8 @@ public:
                     update = 1;
                     Settings_check();           //Export All
                     SetWindowSize(export_width, export_height);
+        screenWidthBox = { global_width / 2 - 190, global_height / 2 - 80, 180, 50 };
+        screenHeightBox = { global_width / 2 + 10, global_height / 2 - 80, 180, 50 };
                 }
             }
             //
@@ -452,7 +465,6 @@ class cGameManager
 private:
     Bricks *brick;                  // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
     int brickCount;
-
     Image imgBrick;
     Image imgSelect;
     Texture2D texBrick;
@@ -735,7 +747,7 @@ public:
         // output brick layout to level.txt
         for(int i = 0; i <= brickCount - 1; i++)
         {
-            lvl_editor<<GetScreenWidth()<<" "<<brick[i].position.x<<" "<<brick[i].position.y<<" "<<brick[i].brickWidth<<" "<<brick[i].brickHeight<<" "<<brick[i].type<<" ";
+            lvl_editor<<GetScreenWidth()<<" "<<GetScreenHeight()<<" "<<brick[i].position.x<<" "<<brick[i].position.y<<" "<<brick[i].brickWidth<<" "<<brick[i].brickHeight<<" "<<brick[i].type<<" ";
             cout<<endl;
             cout<<"Brick Position:"<<endl;
             cout<<"     X: "<<brick[i].position.x<<endl;

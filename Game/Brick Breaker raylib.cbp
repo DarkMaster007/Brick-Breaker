@@ -30,9 +30,11 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
+					<Add option="-flto" />
 					<Add option="-O2" />
 				</Compiler>
 				<Linker>
+					<Add option="-flto" />
 					<Add option="-s" />
 					<Add option="-static" />
 				</Linker>

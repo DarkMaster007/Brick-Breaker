@@ -200,7 +200,7 @@ public:
 
         //Load the settings file
         game_settings>>width>>height>>fullscreen;
-        cout<<"Width: "<<width<<endl<<"Height: "<<height<<"Fullscreen: "<<fullscreen;
+        //cout<<"Width: "<<width<<endl<<"Height: "<<height<<"Fullscreen: "<<fullscreen;
 
         InitWindow(width,height,"Editor");
         SetTargetFPS(400);
@@ -249,8 +249,8 @@ public:
                 brick[i].position.y *= temp2;
                 brick[i].brickWidth *= (temp*1.5);
                 brick[i].brickHeight *= (temp2*1.2);
-                cout<<"X mod: "<<temp<<endl<<"Y mod: "<<temp2<<endl;
-                cout<<"Level res to game res ratio is: "<<temp<<" to "<<temp2<<endl;
+                //cout<<"X mod: "<<temp<<endl<<"Y mod: "<<temp2<<endl;
+                //cout<<"Level res to game res ratio is: "<<temp<<" to "<<temp2<<endl;
             }
             //X clamping
             if(brick[i].position.x < 10)
@@ -594,7 +594,7 @@ public:
         ball_collision = {ball->getX(), ball->getY()};
         if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderBottom))
         {
-            cout<<"You Lose!"<<endl;
+            //cout<<"You Lose!"<<endl;
             reset();
         }
 
@@ -609,12 +609,12 @@ public:
                 if(ball->getX() < paddle->getX() + paddle->getPaddleWidthReverse())
                 {
                     ball->changeDirection(UPLEFT);
-                    cout<<"LEFT"<<endl;
+                    //cout<<"LEFT"<<endl;
                 }
                 if(ball->getX() > paddle->getX() + paddle->getSize().x - paddle->getPaddleWidthReverse())
                 {
                     ball->changeDirection(UPRIGHT);
-                    cout<<"RIGHT"<<endl;
+                    //cout<<"RIGHT"<<endl;
                 }
                 if(ball->getX() >= paddle->getX() + paddle->getPaddleWidthReverse() && ball->getX() <= paddle->getX() + paddle->getSize().x - paddle->getPaddleWidthReverse())
                 {
@@ -626,7 +626,7 @@ public:
                     {
                         ball->changeDirection(UPRIGHT);
                     }
-                    cout<<"MIDDLE"<<endl;
+                    //cout<<"MIDDLE"<<endl;
                 }
             }
             else
@@ -673,7 +673,7 @@ public:
         if(a == 0)
         {
             //win = 1;
-            cout<<"WIN!!!!"<<endl;
+            //cout<<"WIN!!!!"<<endl;
             reset();
         }
     }

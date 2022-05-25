@@ -3,9 +3,11 @@
 //  Allow the player to not replace existing level file
 //  Allow to resize the bricks at will
 //  Consolidate if's into either switch's of less if's
+#define RAYGUI_IMPLEMENTATION
 
 #include <iostream>
 #include "raylib.h"
+#include "raygui.h"
 #include <fstream>
 #include <cstring>
 #include <math.h>
@@ -27,6 +29,7 @@ fstream game_settings;
 class cSettings
 {
 private:
+    Font font;
     Texture2D title;
     int export_width, export_height, export_brick_width, export_brick_height, export_fullscreen, export_offset;
     string export_brick_color;
@@ -41,20 +44,18 @@ private:
     int fail_open;
 
     Rectangle screenWidthBox;   //the box to write screen width to in settings
-    char settings_screenWidth[MAX_INPUT_INT + 1];
-    int letterCount_screenWidth;
-    bool mouseOnText_screenWidth;
-    int framesCounter_screenWidth;
+    int settings_screenWidth;
+    bool spinnerWidthEnable;
 
     Rectangle screenHeightBox;  //the box to write screen height to in settings
-    char settings_screenHeight[MAX_INPUT_INT + 1];
-    int letterCount_screenHeight;
-    bool mouseOnText_screenHeight;
-    int framesCounter_screenHeight;
+    int settings_screenHeight;
+    bool spinnerHeightEnable;
 
 public:
     cSettings(int width, int height, int fullscreen_loaded)
     {
+        font = LoadFontEx("fonts/rainyhearts16.ttf", 40, 0, 0);
+        GuiSetFont(font);
         global_width = width;
         global_height = height;
         fullscreen = fullscreen_loaded;
@@ -67,21 +68,23 @@ public:
             settings.open("..//config//settings.txt", ios::out | ios::in);
         }
 
-        //Settings screen width box text box
-        settings_screenWidth[MAX_INPUT_INT + 1] = '\0';
-        sprintf(settings_screenWidth,"%ld", width);
-        screenWidthBox = { width / 2 - 190, global_height / 2 - 80, 180, 50 };
-        letterCount_screenWidth = log10(width) + 1;
-        mouseOnText_screenWidth = false;
-        framesCounter_screenWidth = 0;
+        //Main screen
+        button_settings = { global_width / 2 - 90, global_height * 0.35, 180, 60 };
+        button_extra = {global_width / 2 - 90, global_height * 0.45, 180, 60};
+        button_start = {global_width / 2 - 90, global_height * 0.65, 180, 60};
         //
+
+
+        //Settings screen width box text box
+        settings_screenWidth = width;
+        screenWidthBox = { width / 2 - 190, global_height / 2 - 80, 180, 50 };
+        spinnerWidthEnable = 0;
+        //
+
         //Settings screen height box text box
-        settings_screenHeight[MAX_INPUT_INT + 1] = '\0';
-        sprintf(settings_screenHeight,"%ld", height);
+        settings_screenHeight = height;
         screenHeightBox = { width / 2 + 10, global_height / 2 - 80, 180, 50 };
-        letterCount_screenHeight = log10(height) + 1;
-        mouseOnText_screenHeight = false;
-        framesCounter_screenHeight = 0;
+        spinnerHeightEnable = 0;
         //
 
         InitWindow(width,height,"Editor");
@@ -101,7 +104,7 @@ public:
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
             export_width = GetMonitorWidth(0);
             export_height = GetMonitorHeight(0);
-            export_fullscreen = 0;
+            export_fullscreen = fullscreen;
             settings<<export_width<<" "<<export_height<<" "<<export_fullscreen<<" ";
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in);
@@ -123,8 +126,8 @@ public:
         char msg_set[9] = "Settings", msg_ext[6] = "Extra", msg_start[6] = "Start";
         char msg_error[95] = "settings.txt file failed to load and was recreated. \nPlease Press \'Esc\' to quit and relaunch.";
         int textsize;
-        ClearBackground(SKYBLUE);
         BeginDrawing();
+        ClearBackground(RAYWHITE);
 
         DrawTexture(title, global_width /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
 
@@ -133,90 +136,43 @@ public:
             //General Menu
             if(current_screen == 0)
             {
-                button_settings = { global_width / 2 - 90, global_height * 0.35, 180, 60 };
-                DrawRectangleRec(button_settings, WHITE);   //Settings Button
-                textsize = MeasureText(msg_set,30);
-                DrawText(msg_set, global_width / 2 - textsize / 2, global_height * 0.35 + 15, 30, BLACK);
+                if(GuiButton(button_settings, msg_set)) {current_screen = 1;}
 
-                button_extra = {global_width / 2 - 90, global_height * 0.45, 180, 60};
-                DrawRectangleRec(button_extra, WHITE); //Extra Button
-                textsize = MeasureText(msg_ext,30);
-                DrawText(msg_ext, global_width / 2 - textsize / 2, global_height * 0.45 + 15, 30, BLACK);
+                if(GuiButton(button_extra, msg_ext)) {current_screen = 2;}
 
-                button_start = {global_width / 2 - 90, global_height * 0.65, 180, 60};
-                DrawRectangleRec(button_start, WHITE); //Start Button
-                textsize = MeasureText(msg_start,30);
-                DrawText(msg_start, global_width / 2 - textsize / 2, global_height * 0.65 + 15, 30, BLACK); //Start Text
+                if(GuiButton(button_start, msg_start)) {current_screen = 3;}
             }
 
             //Settings menu
             if(current_screen == 1)
             {
                 //Draw screen width text box
-                DrawText("Screen",global_width / 2 - 70,global_height / 2 - 200,40,BLACK);
-                DrawText("Width           Height",global_width / 2 - 155,global_height / 2 - 140,30,BLACK);
-                DrawText("X",global_width / 2,global_height / 2 - 135,20,BLACK);
-                DrawRectangleRec(screenWidthBox, LIGHTGRAY);
-                if(mouseOnText_screenWidth)
-                {
-                    DrawRectangleLines((int)screenWidthBox.x, (int)screenWidthBox.y, (int)screenWidthBox.width, (int)screenWidthBox.height, RED);
-                }
-                else
-                {
-                    DrawRectangleLines((int)screenWidthBox.x, (int)screenWidthBox.y, (int)screenWidthBox.width, (int)screenWidthBox.height, DARKGRAY);
-                }
-                DrawText(settings_screenWidth, (int)screenWidthBox.x + 5, (int)screenWidthBox.y + 15, 30, MAROON);
-                if (mouseOnText_screenWidth)
-                {
-                    if (letterCount_screenWidth < MAX_INPUT_INT)
-                    {
-                        // Draw blinking underscore char
-                        if (((framesCounter_screenWidth/20)%2) == 0)
-                        {
-                            DrawText("_", (int)screenWidthBox.x + 8 + MeasureText(settings_screenWidth, 30), (int)screenWidthBox.y + 15, 30, MAROON);
-                        }
-                    }
-                    else DrawText("Press BACKSPACE to delete chars...", global_width / 2 - 180, global_height / 2, 20, GRAY);
-                }
+                if(GuiSpinner(screenWidthBox, NULL, &settings_screenWidth, 0, 9999, spinnerWidthEnable)) {spinnerWidthEnable = !spinnerWidthEnable;}
                 //
 
                 //Draw screen height text box
-                DrawRectangleRec(screenHeightBox, LIGHTGRAY);
-                if(mouseOnText_screenHeight)
-                {
-                    DrawRectangleLines((int)screenHeightBox.x, (int)screenHeightBox.y, (int)screenHeightBox.width, (int)screenHeightBox.height, RED);
-                }
-                else
-                {
-                    DrawRectangleLines((int)screenHeightBox.x, (int)screenHeightBox.y, (int)screenHeightBox.width, (int)screenHeightBox.height, DARKGRAY);
-                }
-                DrawText(settings_screenHeight, (int)screenHeightBox.x + 5, (int)screenHeightBox.y + 15, 30, MAROON);
-                if (mouseOnText_screenHeight)
-                {
-                    if (letterCount_screenHeight < MAX_INPUT_INT)
-                    {
-                        // Draw blinking underscore char
-                        if (((framesCounter_screenHeight/20)%2) == 0)
-                        {
-                            DrawText("_", (int)screenHeightBox.x + 8 + MeasureText(settings_screenHeight, 30), (int)screenHeightBox.y + 15, 30, MAROON);
-                        }
-                    }
-                    else DrawText("Press BACKSPACE to delete chars...", global_width / 2 - 180, global_height / 2, 20, GRAY);
-                }
+                if(GuiSpinner(screenHeightBox, NULL, &settings_screenHeight, 0, 9999, spinnerHeightEnable)) {spinnerHeightEnable = !spinnerHeightEnable;}
                 //
 
                 // Draw full-screen switch
-                DrawRectangle(global_width / 2 - 90, global_height - 200, 180, 60, WHITE);
-                DrawRectangleLines(global_width / 2 - 90, global_height - 200, 180, 60, BLACK);
-                textsize = MeasureText("Fullscreen",30);
-                DrawText("Fullscreen", global_width / 2 - textsize / 2, global_height - 185, 30, BLACK); //Resolution Text
+                if(GuiButton((Rectangle){global_width / 2 - 90, global_height - 200, 180, 60}, "Fullscreen")) {
+                    fullscreen = !fullscreen;
+                    ToggleFullscreen();
+                }
                 //
 
                 // Draw save button
-                DrawRectangle(global_width / 2 - 90, global_height - 100, 180, 60, WHITE);
-                DrawRectangleLines(global_width / 2 - 90, global_height - 100, 180, 60, BLACK);
-                textsize = MeasureText("Save",30);
-                DrawText("Save", global_width / 2 - textsize / 2, global_height - 85, 30, BLACK); //Resolution Text
+                if(GuiButton((Rectangle){global_width / 2 - 90, global_height - 100, 180, 60}, "Save")) {
+                    export_width = settings_screenWidth;
+                    export_height = settings_screenHeight;
+                    export_fullscreen = fullscreen;
+                    current_screen = 0;
+                    update = 1;
+                    Settings_check();           //Export All
+                    SetWindowSize(export_width, export_height);
+                    screenWidthBox = { global_width / 2 - 190, global_height / 2 - 80, 180, 50 };
+                    screenHeightBox = { global_width / 2 + 10, global_height / 2 - 80, 180, 50 };
+                }
                 //
             }
 
@@ -244,191 +200,10 @@ public:
         if(IsKeyPressed('F')){
             ToggleFullscreen();
         }
-        //Collision for the main menu buttons: settings, extra and start
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-        {
-            if(CheckCollisionPointRec(GetMousePosition(),button_settings))
-            {
-                current_screen = 1;
-            }
-            if(CheckCollisionPointRec(GetMousePosition(),button_extra))
-            {
-                current_screen = 2;
-            }
-            if(CheckCollisionPointRec(GetMousePosition(),button_start))
-            {
-                current_screen = 3;
-            }
-        }
 
         if(WindowShouldClose())
         {
             quit = 1;
-        }
-
-        //Collision for the settings input boxes and buttons
-        if(current_screen == 1)
-        {
-            // Logic for input screen width
-            {
-                if (CheckCollisionPointRec(GetMousePosition(), screenWidthBox))
-                {
-                    mouseOnText_screenWidth = true;
-                }
-                else
-                {
-                    mouseOnText_screenWidth = false;
-                }
-                if(mouseOnText_screenWidth)
-                {
-                    SetMouseCursor(MOUSE_CURSOR_IBEAM);
-                    int key = GetCharPressed();
-                    while(key>0)   //Only numbers allowed (to change)
-                    {
-                        if((key >= 48) && (key <= 57) && (letterCount_screenWidth < MAX_INPUT_INT))
-                        {
-                            settings_screenWidth[letterCount_screenWidth] = (char) key;
-                            settings_screenWidth[letterCount_screenWidth + 1] = '\0';
-                            letterCount_screenWidth++;
-                        }
-                        key = GetCharPressed();
-                    }
-                    if(IsKeyPressed(KEY_BACKSPACE))
-                    {
-                        letterCount_screenWidth--;
-                        if(letterCount_screenWidth < 0)
-                        {
-                            letterCount_screenWidth = 0;
-                        }
-                        settings_screenWidth[letterCount_screenWidth] = '\0';
-                    }
-                }
-                else
-                {
-                    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-                }
-                if(mouseOnText_screenWidth)
-                {
-                    framesCounter_screenWidth++;
-                }
-                else
-                {
-                    framesCounter_screenWidth = 0;
-                }
-            }
-            //
-
-            // Logic for input screen height
-            {
-                if (CheckCollisionPointRec(GetMousePosition(), screenHeightBox))
-                {
-                    mouseOnText_screenHeight = true;
-                }
-                else
-                {
-                    mouseOnText_screenHeight = false;
-                }
-                if(mouseOnText_screenHeight)
-                {
-                    SetMouseCursor(MOUSE_CURSOR_IBEAM);
-                    int key = GetCharPressed();
-                    while(key>0)   //Only numbers allowed (to change)
-                    {
-                        if((key >= 48) && (key <= 57) && (letterCount_screenHeight < MAX_INPUT_INT))
-                        {
-                            settings_screenHeight[letterCount_screenHeight] = (char) key;
-                            settings_screenHeight[letterCount_screenHeight + 1] = '\0';
-                            letterCount_screenHeight++;
-                        }
-                        key = GetCharPressed();
-                    }
-                    if(IsKeyPressed(KEY_BACKSPACE))
-                    {
-                        letterCount_screenHeight--;
-                        if(letterCount_screenHeight < 0)
-                        {
-                            letterCount_screenHeight = 0;
-                        }
-                        settings_screenHeight[letterCount_screenHeight] = '\0';
-                    }
-                }
-                else
-                {
-                    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-                }
-                if(mouseOnText_screenHeight)
-                {
-                    framesCounter_screenHeight++;
-                }
-                else
-                {
-                    framesCounter_screenHeight = 0;
-                }
-            }
-            //
-
-            // Logic for input full-screen
-            if(CheckCollisionPointRec(GetMousePosition(), {global_width / 2 - 90, global_height - 200, 180, 60}))
-            {
-                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-                {
-                    export_fullscreen = !export_fullscreen;
-                    ToggleFullscreen();
-
-                }
-            }
-            //
-
-            // Logic for save changes button and actions to do
-            if(CheckCollisionPointRec(GetMousePosition(), {global_width / 2 - 90, global_height - 100, 180, 60}))
-            {
-                if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-                {
-                    //Set Export Screen Width
-                    if(letterCount_screenWidth == 0)
-                    {
-                        export_width = 1024;
-                        strcpy(settings_screenWidth, "1024");
-                        letterCount_screenWidth = 4;
-                        cout<<export_width<<endl;
-                    }
-                    else
-                    {
-                        cout<<settings_screenWidth<<endl;
-                        export_width = atoi(settings_screenWidth);
-                        cout<<export_width<<endl;
-                        global_width = export_width;
-                    }
-                    //
-
-                    //Set Export Screen Height
-                    if(letterCount_screenHeight == 0)
-                    {
-                        export_height = 760;
-                        strcpy(settings_screenHeight, "760");
-                        letterCount_screenHeight = 3;
-                        cout<<export_height<<endl;
-                    }
-                    else
-                    {
-                        cout<<settings_screenHeight<<endl;
-                        export_height = atoi(settings_screenHeight);
-                        cout<<export_height<<endl;
-                        global_height = export_height;
-                    }
-                    //Set Export full-screen state
-                    export_fullscreen = fullscreen;
-                    cout<<export_fullscreen<<endl;
-
-                    current_screen = 0;
-                    update = 1;
-                    Settings_check();           //Export All
-                    SetWindowSize(export_width, export_height);
-        screenWidthBox = { global_width / 2 - 190, global_height / 2 - 80, 180, 50 };
-        screenHeightBox = { global_width / 2 + 10, global_height / 2 - 80, 180, 50 };
-                }
-            }
-            //
         }
     }
     int Run(int fail)

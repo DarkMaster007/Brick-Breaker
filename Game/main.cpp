@@ -12,8 +12,7 @@ using std::ios;
 fstream loadLevelFile;
 fstream game_settings;
 #define MAX_BRICKS 300
-enum eDir
-{ STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
+enum eDir{ STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
 
 class cBall
 {
@@ -97,6 +96,22 @@ public:
     }
 };
 
+typedef struct activePowerups{
+    bool laser = 0;         // Gives you the ability to shoot lasers
+    bool crosshair = 0;     // A crosshair pops over a random brick and breaks it in a short time after
+    bool extend = 0;        // Extends the paddle
+    bool pierce = 0;        // Gives the ball the ability to pierce all bricks
+    bool fireball = 0;      // The ball becomes a fireaball. The ball explodes every time it hits a brick. Any brick in a certain radius also gets damaged
+    bool nextLevel = 0;     // Instantly transports you to the next level
+} activePowerups;
+
+typedef struct powerups{
+    activePowerups state;
+    int type;
+    Vector2 position;
+    bool enabled;
+}powerups;
+
 class cPaddle
 {
 private:
@@ -152,7 +167,7 @@ typedef struct Bricks
     int brickWidth;
     int brickHeight;
     int type;           //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
-    int enabled;
+    bool enabled;
 } Bricks;
 
 class cGameManager
@@ -174,6 +189,7 @@ private:
     Rectangle borderRight;          // right border rectangle, for collision and drawing
     Rectangle borderTop;            // top border rectangle, for collision and drawing
     Rectangle borderBottom;         // bottom border rectangle, for collision and drawing
+    powerups *powerup;              // Handles powerups
 
     int brickCount;
     int movement_speed_paddle_base; // base speed for paddle
@@ -188,7 +204,6 @@ public:
     {
         //Open settings.txt file
         game_settings.open("..\\config\\settings.txt", ios::in);
-
         //Initialize all vars with their proper values
         brickCount = 0;
         quit = 0;
@@ -212,6 +227,7 @@ public:
         ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10);
         paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
         brick = (Bricks *)MemAlloc(MAX_BRICKS*sizeof(Bricks)); // MemAlloc() is equivalent to malloc();
+        powerup = (powerups *)MemAlloc(6*sizeof(powerups));
 
         //Load and resize image and then convert it to texture
         imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
@@ -296,6 +312,12 @@ public:
         ImageResize(&imgBrick, brick[0].brickWidth, brick[0].brickHeight);
         texBrick = LoadTextureFromImage(imgBrick);
         loadLevelFile.close();
+    }
+
+    void SpawnPowerup(char powerupName){
+        if(strcmp(&powerupName, "extend") == 0){
+
+        }
     }
 
     void Draw()
@@ -530,6 +552,9 @@ public:
             }
         }
 
+        if(IsKeyPressed(KEY_KP_0)){
+           SpawnPowerup("extend");
+        }
 
         //Try to do ball movement based on frame-time (dunno if ti works)
         int movement_speed_ball = (movement_speed_ball_base + rand() % 6) * frametime;

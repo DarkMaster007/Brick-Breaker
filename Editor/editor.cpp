@@ -54,10 +54,12 @@ private:
 public:
     cSettings(int width, int height, int fullscreen_loaded)
     {
-        font = LoadFontEx("fonts/rainyhearts16.ttf", 40, 0, 0);
+        font = LoadFont("fonts/rainyhearts16.ttf");
         GuiSetFont(font);
         global_width = width;
         global_height = height;
+        settings_screenWidth = global_width;
+        settings_screenHeight = global_height;
         fullscreen = fullscreen_loaded;
         quit = 0;
         current_screen = 0; // 0 - Menu, 1 - Settings, 2 - Extra, 3 - Start
@@ -69,25 +71,27 @@ public:
         }
 
         //Main screen
-        button_settings = { global_width / 2 - 90, global_height * 0.35, 180, 60 };
-        button_extra = {global_width / 2 - 90, global_height * 0.45, 180, 60};
-        button_start = {global_width / 2 - 90, global_height * 0.65, 180, 60};
+        int x = global_width / 2 - 90;
+        int y = global_height * 0.35;
+        int box_width = 180;
+        int box_height = 60;
+        button_settings = { x, y, box_width, box_height };
+        button_extra = {x, y + box_height + 20, box_width, box_height};
+        button_start = {x, y + box_height + 20 + 200, box_width, box_height};
         //
 
 
         //Settings screen width box text box
-        settings_screenWidth = width;
         screenWidthBox = { width / 2 - 190, global_height / 2 - 80, 180, 50 };
         spinnerWidthEnable = 0;
         //
 
         //Settings screen height box text box
-        settings_screenHeight = height;
         screenHeightBox = { width / 2 + 10, global_height / 2 - 80, 180, 50 };
         spinnerHeightEnable = 0;
         //
 
-        InitWindow(width,height,"Editor");
+        InitWindow(global_width,global_height,"Editor");
         SetTargetFPS(30);
         if(fullscreen && !IsWindowFullscreen()){
             ToggleFullscreen();
@@ -96,14 +100,15 @@ public:
         //Load Textures
         title = LoadTexture("..//resources//title_main.png");
     }
+
     void Settings_check()
     {
         if(!settings.is_open() && !update)
         {
             settings.close();
             settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
-            export_width = GetMonitorWidth(0);
-            export_height = GetMonitorHeight(0);
+            export_width = global_width;
+            export_height = global_height;
             export_fullscreen = fullscreen;
             settings<<export_width<<" "<<export_height<<" "<<export_fullscreen<<" ";
             settings.close();
@@ -121,6 +126,7 @@ public:
             settings.open("..//config//settings.txt", ios::out | ios::in);
         }
     }
+
     void Draw()
     {
         char msg_set[9] = "Settings", msg_ext[6] = "Extra", msg_start[6] = "Start";
@@ -136,6 +142,8 @@ public:
             //General Menu
             if(current_screen == 0)
             {
+                settings_screenWidth = global_width;
+                settings_screenHeight = global_height;
                 if(GuiButton(button_settings, msg_set)) {current_screen = 1;}
 
                 if(GuiButton(button_extra, msg_ext)) {current_screen = 2;}
@@ -163,10 +171,19 @@ public:
 
                 // Draw save button
                 if(GuiButton((Rectangle){global_width / 2 - 90, global_height - 100, 180, 60}, "Save")) {
-                    export_width = settings_screenWidth;
-                    export_height = settings_screenHeight;
+                    global_width = settings_screenWidth;
+                    global_height = settings_screenHeight;
+                    export_width = global_width;
+                    export_height = global_height;
                     export_fullscreen = fullscreen;
                     current_screen = 0;
+                    int x = global_width / 2 - 90;
+                    int y = global_height * 0.35;
+                    int box_width = 180;
+                    int box_height = 60;
+                    button_settings = { x, y, box_width, box_height };
+                    button_extra = {x, y + box_height + 20, box_width, box_height};
+                    button_start = {x, y + box_height + 20 + 200, box_width, box_height};
                     update = 1;
                     Settings_check();           //Export All
                     SetWindowSize(export_width, export_height);
@@ -179,8 +196,8 @@ public:
             //Extra menu
             if(current_screen == 2)
             {
-                textsize = MeasureText("Nothing but us chickens here!",25);
-                DrawText("Nothing but us chickens here!", global_width / 2 - textsize / 2, global_height / 2, 25, BLACK);
+                textsize = MeasureText("Nothing but us chickens here!", 30);
+                DrawTextEx(font, "Nothing but us chickens here!", (Vector2){global_width / 2 - textsize / 2, global_height / 2 - 15}, 30, 1,BLACK);
                 if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
                 {
                     current_screen = 0;
@@ -190,11 +207,12 @@ public:
         else
         {
             textsize = MeasureText(msg_error,25);
-            DrawText(msg_error, global_width / 2 - textsize / 2, global_height / 2, 25, BLACK);
+            DrawTextEx(font ,msg_error, (Vector2){global_width / 2 - textsize / 2, global_height / 2}, 25, 1,BLACK);
         }
 
         EndDrawing();
     }
+
     void Logic()
     {
         if(IsKeyPressed('F')){
@@ -206,6 +224,7 @@ public:
             quit = 1;
         }
     }
+
     int Run(int fail)
     {
         fail_open = fail;
@@ -609,6 +628,7 @@ int main(int argc, char** argv)
         cout<<"Settings failed to open!"<<endl;
         width = 640;
         height = 480;
+        fullscreen = 0;
         fail = 1;
     }
     cout<<"Screen width: "<<width<<endl;

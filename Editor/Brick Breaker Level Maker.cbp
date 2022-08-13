@@ -52,7 +52,8 @@
 			<Add option="-Og" />
 			<Add option="-g" />
 			<Add option="-fpermissive" />
-			<Add directory="include" />
+			<Add directory="../../Raylib Library/raylib/src" />
+			<Add directory="../../Raylib Library/raygui/src" />
 		</Compiler>
 		<Linker>
 			<Add option="-pg -lgmon" />
@@ -62,7 +63,7 @@
 			<Add library="opengl32" />
 			<Add library="gdi32" />
 			<Add library="winmm" />
-			<Add directory="lib" />
+			<Add directory="../../Raylib Library/raylib/src" />
 		</Linker>
 		<Unit filename="editor.cpp" />
 		<Unit filename="icon.rc">

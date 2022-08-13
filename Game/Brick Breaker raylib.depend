@@ -40,3 +40,14 @@
 
 1642428584 source:e:\windowsfolders\desktop\c++\brick-breaker\game\icon.rc
 
+1660409358 source:e:\windowsfolders\desktop\c++\brick-breaker\game\main.cpp
+	<iostream>
+	<fstream>
+	"E:\WindowsFolders\Desktop\C++\Raylib Library\raylib\src\raylib.h"
+	<string.h>
+	<cstring>
+
+1660393590 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+

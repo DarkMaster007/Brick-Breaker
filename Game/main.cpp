@@ -628,6 +628,9 @@ class cGameManager {
             Draw();
         }
         MemFree(brick);
+        MemFree(c_powerup);
+        delete ball;
+        delete paddle;
         CloseWindow();
         return 0;
     }

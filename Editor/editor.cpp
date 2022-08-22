@@ -464,7 +464,7 @@ public:
         //Move bricks by holding Left-Click
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            int a = CheckBrickExists();
+            int a = CheckBrickExists();  //CheckBrickExists might also function as the collision check between bricks
             if(a != -1)
             {
                 if(brick[a].selected)

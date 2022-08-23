@@ -535,8 +535,49 @@ public:
         }
         //
     }
+    
+    int searchString(char *arrayToParseIn, char stringToSearchFor[], char stringToReplaceWith[]) {   //Allows you to replace part of string
+	int i = 0;
+	int arraySize = strlen(arrayToParseIn);
+	int searchSize = strlen(stringToSearchFor);
+
+	char temp_compare[searchSize + 1];
+	char temp_arrayhead[arraySize + 1];
+	char temp_arraybottom[arraySize + 1];
+	memset(temp_compare, 0, searchSize*sizeof(char));
+	memset(temp_arrayhead, 0, arraySize*sizeof(char));
+	memset(temp_arraybottom, 0, arraySize*sizeof(char));
+
+	while(i < arraySize) {
+		if(arrayToParseIn[i] == stringToSearchFor[0]) {
+			strncpy(temp_compare, &arrayToParseIn[i], searchSize);
+			temp_compare[searchSize] = '\0';
+			if(strcmp(temp_compare, stringToSearchFor) == 0) {
+				strncpy(temp_arrayhead, arrayToParseIn, i);
+				temp_arrayhead[i] = '\0';
+				strncpy(temp_arraybottom, &arrayToParseIn[searchSize + i], arraySize - i - searchSize);
+				temp_arraybottom[arraySize - i - searchSize] = '\0';
+				sprintf(arrayToParseIn, "%s%s%s", temp_arrayhead, stringToReplaceWith, temp_arraybottom);
+				return i;
+			}
+		}
+		i++;
+	}
+	return -1;
+}
+    
     void Output()  //output the current brick layout to the level.txt file
     {
+        /*char charParse[STR_SIZE]; //HOW TO OPEN A FILE USING FOPEN AND LOAD THE FILE INTO A VARIABLE. TO USE WITH SEARCHSTRING
+	char charParse[1000];
+	char charTemp[100];
+	FILE *fp;
+	fp = fopen("SupplierData-K190.xml", "r");
+	while(fgets(charTemp,sizeof(charTemp), fp) != NULL){
+		strcat(charParse, charTemp);
+		strcat(charParse, "\n");
+	}
+	fclose(fp);*/
         lvl_editor.open("..//config//level.txt", ios::out);
         // output brick layout to level.txt
         for(int i = 0; i <= brickCount - 1; i++)

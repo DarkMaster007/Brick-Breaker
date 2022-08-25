@@ -325,11 +325,11 @@ public:
         }
     }
 
-    int CheckBrickExists()  //Check if a brick exists at mouse location and output the bricks ID out of brickCount (only to be used in an if)
+    int CheckBrickExists(bool enb_offset = 0)  //Check if a brick exists at mouse location and output the bricks ID out of brickCount (only to be used in an if)
     {
         for(int i = 0; i <= brickCount; i++)
         {
-            if(GetMouseX() > brick[i].position.x - brick[i].brickWidth / 2 && GetMouseX() < brick[i].position.x + brick[i].brickWidth * 1.5)
+            if(GetMouseX() > brick[i].position.x - ( brick[i].brickWidth / 2 ) * enb_offset && GetMouseX() < brick[i].position.x + brick[i].brickWidth * 1.5 * enb_offset)
             {
                 if(GetMouseY() > brick[i].position.y - brick[i].brickHeight / 2 && GetMouseY() < brick[i].position.y + brick[i].brickHeight * 1.5)
                 {

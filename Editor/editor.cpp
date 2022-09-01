@@ -309,11 +309,11 @@ public:
         BeginDrawing();
         ClearBackground(BLACK);
         // The actual message you see on screen from here on:
-        DrawText("Level editor for Brick Breaker BGM Edition",GetScreenWidth() / 2 - 42 * 3, GetScreenHeight() / 7.6,15,WHITE);
-        DrawText("Create the model that will appear in the final game.",GetScreenWidth() / 2 - 52 * 3, GetScreenHeight() / 2.5,15,WHITE);
-        DrawText("Click on any brick to disable it and click again to re-enable it.",GetScreenWidth() / 2 - 65 * 3, GetScreenHeight() / 2.5 + 35,15,WHITE);
-        DrawText("Press Q once you are done to quit and save.",GetScreenWidth() / 2 - 43 * 3, GetScreenHeight() / 2.5 + 70,15,WHITE);
-        DrawText("Click left mouse button to continue.",GetScreenWidth() / 2 - 36 * 3, GetScreenHeight() - GetScreenHeight() / 7.6,15,WHITE);
+        DrawText("Level editor for Brick Breaker Raylib Edition", GetScreenWidth() / 2 - 42 * 3, GetScreenHeight() / 7.6, 15, WHITE);
+        DrawText("Create the level layout that will appear in the game.", GetScreenWidth() / 2 - 52 * 3, GetScreenHeight() / 2.5, 15, WHITE);
+        DrawText("Ctrl+L_Click to spawn a brick. R_Click to change it's type.L_Click to select a brick and hold L_Click and drag to move selected brick.", GetScreenWidth() / 2 - 65 * 3, GetScreenHeight() / 2.5 + 35, 15, WHITE);
+        DrawText("Press \"Quit and save\" to save current layout.", GetScreenWidth() / 2 - 43 * 3, GetScreenHeight() / 2.5 + 70, 15, WHITE);
+        DrawText("Click left mouse button to continue to editor.", GetScreenWidth() / 2 - 36 * 3, GetScreenHeight() - GetScreenHeight() / 7.6, 15, WHITE);
         EndDrawing();
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {

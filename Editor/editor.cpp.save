@@ -1,38 +1,23 @@
-//  TODO:
-//  Allow the player to load the existing level
-//  Allow the player to not replace existing level file
-//  Allow to resize the bricks at will
-//  Consolidate if's into either switch's of less if's
+// TODO (Dark#1#):  Allow the player to load the existing level
+// TODO (Dark#1#):  Allow the player to not replace existing level file
+// NOTE (Dark#1#): Allow to resize the bricks at will (maybe?)
+// TODO (Dark#1#): Consolidate if's into either switch's of less if's
 #define RAYGUI_IMPLEMENTATION
-
-#include <iostream>
-#include "raylib.h"
-#include "raygui.h"
-#include <fstream>
-#include <cstring>
-#include <math.h>
-using std::fstream;
-using std::endl;
-using std::string;
-using std::cout;
-using std::ios;
-using std::strcpy;
+#include <raylib.h>
+#include <raygui.h>
+#include "../Release/resources/includes/soundSelect.h"
 
 #define MAX_INPUT_CHARS   9
 #define MAX_INPUT_INT     4
 #define MAX_BRICKS        300
 
-fstream settings;
-fstream lvl_editor;
-fstream game_settings;
-
 class cSettings
 {
 private:
+    FILE *fp;
     Font font;
     Texture2D title;
     int export_width, export_height, export_brick_width, export_brick_height, export_fullscreen, export_offset;
-    string export_brick_color;
     int current_screen;
     int global_width, global_height;
     int fullscreen;
@@ -42,6 +27,8 @@ private:
     int quit;
     bool update;
     int fail_open;
+
+    Wave waveSelect;
 
     Rectangle screenWidthBox;   //the box to write screen width to in settings
     int settings_screenWidth;
@@ -54,6 +41,7 @@ private:
 public:
     cSettings(int width, int height, int fullscreen_loaded)
     {
+        fp = NULL;
         font = LoadFont("fonts/rainyhearts16.ttf");
         GuiSetFont(font);
         global_width = width;
@@ -65,9 +53,10 @@ public:
         current_screen = 0; // 0 - Menu, 1 - Settings, 2 - Extra, 3 - Start
         update = 0;
         fail_open = 0;
-        if(!settings.is_open())
+        fp = fopen("..//config//settings.txt", "r+");
+        if(fp == NULL)
         {
-            settings.open("..//config//settings.txt", ios::out | ios::in);
+            fail_open = 1;
         }
 
         //Main screen
@@ -75,25 +64,33 @@ public:
         int y = global_height * 0.35;
         int box_width = 180;
         int box_height = 60;
-        button_settings = { x, y, box_width, box_height };
-        button_extra = {x, y + box_height + 20, box_width, box_height};
-        button_start = {x, y + box_height + 20 + 200, box_width, box_height};
+        button_settings = { (float)x, (float)y, (float)box_width, (float)box_height };
+        button_extra = { (float)x, (float)(y + box_height + 20), (float)box_width, (float)box_height };
+        button_start = { (float)x, (float)(y + box_height + 20 + 200), (float)box_width, (float)box_height };
         //
 
 
         //Settings screen width box text box
-        screenWidthBox = { width / 2 - 190, global_height / 2 - 80, 180, 50 };
+        screenWidthBox = { (float)(width / 2 - 190), (float)(global_height / 2 - 80), 180, 50 };
         spinnerWidthEnable = 0;
         //
 
         //Settings screen height box text box
-        screenHeightBox = { width / 2 + 10, global_height / 2 - 80, 180, 50 };
+        screenHeightBox = { (float)(width / 2 + 10), (float)(global_height / 2 - 80), 180, 50 };
         spinnerHeightEnable = 0;
         //
 
+        waveSelect.channels = WAVESELECT_CHANNELS;
+        waveSelect.frameCount = WAVESELECT_FRAME_COUNT;
+        waveSelect.sampleRate = WAVESELECT_SAMPLE_RATE;
+        waveSelect.sampleSize = WAVESELECT_SAMPLE_SIZE;
+        waveSelect.data = waveSelectData;
+
+        InitAudioDevice();
         InitWindow(global_width,global_height,"Editor");
         SetTargetFPS(30);
-        if(fullscreen && !IsWindowFullscreen()){
+        if(fullscreen && !IsWindowFullscreen())
+        {
             ToggleFullscreen();
         }
 
@@ -103,27 +100,43 @@ public:
 
     void Settings_check()
     {
-        if(!settings.is_open() && !update)
+        if(fp == NULL && !update)
         {
-            settings.close();
-            settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
+            fclose(fp);
+            fp = fopen("..//config//settings.txt", "w+");
+            if(fp == NULL)
+            {
+                fail_open = 1;
+            }
             export_width = global_width;
             export_height = global_height;
             export_fullscreen = fullscreen;
-            settings<<export_width<<" "<<export_height<<" "<<export_fullscreen<<" ";
-            settings.close();
-            settings.open("..//config//settings.txt", ios::out | ios::in);
-            cout<<export_width<<" "<<export_height<<" "<<export_fullscreen<<endl;
+            fprintf(fp, "%d %d %d ", export_width, export_height, export_fullscreen);
+            fclose(fp);
+            fp = fopen("..//config//settings.txt", "r+");
+            if(fp == NULL)
+            {
+                fail_open = 1;
+            }
+            printf("%d %d %d\n", export_width, export_height, export_fullscreen);
         }
         if(update)
         {
-            settings.close();
-            settings.open("..//config//settings.txt", ios::out | ios::in | ios::trunc);
-            settings<<export_width<<" "<<export_height<<" "<<export_fullscreen;
-            settings.close();
-            cout<<export_width<<" "<<export_height<<" "<<export_fullscreen<<endl;
+            fclose(fp);
+            fp = fopen("..//config//settings.txt", "w+");
+            if(fp == NULL)
+            {
+                fail_open = 1;
+            }
+            fprintf(fp, "%d %d %d ", export_width, export_height, export_fullscreen);
+            fclose(fp);
+            printf("%d %d %d\n", export_width, export_height, export_fullscreen);
             update = 0;
-            settings.open("..//config//settings.txt", ios::out | ios::in);
+            fp = fopen("..//config//settings.txt", "r+");
+            if(fp == NULL)
+            {
+                fail_open = 1;
+            }
         }
     }
 
@@ -137,40 +150,66 @@ public:
 
         DrawTexture(title, global_width /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
 
-        if(settings.is_open() & !fail_open)
+        if(fp != NULL && !fail_open)
         {
             //General Menu
             if(current_screen == 0)
             {
                 settings_screenWidth = global_width;
                 settings_screenHeight = global_height;
-                if(GuiButton(button_settings, msg_set)) {current_screen = 1;}
+                if(GuiButton(button_settings, msg_set))
+                {
+                    PlaySound(LoadSoundFromWave(waveSelect));
+                    current_screen = 1;
+                }
 
-                if(GuiButton(button_extra, msg_ext)) {current_screen = 2;}
+                if(GuiButton(button_extra, msg_ext))
+                {
+                    PlaySound(LoadSoundFromWave(waveSelect));
+                    current_screen = 2;
+                }
 
-                if(GuiButton(button_start, msg_start)) {current_screen = 3;}
+                if(GuiButton(button_start, msg_start))
+                {
+                    PlaySound(LoadSoundFromWave(waveSelect));
+                    current_screen = 3;
+                }
             }
 
             //Settings menu
             if(current_screen == 1)
             {
                 //Draw screen width text box
-                if(GuiSpinner(screenWidthBox, NULL, &settings_screenWidth, 0, 9999, spinnerWidthEnable)) {spinnerWidthEnable = !spinnerWidthEnable;}
+                if(GuiSpinner(screenWidthBox, NULL, &settings_screenWidth, 0, 9999, spinnerWidthEnable))
+                {
+                    spinnerWidthEnable = !spinnerWidthEnable;
+                }
                 //
 
                 //Draw screen height text box
-                if(GuiSpinner(screenHeightBox, NULL, &settings_screenHeight, 0, 9999, spinnerHeightEnable)) {spinnerHeightEnable = !spinnerHeightEnable;}
+                if(GuiSpinner(screenHeightBox, NULL, &settings_screenHeight, 0, 9999, spinnerHeightEnable))
+                {
+                    spinnerHeightEnable = !spinnerHeightEnable;
+                }
                 //
 
                 // Draw full-screen switch
-                if(GuiButton((Rectangle){global_width / 2 - 90, global_height - 200, 180, 60}, "Fullscreen")) {
+                if(GuiButton((Rectangle)
+            {
+                (float)(global_width / 2 - 90), (float)(global_height - 200), 180, 60
+                }, "Fullscreen"))
+                {
                     fullscreen = !fullscreen;
                     ToggleFullscreen();
                 }
                 //
 
                 // Draw save button
-                if(GuiButton((Rectangle){global_width / 2 - 90, global_height - 100, 180, 60}, "Save")) {
+                if(GuiButton((Rectangle)
+            {
+                (float)(global_width / 2 - 90), (float)(global_height - 100), 180, 60
+                }, "Save"))
+                {
                     global_width = settings_screenWidth;
                     global_height = settings_screenHeight;
                     export_width = global_width;
@@ -181,14 +220,14 @@ public:
                     int y = global_height * 0.35;
                     int box_width = 180;
                     int box_height = 60;
-                    button_settings = { x, y, box_width, box_height };
-                    button_extra = {x, y + box_height + 20, box_width, box_height};
-                    button_start = {x, y + box_height + 20 + 200, box_width, box_height};
+                    button_settings = { (float)x, (float)y, (float)box_width, (float)box_height };
+                    button_extra = { (float)x, (float)(y + box_height + 20), (float)box_width, (float)box_height};
+                    button_start = { (float)x, (float)(y + box_height + 20 + 200), (float)box_width, (float)box_height};
                     update = 1;
                     Settings_check();           //Export All
                     SetWindowSize(export_width, export_height);
-                    screenWidthBox = { global_width / 2 - 190, global_height / 2 - 80, 180, 50 };
-                    screenHeightBox = { global_width / 2 + 10, global_height / 2 - 80, 180, 50 };
+                    screenWidthBox = { (float)(global_width / 2 - 190), (float)(global_height / 2 - 80), 180, 50 };
+                    screenHeightBox = { (float)(global_width / 2 + 10), (float)(global_height / 2 - 80), 180, 50 };
                 }
                 //
             }
@@ -197,7 +236,10 @@ public:
             if(current_screen == 2)
             {
                 textsize = MeasureText("Nothing but us chickens here!", 30);
-                DrawTextEx(font, "Nothing but us chickens here!", (Vector2){global_width / 2 - textsize / 2, global_height / 2 - 15}, 30, 1,BLACK);
+                DrawTextEx(font, "Nothing but us chickens here!", (Vector2)
+                {
+                    (float)(global_width / 2 - textsize / 2), (float)(global_height / 2 - 15)
+                }, 30, 1,BLACK);
                 if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
                 {
                     current_screen = 0;
@@ -207,7 +249,10 @@ public:
         else
         {
             textsize = MeasureText(msg_error,25);
-            DrawTextEx(font ,msg_error, (Vector2){global_width / 2 - textsize / 2, global_height / 2}, 25, 1,BLACK);
+            DrawTextEx(font,msg_error, (Vector2)
+            {
+                (float)(global_width / 2 - textsize / 2), (float)(global_height / 2)
+            }, 25, 1,BLACK);
         }
 
         EndDrawing();
@@ -215,7 +260,8 @@ public:
 
     void Logic()
     {
-        if(IsKeyPressed('F')){
+        if(IsKeyPressed('F'))
+        {
             ToggleFullscreen();
         }
 
@@ -229,14 +275,13 @@ public:
     {
         fail_open = fail;
         Settings_check();
-        while(!quit & current_screen != 3)
+        while(!quit && current_screen != 3)
         {
             Draw();
             Logic();
-            if(settings.eof())
+            if(feof(fp))
             {
-                settings.seekg(ios::beg);
-                settings.clear();
+                rewind(fp);
             }
         }
         UnloadTexture(title);
@@ -257,6 +302,8 @@ typedef struct Bricks
 class cGameManager
 {
 private:
+    FILE *fp;       // pointer for file to save level
+    //FILE *fs;       // pointer for file to load settings
     Bricks *brick;                  // max amount of bricks; example: brick[100] [100] is 100 x 100 bricks = 10000
     int brickCount;
     Image imgBrick;
@@ -265,6 +312,8 @@ private:
     Texture2D texSelect;
     bool resizeTexture;
 
+    Wave waveSelect;
+
     Rectangle button_SaveAndQuit;   // Save and quit button
     Rectangle button_QuitOnly;      // Quit only button
     bool save;                      // To save or not to save...that is the question (I had to I was listening to Hate Me)
@@ -272,7 +321,9 @@ private:
 public:
     cGameManager()
     {
-        game_settings.open("..//config//settings.txt", ios::in);
+        fp = NULL;
+        //fs = NULL;
+        //fs = fopen("..//config//settings.txt", "r");
 
         //variables
         brick = (Bricks *)MemAlloc(MAX_BRICKS*sizeof(Bricks)); // MemAlloc() is equivalent to malloc()
@@ -286,13 +337,22 @@ public:
         texSelect = LoadTextureFromImage(imgSelect);
         resizeTexture = 0;
 
+        button_SaveAndQuit = { (float)(GetScreenWidth() / 2 - 160), (float)(GetScreenHeight() - 100), 150, 50};
+        button_QuitOnly = { (float)(GetScreenWidth() / 2 + 10), (float)(GetScreenHeight() - 100), 150, 50};
+
+        waveSelect.channels = WAVESELECT_CHANNELS;
+        waveSelect.frameCount = WAVESELECT_FRAME_COUNT;
+        waveSelect.sampleRate = WAVESELECT_SAMPLE_RATE;
+        waveSelect.sampleSize = WAVESELECT_SAMPLE_SIZE;
+        waveSelect.data = waveSelectData;
+
         save = 0;
         quit = 0;
 
         SetTargetFPS(240);
     }
 
-    void Init() // load the brick variable with only ones (meaning all bricks are visible and active)
+    void Init()   // load the brick variable with only ones (meaning all bricks are visible and active)
     {
         for(int i = 0; i < MAX_BRICKS; i++)
         {
@@ -304,7 +364,7 @@ public:
         }
     }
 
-    int Info()  //the info menu
+    int Info()   //the info menu
     {
         BeginDrawing();
         ClearBackground(BLACK);
@@ -312,11 +372,9 @@ public:
         DrawText("Level editor for Brick Breaker Raylib Edition",GetScreenWidth() / 2 - 42 * 3, GetScreenHeight() / 7.6,15,WHITE);
         DrawText("Create the model that will appear in the game.",GetScreenWidth() / 2 - 52 * 3, GetScreenHeight() / 2.5,15,WHITE);
         DrawText("Click + ctrl to create a brick. Click it to select it. Right Click to change it's type.",GetScreenWidth() / 2 - 87 * 3, GetScreenHeight() / 2.5 + 35,15,WHITE);
-        DrawText("Press \"Save and Quit\" once you are done to quit and save.",GetScreenWidth() / 2 - 59 * 3, GetScreenHeight() / 2.5 + 70,15,WHITE);
+        DrawText("Press \"Save and Quit\" once you are done to quit and save.",GetScreenWidth() / 2 - 43 * 3, GetScreenHeight() / 2.5 + 70,15,WHITE);
         DrawText("Click left mouse button to continue.",GetScreenWidth() / 2 - 36 * 3, GetScreenHeight() - GetScreenHeight() / 7.6,15,WHITE);
-
         EndDrawing();
-
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             return true;
@@ -327,24 +385,40 @@ public:
         }
     }
 
-    int CheckBrickExists()  //Check if a brick exists at mouse location and output the bricks ID out of brickCount (only to be used in an if)
+    int CheckBrickExists(bool enb_offset = 0)   //Check if a brick exists at mouse location and output the bricks ID out of brickCount (only to be used in an if)
     {
         for(int i = 0; i <= brickCount; i++)
         {
-            if(GetMouseX() > brick[i].position.x - brick[i].brickWidth / 2 && GetMouseX() < brick[i].position.x + brick[i].brickWidth * 1.5)
+            if(GetMouseX() > brick[i].position.x - ( brick[i].brickWidth / 2 ) * enb_offset && GetMouseX() < brick[i].position.x + brick[i].brickWidth * 1.5 * enb_offset + brick[i].brickWidth * !enb_offset)
             {
-                if(GetMouseY() > brick[i].position.y - brick[i].brickHeight / 2 && GetMouseY() < brick[i].position.y + brick[i].brickHeight * 1.5)
+                if(GetMouseY() > brick[i].position.y - ( brick[i].brickHeight / 2 ) * enb_offset && GetMouseY() < brick[i].position.y + brick[i].brickHeight * 1.5 + brick[i].brickHeight * !enb_offset)
                 {
-                    //cout<<"ID of Brick Clicked: "<<i<<endl;
+                    printf("ID of Brick Clicked: %i\n", i);
                     return i;
                 }
             }
         }
-        //cout<<"No brick clicked. Result: -1"<<endl;
+        printf("No brick clicked. Result: -1\n");
         return -1;
     }
 
-    void Draw()  //draw the actual bricks only if their enabled value is 1
+    int CheckBrickCollision()
+    {
+        int brick_id = CheckBrickExists();
+        if(brick_id != -1)
+        {
+            //int selected_brick_wall_R = brick[brick_id].position.x + brick[brick_id].brickWidth;
+            //int selected_brick_wall_B = brick[brick_id].position.y + brick[brick_id].brickHeight;
+            for(int i = 0; i <= brickCount; i++)
+            {
+
+            }
+            return 0;
+        }
+        return -1;
+    }
+
+    void Draw()   //draw the actual bricks only if their enabled value is 1
     {
         BeginDrawing();
         ClearBackground(BLACK);
@@ -391,14 +465,18 @@ public:
         //
 
         // Draw Quit and SaveAndQuit buttons
-        button_SaveAndQuit = {GetScreenWidth() / 2 - 160, GetScreenHeight() - 100, 150, 50};
-        button_QuitOnly = {GetScreenWidth() / 2 + 10, GetScreenHeight() - 100, 150, 50};
-        DrawRectangleRec(button_SaveAndQuit,WHITE);
-        DrawRectangleRec(button_QuitOnly,WHITE);
-        int textsize = MeasureText("Only Quit",25);
-        DrawText("Only Quit", GetScreenWidth() / 2 + 30, GetScreenHeight() - 85, 25, BLACK);
-        textsize = MeasureText("Quit and save",20);
-        DrawText("Quit and save", GetScreenWidth() / 2 - 155, GetScreenHeight() - 85, 20, BLACK);
+        if(GuiButton(button_SaveAndQuit, "Save and Quit"))
+        {
+            PlaySound(LoadSoundFromWave(waveSelect));
+            save = 1;
+            quit = 1;
+        }
+        if(GuiButton(button_QuitOnly, "Quit Only"))
+        {
+            PlaySound(LoadSoundFromWave(waveSelect));
+            save = 0;
+            quit = 1;
+        }
         //
 
         //Dev Stuff
@@ -411,7 +489,7 @@ public:
         EndDrawing();
 
     }
-    void Logic()  //
+    void Logic()   //
     {
         //Spawn bricks with Left-Click and disallow creating another on top of it
         if(brickCount != MAX_BRICKS - 1)
@@ -420,15 +498,15 @@ public:
             {
                 if(GetMouseY() < GetScreenHeight() - 350)
                 {
-                    if(CheckBrickExists() == -1)
+                    if(CheckBrickExists(1) == -1)
                     {
                         brick[brickCount].enabled = 1;
                         brick[brickCount].position = (Vector2)
                         {
-                            GetMouseX() - brick[brickCount].brickWidth / 2, GetMouseY() - brick[brickCount].brickHeight / 2
+                            (float)(GetMouseX() - brick[brickCount].brickWidth / 2), (float)(GetMouseY() - brick[brickCount].brickHeight / 2)
                         };
                         brickCount++;
-                        cout<<"Brick amount on Screen: "<<brickCount<<endl;
+                        printf("Brick amount on Screen: %d\n", brickCount);
                     }
                 }
             }
@@ -442,7 +520,7 @@ public:
             if(a != -1)
             {
                 brick[a].selected = 1;
-                cout<<"Brick selected: "<<a<<endl;
+                printf("Brick selected: %d\n", a);
                 for(int i = 0; i < a; i++)
                 {
                     brick[i].selected = 0;
@@ -457,17 +535,19 @@ public:
                 for(int i = 0; i < brickCount; i++)
                 {
                     brick[i].selected = 0;
-                    cout<<"Nothing selected!"<<endl;
+                    printf("Nothing selected!\n");
                 }
             }
         }
         //
 
         //Move bricks by holding Left-Click
+        // TODO (Dark#7#): Repair brick movement
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            int a = CheckBrickExists();  //CheckBrickExists might also function as the collision check between bricks
-            if(a != -1)
+            bool a = CheckBrickCollision();  //CheckBrickExists might also function as the collision check between bricks
+            printf("Collision result: %i\n", a);
+            if(a == 0)
             {
                 if(brick[a].selected)
                 {
@@ -488,7 +568,7 @@ public:
             {
                 if(brick[a].selected)
                 {
-                    if(brick[a].type != 4)
+                    if(brick[a].type != 4)      //????
                     {
                         brick[a].type++;
                     }
@@ -496,127 +576,109 @@ public:
                     {
                         brick[a].type = 0;
                     }
-                    if(brick[a].type == 0)
+                    switch(brick[a].type)
                     {
-                        cout<<"Normal"<<endl;
-                    }
-                    if(brick[a].type == 1)
-                    {
-                        cout<<"1HP"<<endl;
-                    }
-                    if(brick[a].type == 2)
-                    {
-                        cout<<"2HP"<<endl;
-                    }
-                    if(brick[a].type == 3)
-                    {
-                        cout<<"Gold(Unbreakable)"<<endl;
-                    }
-                    if(brick[a].type == 4)
-                    {
-                        cout<<"Explosive"<<endl;
+                    case 0:
+                        printf("Normal\n");
+                        break;
+                    case 1:
+                        printf("1HP\n");
+                        break;
+                    case 2:
+                        printf("2HP\n");
+                        break;
+                    case 3:
+                        printf("Gold(Unbreakable)\n");
+                        break;
+                    case 4:
+                        printf("Explosive\n\n");
+                        break;
                     }
                 }
             }
         }
         //
-
-        //The Collision for the "Quit Only" and "Save and Quit" buttons
-        if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-        {
-            if(CheckCollisionPointRec(GetMousePosition(),button_SaveAndQuit))       //Save and quit
-            {
-                save = 1;
-                quit = 1;
-            }
-            if(CheckCollisionPointRec(GetMousePosition(),button_QuitOnly))          //Quit only
-            {
-                save = 0;
-                quit = 1;
-            }
-        }
-        //
     }
 
-    int searchString(char *arrayToParseIn, char stringToSearchFor[], char stringToReplaceWith[]) {   //Allows you to replace part of string
-	int i = 0;
-	int arraySize = strlen(arrayToParseIn);
-	int searchSize = strlen(stringToSearchFor);
+    int searchString(char *arrayToParseIn, char stringToSearchFor[], char stringToReplaceWith[])     //Allows you to replace part of string
+    {
+        int i = 0;
+        int arraySize = strlen(arrayToParseIn);
+        int searchSize = strlen(stringToSearchFor);
 
-	char temp_compare[searchSize + 1];
-	char temp_arrayhead[arraySize + 1];
-	char temp_arraybottom[arraySize + 1];
-	memset(temp_compare, 0, searchSize*sizeof(char));
-	memset(temp_arrayhead, 0, arraySize*sizeof(char));
-	memset(temp_arraybottom, 0, arraySize*sizeof(char));
+        char temp_compare[searchSize + 1];
+        char temp_arrayhead[arraySize + 1];
+        char temp_arraybottom[arraySize + 1];
+        memset(temp_compare, 0, searchSize*sizeof(char));
+        memset(temp_arrayhead, 0, arraySize*sizeof(char));
+        memset(temp_arraybottom, 0, arraySize*sizeof(char));
 
-	while(i < arraySize) {
-		if(arrayToParseIn[i] == stringToSearchFor[0]) {
-			strncpy(temp_compare, &arrayToParseIn[i], searchSize);
-			temp_compare[searchSize] = '\0';
-			if(strcmp(temp_compare, stringToSearchFor) == 0) {
-				strncpy(temp_arrayhead, arrayToParseIn, i);
-				temp_arrayhead[i] = '\0';
-				strncpy(temp_arraybottom, &arrayToParseIn[searchSize + i], arraySize - i - searchSize);
-				temp_arraybottom[arraySize - i - searchSize] = '\0';
-				sprintf(arrayToParseIn, "%s%s%s", temp_arrayhead, stringToReplaceWith, temp_arraybottom);
-				return i;
-			}
-		}
-		i++;
-	}
-	return -1;
-}
+        while(i < arraySize)
+        {
+            if(arrayToParseIn[i] == stringToSearchFor[0])
+            {
+                strncpy(temp_compare, &arrayToParseIn[i], searchSize);
+                temp_compare[searchSize] = '\0';
+                if(strcmp(temp_compare, stringToSearchFor) == 0)
+                {
+                    strncpy(temp_arrayhead, arrayToParseIn, i);
+                    temp_arrayhead[i] = '\0';
+                    strncpy(temp_arraybottom, &arrayToParseIn[searchSize + i], arraySize - i - searchSize);
+                    temp_arraybottom[arraySize - i - searchSize] = '\0';
+                    sprintf(arrayToParseIn, "%s%s%s", temp_arrayhead, stringToReplaceWith, temp_arraybottom);
+                    return i;
+                }
+            }
+            i++;
+        }
+        return -1;
+    }
 
-    void Output()  //output the current brick layout to the level.txt file
+    void Output()   //output the current brick layout to the level.txt file
     {
         /*char charParse[STR_SIZE]; //HOW TO OPEN A FILE USING FOPEN AND LOAD THE FILE INTO A VARIABLE. TO USE WITH SEARCHSTRING
-	char charParse[1000];
-	char charTemp[100];
-	FILE *fp;
-	fp = fopen("SupplierData-K190.xml", "r");
-	while(fgets(charTemp,sizeof(charTemp), fp) != NULL){
-		strcat(charParse, charTemp);
-		strcat(charParse, "\n");
-	}
-	fclose(fp);*/
-        lvl_editor.open("..//config//level.txt", ios::out);
+        char charParse[1000];
+        char charTemp[100];
+        FILE *fp;
+        fp = fopen("SupplierData-K190.xml", "r");
+        while(fgets(charTemp,sizeof(charTemp), fp) != NULL){
+        	strcat(charParse, charTemp);
+        	strcat(charParse, "\n");
+        }
+        fclose(fp);*/
+        fp = fopen("..//config//level.txt", "w");
         // output brick layout to level.txt
         for(int i = 0; i <= brickCount - 1; i++)
         {
-            lvl_editor<<GetScreenWidth()<<" "<<GetScreenHeight()<<" "<<brick[i].position.x<<" "<<brick[i].position.y<<" "<<brick[i].brickWidth<<" "<<brick[i].brickHeight<<" "<<brick[i].type<<" ";
-            cout<<endl;
-            cout<<"Brick Position:"<<endl;
-            cout<<"     X: "<<brick[i].position.x<<endl;
-            cout<<"     Y: "<<brick[i].position.y<<endl;
-            cout<<"Brick Width: "<<brick[i].brickWidth<<endl;
-            cout<<"Brick Height: "<<brick[i].brickHeight<<endl;
-            cout<<"Brick type: ";
-            if(brick[i].type == 0)
+            fprintf(fp, "%d %d %f %f %d %d %d ", GetScreenWidth(), GetScreenHeight(), brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight, brick[i].type);
+            printf("\nBrick Position:\n");
+            printf("     X: %f\n", brick[i].position.x);
+            printf("     Y: %f\n", brick[i].position.y);
+            printf("Brick Width: %d\n", brick[i].brickWidth);
+            printf("Brick Height: %d\n", brick[i].brickHeight);
+            printf("Brick type: ");
+            switch(brick[i].type)
             {
-                cout<<"Normal"<<endl;
+            case 0:
+                printf("Normal\n");
+                break;
+            case 1:
+                printf("1HP\n");
+                break;
+            case 2:
+                printf("2HP\n");
+                break;
+            case 3:
+                printf("Gold(Unbreakable)\n");
+                break;
+            case 4:
+                printf("Explosive\n\n");
+                break;
             }
-            if(brick[i].type == 1)
-            {
-                cout<<"1HP"<<endl;
-            }
-            if(brick[i].type == 2)
-            {
-                cout<<"2HP"<<endl;
-            }
-            if(brick[i].type == 3)
-            {
-                cout<<"Gold(Unbreakable)"<<endl;
-            }
-            if(brick[i].type == 4)
-            {
-                cout<<"Explosive"<<endl;
-            }
-            cout<<endl;
         }
         //
     }
-    int Run(int quit_settings)  //actually runs the previously made functions
+    int Run(int quit_settings)   //actually runs the previously made functions
     {
         quit = quit_settings;
         Init();
@@ -640,43 +702,33 @@ public:
             Output();
         }
 
-        // close all streams
-        if(lvl_editor.is_open())
-        {
-            lvl_editor.close();
-        }
-        if(game_settings.is_open())
-        {
-            game_settings.close();
-        }
-        if(settings.is_open())
-        {
-            settings.close();
-        }
-        MemFree(brick); //equivalent to free()
+        _fcloseall();
+        MemFree(brick); //equivalent to free() but for memstuff
         return quit;
     }
 };
 
-int main(int argc, char** argv)
+int main()
 {
-    int width, height, fullscreen, quit = 0, run = 1, fail = 0;
-    settings.open("..//config//settings.txt", ios::out | ios::in);
-    if(settings.is_open())
+    int width, height, fullscreen, quit = 0, fail = 0;
+    FILE *fp = NULL;
+    fp = fopen("..//config//settings.txt", "r+");
+    if(fp != NULL)
     {
-        settings>>width>>height>>fullscreen;
+        fscanf(fp, "%d %d %d", &width, &height, &fullscreen);
     }
     else
     {
-        cout<<"Settings failed to open!"<<endl;
+        printf("Settings failed to open!\n");
         width = 640;
         height = 480;
         fullscreen = 0;
         fail = 1;
     }
-    cout<<"Screen width: "<<width<<endl;
-    cout<<"Screen height: "<<height<<endl;
-    cout<<"Fullscreen: "<<fullscreen<<endl;
+    fclose(fp);
+    printf("Screen width: %d\n", width);
+    printf("Screen height: %d\n", height);
+    printf("Fullscreen: %d\n\n", fullscreen);
 
     cSettings c_settings(width,height,fullscreen);
     quit = c_settings.Run(fail);

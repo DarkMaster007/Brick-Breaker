@@ -311,7 +311,7 @@ private:
     Texture2D texBrick;
     Texture2D texSelect;
     bool resizeTexture;
-
+    
     Wave waveSelect;
 
     Rectangle button_SaveAndQuit;   // Save and quit button
@@ -340,12 +340,6 @@ public:
         button_SaveAndQuit = { (float)(GetScreenWidth() / 2 - 160), (float)(GetScreenHeight() - 100), 150, 50};
         button_QuitOnly = { (float)(GetScreenWidth() / 2 + 10), (float)(GetScreenHeight() - 100), 150, 50};
 
-        waveSelect.channels = WAVESELECT_CHANNELS;
-        waveSelect.frameCount = WAVESELECT_FRAME_COUNT;
-        waveSelect.sampleRate = WAVESELECT_SAMPLE_RATE;
-        waveSelect.sampleSize = WAVESELECT_SAMPLE_SIZE;
-        waveSelect.data = waveSelectData;
-
         save = 0;
         quit = 0;
 
@@ -369,10 +363,10 @@ public:
         BeginDrawing();
         ClearBackground(BLACK);
         // The actual message you see on screen from here on:
-        DrawText("Level editor for Brick Breaker Raylib Edition",GetScreenWidth() / 2 - 42 * 3, GetScreenHeight() / 7.6,15,WHITE);
-        DrawText("Create the model that will appear in the game.",GetScreenWidth() / 2 - 52 * 3, GetScreenHeight() / 2.5,15,WHITE);
-        DrawText("Click + ctrl to create a brick. Click it to select it. Right Click to change it's type.",GetScreenWidth() / 2 - 87 * 3, GetScreenHeight() / 2.5 + 35,15,WHITE);
-        DrawText("Press \"Save and Quit\" once you are done to quit and save.",GetScreenWidth() / 2 - 43 * 3, GetScreenHeight() / 2.5 + 70,15,WHITE);
+        DrawText("Level editor for Brick Breaker BGM Edition",GetScreenWidth() / 2 - 42 * 3, GetScreenHeight() / 7.6,15,WHITE);
+        DrawText("Create the model that will appear in the final game.",GetScreenWidth() / 2 - 52 * 3, GetScreenHeight() / 2.5,15,WHITE);
+        DrawText("Click on any brick to disable it and click again to re-enable it.",GetScreenWidth() / 2 - 65 * 3, GetScreenHeight() / 2.5 + 35,15,WHITE);
+        DrawText("Press Q once you are done to quit and save.",GetScreenWidth() / 2 - 43 * 3, GetScreenHeight() / 2.5 + 70,15,WHITE);
         DrawText("Click left mouse button to continue.",GetScreenWidth() / 2 - 36 * 3, GetScreenHeight() - GetScreenHeight() / 7.6,15,WHITE);
         EndDrawing();
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))

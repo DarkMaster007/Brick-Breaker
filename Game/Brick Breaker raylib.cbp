@@ -41,6 +41,11 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Wshadow" />
+			<Add option="-Wredundant-decls" />
+			<Add option="-Wfloat-equal" />
+			<Add option="-Winline" />
+			<Add option="-Wunreachable-code" />
 			<Add option="-Wall" />
 			<Add option="-pg" />
 			<Add option="-Og" />
@@ -48,17 +53,23 @@
 			<Add option="-fpermissive" />
 			<Add option="-Wnarrowing" />
 			<Add directory="../../Raylib Library/raylib/src" />
+			<Add directory="../../Raylib Library/raygui/src" />
 		</Compiler>
 		<Linker>
 			<Add option="-pg -lgmon" />
-			<Add option="-static" />
+			<Add option="-static-libstdc++" />
+			<Add option="-static-libgcc" />
 			<Add library="raylib" />
 			<Add library="opengl32" />
 			<Add library="gdi32" />
 			<Add library="winmm" />
 			<Add directory="../../Raylib Library/raylib/src" />
+			<Add directory="../../Raylib Library/raygui/src" />
 		</Linker>
-		<Unit filename="../../Raylib Library/raylib/src/raylib.h" />
+		<Unit filename="../Release/resources/includes/soundBounceGeneral.h" />
+		<Unit filename="../Release/resources/includes/soundBouncePaddle.h" />
+		<Unit filename="../Release/resources/includes/soundDeath.h" />
+		<Unit filename="../Release/resources/includes/soundSelect.h" />
 		<Unit filename="icon.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

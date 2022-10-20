@@ -171,7 +171,7 @@ private:
     bool fullscreen;                // whether it's full-screen or not
     bool quit;                      // whether the game should quit or not
     int brickCount;
-    float movement_speed_paddle_base; // base speed for paddle
+    int movement_speed_paddle_base; // base speed for paddle
     float movement_speed_ball_base;   // base speed for ball
     bool auto_move;                  // whether the paddle automatically moves or not. helps with testing simple stuff
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
@@ -187,7 +187,7 @@ public:
         brickCount = 0;
         quit = 0;
         movement_speed_paddle_base = 8;
-        movement_speed_ball_base = 1.6;
+        movement_speed_ball_base = 2;
         auto_move = 0;
         win = 0;
         pause = 0;

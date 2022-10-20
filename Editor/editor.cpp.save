@@ -311,7 +311,7 @@ private:
     Texture2D texBrick;
     Texture2D texSelect;
     bool resizeTexture;
-
+    
     Wave waveSelect;
 
     Rectangle button_SaveAndQuit;   // Save and quit button
@@ -339,12 +339,6 @@ public:
 
         button_SaveAndQuit = { (float)(GetScreenWidth() / 2 - 160), (float)(GetScreenHeight() - 100), 150, 50};
         button_QuitOnly = { (float)(GetScreenWidth() / 2 + 10), (float)(GetScreenHeight() - 100), 150, 50};
-
-        waveSelect.channels = WAVESELECT_CHANNELS;
-        waveSelect.frameCount = WAVESELECT_FRAME_COUNT;
-        waveSelect.sampleRate = WAVESELECT_SAMPLE_RATE;
-        waveSelect.sampleSize = WAVESELECT_SAMPLE_SIZE;
-        waveSelect.data = waveSelectData;
 
         save = 0;
         quit = 0;

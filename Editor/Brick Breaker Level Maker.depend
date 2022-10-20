@@ -67,13 +67,9 @@
 	<stdarg.h>
 	<math.h>
 
-1654512742 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\editor.cpp
-	<iostream>
-	"raylib.h"
-	"raygui.h"
-	<fstream>
-	<cstring>
-	<math.h>
+1665594784 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\editor.cpp
+	<raylib.h>
+	<raygui.h>
 
 1641589565 e:\windowsfolders\desktop\c++\brick-breaker\editor\include\raylib.h
 	<stdarg.h>
@@ -88,4 +84,16 @@
 	<math.h>
 
 1642428584 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\icon.rc
+
+1665875475 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+	<stdarg.h>
+	<stdbool.h>
+
+1665875469 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
+	"raylib.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdarg.h>
+	<math.h>
 

@@ -67,9 +67,10 @@
 	<stdarg.h>
 	<math.h>
 
-1665594784 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\editor.cpp
+1667069957 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\editor.cpp
 	<raylib.h>
 	<raygui.h>
+	"../Release/resources/includes/soundSelect.h"
 
 1641589565 e:\windowsfolders\desktop\c++\brick-breaker\editor\include\raylib.h
 	<stdarg.h>
@@ -85,15 +86,17 @@
 
 1642428584 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\icon.rc
 
-1665875475 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+1666985995 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
 	<stdarg.h>
 	<stdbool.h>
 
-1665875469 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
+1666986015 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
 	"raylib.h"
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<stdarg.h>
 	<math.h>
+
+1666986619 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundselect.h
 

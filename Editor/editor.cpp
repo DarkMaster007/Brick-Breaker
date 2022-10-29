@@ -391,9 +391,9 @@ public:
     {
         for(int i = 0; i <= brickCount; i++)
         {
-            if(GetMouseX() > brick[i].position.x - ( brick[i].brickWidth / 2 ) * enb_offset && GetMouseX() < brick[i].position.x + brick[i].brickWidth * 1.5 * enb_offset + brick[i].brickWidth * !enb_offset)
+            if(GetMouseX() > brick[i].position.x - ( brick[i].brickWidth / 2 ) * enb_offset && GetMouseX() < brick[i].position.x + enb_offset + brick[i].brickWidth * !enb_offset)
             {
-                if(GetMouseY() > brick[i].position.y - ( brick[i].brickHeight / 2 ) * enb_offset && GetMouseY() < brick[i].position.y + brick[i].brickHeight * 1.5 + brick[i].brickHeight * !enb_offset)
+                if(GetMouseY() > brick[i].position.y - ( brick[i].brickHeight / 2 ) * enb_offset && GetMouseY() < brick[i].position.y + brick[i].brickHeight * !enb_offset)
                 {
                     printf("ID of Brick Clicked: %i\n", i);
                     return i;
@@ -404,20 +404,70 @@ public:
         return -1;
     }
 
-    int CheckBrickCollision()
+    void inline SetBrickPosition(int brickID, Vector2 newPosition)
+    {
+        brick[brickID].position = newPosition;
+    }
+
+    int CheckBrickCollision()   //Outputs -1 if there is a collision, else selectedBrickID
     {
         int brick_id = CheckBrickExists();
         if(brick_id != -1)
         {
-            //int selected_brick_wall_R = brick[brick_id].position.x + brick[brick_id].brickWidth;
-            //int selected_brick_wall_B = brick[brick_id].position.y + brick[brick_id].brickHeight;
             for(int i = 0; i <= brickCount; i++)
             {
-
+//              UL*--------*UR
+//                |        |
+//                |        |
+//              LL*--------*LR
+                if(i != brick_id)
+                {
+                    bool pointUpperLeft = brick[brick_id].position.x <= brick[i].position.x + brick[i].brickWidth && brick[brick_id].position.x >= brick[i].position.x && brick[brick_id].position.y >= brick[i].position.y && brick[brick_id].position.y <= brick[i].position.y + brick[i].brickHeight;
+                    if(pointUpperLeft)
+                    {
+                        printf("Collision upperLeft\n");
+                    }
+                    bool pointUpperRight = brick[brick_id].position.x + brick[brick_id].brickWidth >= brick[i].position.x &&  brick[brick_id].position.x + brick[brick_id].brickWidth <=  brick[i].position.x + brick[i].brickWidth && brick[brick_id].position.y >= brick[i].position.y && brick[brick_id].position.y <= brick[i].position.y + brick[i].brickHeight;
+                    if(pointUpperRight)
+                    {
+                        printf("Collision upperRight\n");
+                    }
+                    bool pointLowerLeft = brick[brick_id].position.x <= brick[i].position.x + brick[i].brickWidth && brick[brick_id].position.x >= brick[i].position.x && brick[brick_id].position.y + brick[brick_id].brickHeight >= brick[i].position.y && brick[brick_id].position.y + brick[brick_id].brickHeight <= brick[i].position.y + brick[i].brickHeight;
+                    if(pointLowerLeft)
+                    {
+                        printf("Collision lowerLeft\n");
+                    }
+                    bool pointLowerRight = brick[brick_id].position.x + brick[brick_id].brickWidth >= brick[i].position.x && brick[brick_id].position.x + brick[brick_id].brickWidth <= brick[i].position.x + brick[i].brickWidth && brick[brick_id].position.y + brick[brick_id].brickHeight >= brick[i].position.y && brick[brick_id].position.y + brick[brick_id].brickHeight <= brick[i].position.y + brick[i].brickHeight;
+                    if(pointLowerRight)
+                    {
+                        printf("Collision lowerRight\n");
+                    }
+                    if( pointUpperLeft || pointUpperRight || pointLowerLeft || pointLowerRight )
+                    {
+                        if(pointUpperLeft)
+                        {
+                            brick[brick_id].position.x += 2;
+                            brick[brick_id].position.y += 2;
+                        }
+                        if(pointUpperRight)
+                        {
+                            brick[brick_id].position.x -= 2;
+                            brick[brick_id].position.y += 2;
+                        }
+                        if(pointLowerLeft){
+                            brick[brick_id].position.x += 2;
+                            brick[brick_id].position.y -= 2;
+                        }
+                        if(pointLowerRight){
+                            brick[brick_id].position.x -= 2;
+                            brick[brick_id].position.y -= 2;
+                        }
+                        return -1;
+                    }
+                }
             }
-            return 0;
         }
-        return -1;
+        return brick_id;
     }
 
     void Draw()   //draw the actual bricks only if their enabled value is 1
@@ -522,7 +572,7 @@ public:
             if(a != -1)
             {
                 brick[a].selected = 1;
-                printf("Brick selected: %d\n", a);
+                //printf("Brick selected: %d\n", a);
                 for(int i = 0; i < a; i++)
                 {
                     brick[i].selected = 0;
@@ -537,7 +587,7 @@ public:
                 for(int i = 0; i < brickCount; i++)
                 {
                     brick[i].selected = 0;
-                    printf("Nothing selected!\n");
+                    //printf("Nothing selected!\n");
                 }
             }
         }
@@ -547,17 +597,15 @@ public:
         // TODO (Dark#7#): Repair brick movement
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            bool a = CheckBrickCollision();  //CheckBrickExists might also function as the collision check between bricks
-            printf("Collision result: %i\n", a);
-            if(a == 0)
+            int currentlyDraggedBrick = CheckBrickCollision();  //Outputs -1 if there is a collision, else selectedBrickID
+            //printf("Selected brick: %i\n", currentlyDraggedBrick);
+            if(currentlyDraggedBrick != -1 && brick[currentlyDraggedBrick].selected)
             {
-                if(brick[a].selected)
+                Vector2 newBrickPoz = (Vector2)
                 {
-                    brick[a].position = (Vector2)
-                    {
-                        GetMousePosition().x - brick[a].brickWidth / 2, GetMousePosition().y - brick[a].brickHeight / 2
-                    };
-                }
+                    GetMousePosition().x - brick[currentlyDraggedBrick].brickWidth / 2, GetMousePosition().y - brick[currentlyDraggedBrick].brickHeight / 2
+                };
+                SetBrickPosition(currentlyDraggedBrick, newBrickPoz);
             }
         }
         //
@@ -602,7 +650,7 @@ public:
         //
     }
 
-    int searchString(char *arrayToParseIn, char stringToSearchFor[], char stringToReplaceWith[])     //Allows you to replace part of string
+    int searchString(char *arrayToParseIn, char stringToSearchFor[], char stringToReplaceWith[])     //Allows you to replace part of string; not in use yet
     {
         int i = 0;
         int arraySize = strlen(arrayToParseIn);
@@ -642,7 +690,7 @@ public:
         char charParse[1000];
         char charTemp[100];
         FILE *fp;
-        fp = fopen("SupplierData-K190.xml", "r");
+        fp = fopen("SupplierData.xml", "r");
         while(fgets(charTemp,sizeof(charTemp), fp) != NULL){
         	strcat(charParse, charTemp);
         	strcat(charParse, "\n");

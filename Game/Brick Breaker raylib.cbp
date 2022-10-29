@@ -16,9 +16,12 @@
 					<Add option="-pg" />
 					<Add option="-Og" />
 					<Add option="-g" />
+					<Add option="-O0" />
 				</Compiler>
 				<Linker>
 					<Add option="-pg -lgmon" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
 					<Add option="-static" />
 				</Linker>
 			</Target>
@@ -36,6 +39,8 @@
 				<Linker>
 					<Add option="-flto" />
 					<Add option="-s" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
 					<Add option="-static" />
 				</Linker>
 			</Target>
@@ -47,18 +52,15 @@
 			<Add option="-Winline" />
 			<Add option="-Wunreachable-code" />
 			<Add option="-Wall" />
-			<Add option="-pg" />
-			<Add option="-Og" />
-			<Add option="-g" />
 			<Add option="-fpermissive" />
 			<Add option="-Wnarrowing" />
 			<Add directory="../../Raylib Library/raylib/src" />
 			<Add directory="../../Raylib Library/raygui/src" />
 		</Compiler>
 		<Linker>
-			<Add option="-pg -lgmon" />
 			<Add option="-static-libstdc++" />
 			<Add option="-static-libgcc" />
+			<Add option="-static" />
 			<Add library="raylib" />
 			<Add library="opengl32" />
 			<Add library="gdi32" />

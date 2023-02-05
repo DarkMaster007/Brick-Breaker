@@ -38,9 +38,9 @@
 	<stdarg.h>
 	<stdbool.h>
 
-1642428584 source:e:\windowsfolders\desktop\c++\brick-breaker\game\icon.rc
+1642424984 source:e:\windowsfolders\desktop\c++\brick-breaker\game\icon.rc
 
-1666986619 source:e:\windowsfolders\desktop\c++\brick-breaker\game\main.cpp
+1669840031 source:e:\windowsfolders\desktop\c++\brick-breaker\game\main.cpp
 	<raylib.h>
 	<raygui.h>
 	<stdio.h>
@@ -50,20 +50,22 @@
 	"../Release/resources/includes/soundBouncePaddle.h"
 	<math.h>
 	<time.h>
+	<random>
+	<chrono>
 
-1666985995 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+1666982395 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
 	<stdarg.h>
 	<stdbool.h>
 
-1666986619 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\sounddeath.h
+1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\sounddeath.h
 
-1666986619 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundselect.h
+1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundselect.h
 
-1666986619 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncegeneral.h
+1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncegeneral.h
 
-1666986619 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncepaddle.h
+1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncepaddle.h
 
-1666986015 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
+1668113218 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
 	"raylib.h"
 	<stdio.h>
 	<stdlib.h>

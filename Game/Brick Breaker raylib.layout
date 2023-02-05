@@ -2,9 +2,9 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="..\Release\resources\includes\soundDeath.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\Release\resources\includes\soundSelect.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1061" topLine="0" />
+			<Cursor1 position="878" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="..\Release\resources\includes\soundBouncePaddle.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -12,28 +12,23 @@
 			<Cursor1 position="1086" topLine="0" />
 		</Cursor>
 	</File>
+	<File name="main.cpp" open="1" top="1" tabpos="2" split="0" active="1" splitpos="0" zoom_1="2" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="17026" topLine="318" />
+		</Cursor>
+		<Folding>
+			<Collapse line="284" />
+			<Collapse line="340" />
+		</Folding>
+	</File>
+	<File name="..\Release\resources\includes\soundDeath.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1061" topLine="0" />
+		</Cursor>
+	</File>
 	<File name="..\Release\resources\includes\soundBounceGeneral.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="1063" topLine="0" />
 		</Cursor>
-	</File>
-	<File name="..\Release\resources\includes\soundSelect.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="878" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="2" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="5427" topLine="42" />
-		</Cursor>
-		<Folding>
-			<Collapse line="17" />
-			<Collapse line="60" />
-			<Collapse line="87" />
-			<Collapse line="93" />
-			<Collapse line="133" />
-			<Collapse line="264" />
-			<Collapse line="320" />
-		</Folding>
 	</File>
 </CodeBlocks_layout_file>

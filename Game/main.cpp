@@ -8,6 +8,8 @@
 #include "../Release/resources/includes/soundBouncePaddle.h"
 #include <math.h>
 #include <time.h>
+#include <random>
+#include <chrono>
 
 #define MAX_BRICKS 300
 #define MAX_POWERUPS 6
@@ -21,6 +23,10 @@ private:
     int originalX, originalY;
     int current_size, originalSize;
     eDir direction;
+    int randomMovementOffset[2]{};
+    std::mt19937 marsenneTwister{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count())};
+    std::uniform_int_distribution<> randomNrDistribution{1, 2};
+    std::uniform_int_distribution<> randomNrDirection{1, 4};
 public:
     cBall(int posX, int posY, int ball_size) {
         originalX = posX;
@@ -30,6 +36,7 @@ public:
         direction = STOP;
         originalSize = ball_size;
         current_size = ball_size;
+        randomizeMovement();
     }
     void Reset() {
         x = originalX;
@@ -41,7 +48,7 @@ public:
         direction = d;
     }
     void randomDirection() {
-        direction = (eDir)(GetRandomValue(1, 4));
+        direction = (eDir)(randomNrDirection(marsenneTwister));
     }
     inline int getX() {
         return x;
@@ -58,25 +65,29 @@ public:
     inline int getSize() {
         return current_size;
     }
+    inline void randomizeMovement(){
+        randomMovementOffset[0] = randomNrDistribution(marsenneTwister);
+        randomMovementOffset[1] = randomNrDistribution(marsenneTwister);
+    }
     void Move(int movement) {
         switch (direction) {
         case STOP:
             break;
         case UPLEFT:
-            x-=movement;
-            y-=movement;
+            x-=(movement + randomMovementOffset[0]);
+            y-=(movement + randomMovementOffset[1]);
             break;
         case DOWNLEFT:
-            x-=movement;
-            y+=movement;
+            x-=(movement + randomMovementOffset[0]);
+            y+=(movement + randomMovementOffset[1]);
             break;
         case UPRIGHT:
-            x+=movement;
-            y-=movement;
+            x+=(movement + randomMovementOffset[0]);
+            y-=(movement + randomMovementOffset[1]);
             break;
         case DOWNRIGHT:
-            x+=movement;
-            y+=movement;
+            x+=(movement + randomMovementOffset[0]);
+            y+=(movement + randomMovementOffset[1]);
             break;
         default:
             direction = STOP;
@@ -164,6 +175,9 @@ private:
     Wave waveSelect;
 
     Sound soundBouncePaddle;
+    Sound soundBounceGeneral;
+    Sound soundDeath;
+    Sound soundSelect;
     float soundVolume;
     bool soundMute;
 
@@ -200,7 +214,7 @@ public:
 
         InitWindow(width,height,"Editor");
         InitAudioDevice();
-        SetTargetFPS(400);
+        SetTargetFPS(120);
         HideCursor();
         if(fullscreen == 1) {
             ToggleFullscreen();
@@ -229,18 +243,21 @@ public:
         waveDeath.frameCount = WAVEDEATH_FRAME_COUNT;
         waveDeath.sampleRate = WAVEDEATH_SAMPLE_RATE;
         waveDeath.sampleSize = WAVEDEATH_SAMPLE_SIZE;
+        soundDeath = LoadSoundFromWave(waveDeath);
 
         waveSelect.channels = WAVESELECT_CHANNELS;
         waveSelect.data = waveSelectData;
         waveSelect.frameCount = WAVESELECT_FRAME_COUNT;
         waveSelect.sampleRate = WAVESELECT_SAMPLE_RATE;
         waveSelect.sampleSize = WAVESELECT_SAMPLE_SIZE;
+        soundSelect = LoadSoundFromWave(waveSelect);
 
         waveBounceGeneral.channels = WAVEBOUNCEGENERAL_CHANNELS;
         waveBounceGeneral.data = waveBounceGeneralData;
         waveBounceGeneral.frameCount = WAVEBOUNCEGENERAL_FRAME_COUNT;
         waveBounceGeneral.sampleRate = WAVEBOUNCEGENERAL_SAMPLE_RATE;
         waveBounceGeneral.sampleSize = WAVEBOUNCEGENERAL_SAMPLE_SIZE;
+        soundBounceGeneral = LoadSoundFromWave(waveBounceGeneral);
 
         waveBouncePaddle.channels = WAVEBOUNCEPADDLE_CHANNELS;
         waveBouncePaddle.data = waveBouncePaddleData;
@@ -249,7 +266,10 @@ public:
         waveBouncePaddle.sampleSize = WAVEBOUNCEPADDLE_SAMPLE_SIZE;
         soundBouncePaddle = LoadSoundFromWave(waveBouncePaddle);
 
-        SetSoundVolume(soundBouncePaddle, 0.5f);
+        SetSoundVolume(soundBouncePaddle, 0.1f);
+        SetSoundVolume(soundBounceGeneral, 0.2f);
+        SetSoundVolume(soundDeath, 0.5f);
+        SetSoundVolume(soundSelect, 1.0f);
         soundVolume = 1.0f;
         soundMute = 0;
         SetMasterVolume(soundVolume);
@@ -516,7 +536,8 @@ public:
                     brick[i].enabled = 0;
                 }
                 SpawnPowerup(i);
-                PlaySound(LoadSoundFromWave(waveBounceGeneral));
+                PlaySound(soundBounceGeneral);
+                ball->randomizeMovement();
             }
         }
         return ball_collision;
@@ -546,7 +567,7 @@ public:
         }
 
         //Try to do ball movement based on frame-time (dunno if ti works)
-        int movement_speed_ball = movement_speed_ball_base + rand() % 6;
+        int movement_speed_ball = movement_speed_ball_base;
         movement_speed_ball = movement_speed_ball + movement_speed_ball * GetFrameTime();
         if(movement_speed_ball > movement_speed_ball_base * 2.5) {
             movement_speed_ball = movement_speed_ball_base * 2.5 + rand() % 2;
@@ -566,7 +587,7 @@ public:
             if(ball->getDirection() == DOWNLEFT) {
                 ball->changeDirection(DOWNRIGHT);
             }
-            PlaySound(LoadSoundFromWave(waveBounceGeneral));
+            PlaySound(soundBounceGeneral);
         }
 
         //Right wall collision
@@ -578,7 +599,7 @@ public:
             if(ball->getDirection() == DOWNRIGHT) {
                 ball->changeDirection(DOWNLEFT);
             }
-            PlaySound(LoadSoundFromWave(waveBounceGeneral));
+            PlaySound(soundBounceGeneral);
         }
 
         //Top wall collision
@@ -590,14 +611,14 @@ public:
             if(ball->getDirection() == UPLEFT) {
                 ball->changeDirection(DOWNLEFT);
             }
-            PlaySound(LoadSoundFromWave(waveBounceGeneral));
+            PlaySound(soundBounceGeneral);
         }
 
         //Bottom wall collision
         ball_collision = {(float)ball->getX(), (float)ball->getY()};
         if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderBottom)) {
             //cout<<"You Lose!"<<endl;
-            PlaySound(LoadSoundFromWave(waveDeath));
+            PlaySound(soundDeath);
             reset();
         }
 

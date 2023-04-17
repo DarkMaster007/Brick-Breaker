@@ -17,6 +17,8 @@
 					<Add option="-Og" />
 					<Add option="-g" />
 					<Add option="-O0" />
+					<Add directory="./" />
+					<Add directory=".h" />
 				</Compiler>
 				<Linker>
 					<Add option="-pg -lgmon" />
@@ -35,6 +37,7 @@
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-flto" />
 					<Add option="-O2" />
+					<Add directory="./" />
 				</Compiler>
 				<Linker>
 					<Add option="-flto" />
@@ -68,14 +71,27 @@
 			<Add directory="../../Raylib Library/raylib/src" />
 			<Add directory="../../Raylib Library/raygui/src" />
 		</Linker>
-		<Unit filename="../Release/resources/includes/soundBounceGeneral.h" />
-		<Unit filename="../Release/resources/includes/soundBouncePaddle.h" />
-		<Unit filename="../Release/resources/includes/soundDeath.h" />
-		<Unit filename="../Release/resources/includes/soundSelect.h" />
+		<Unit filename=".cpp/cBall.cpp" />
+		<Unit filename=".cpp/cBricks.cpp" />
+		<Unit filename=".cpp/cCollisionManager.cpp" />
+		<Unit filename=".cpp/cGameManager.cpp" />
+		<Unit filename=".cpp/cPaddle.cpp" />
+		<Unit filename=".cpp/cPowerup.cpp" />
+		<Unit filename=".cpp/main.cpp" />
+		<Unit filename=".h/cBall.h" />
+		<Unit filename=".h/cBricks.h" />
+		<Unit filename=".h/cCollisionManager.h" />
+		<Unit filename=".h/cGameManager.h" />
+		<Unit filename=".h/cPaddle.h" />
+		<Unit filename=".h/cPowerup.h" />
+		<Unit filename=".h/defines.h" />
+		<Unit filename=".h/soundBounceGeneral.h" />
+		<Unit filename=".h/soundBouncePaddle.h" />
+		<Unit filename=".h/soundDeath.h" />
+		<Unit filename=".h/soundSelect.h" />
 		<Unit filename="icon.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
-		<Unit filename="main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

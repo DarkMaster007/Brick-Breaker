@@ -31,7 +31,7 @@ cGameManager::cGameManager()
     }
     ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10);
     paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
-    brick = (Bricks *)MemAlloc(MAX_BRICKS*sizeof(Bricks));  //MemAlloc() is equivalent to malloc();
+    brick = (cBricks *)MemAlloc(MAX_BRICKS*sizeof(cBricks));  //MemAlloc() is equivalent to malloc();
     c_powerup = (powerup *)MemAlloc(6*sizeof(powerup));
 
     //Load and resize image and then convert it to texture
@@ -96,22 +96,23 @@ void cGameManager::loadLevel()
 {
     fp = fopen("..\\config\\level.txt", "r");
     int i = 0;
-    int temp, temp2;
-    int level_width, level_height;
+    int tempWidth, tempHeight;
+    int levelWidth, levelHeight;
+    int brickPosX, brickPosY, brickWidth, brickHeight, brickType;
     brickCount = 0;
     while(!feof(fp))
     {
-        fscanf(fp, "%d %d %f %f %d %d %d", &level_width, &level_height, &brick[i].position.x, &brick[i].position.y, &brick[i].brickWidth, &brick[i].brickHeight, &brick[i].type);
-        if(width != level_width || height != level_height)
+        fscanf(fp, "%d %d %f %f %d %d %d", &levelWidth, &levelHeight, &brick[i].position.x, &brick[i].position.y, &brick[i].brickWidth, &brick[i].brickHeight, &brick[i].type);
+        if(width != levelWidth || height != levelHeight)
         {
-            temp = width / level_width;
-            temp2 = height / level_height;
-            brick[i].position.x *= temp;
-            brick[i].position.y *= temp2;
-            brick[i].brickWidth *= (temp*1.5);
-            brick[i].brickHeight *= (temp2*1.2);
-            //cout<<"X mod: "<<temp<<endl<<"Y mod: "<<temp2<<endl;
-            //cout<<"Level res to game res ratio is: "<<temp<<" to "<<temp2<<endl;
+            tempWidth = width / levelWidth;
+            tempHeight = height / levelHeight;
+            brick[i].position.x *= tempWidth;
+            brick[i].position.y *= tempHeight;
+            brick[i].brickWidth *= (tempWidth*1.5);
+            brick[i].brickHeight *= (tempHeight*1.2);
+            //cout<<"X mod: "<<tempWidth<<endl<<"Y mod: "<<tempHeight<<endl;
+            //cout<<"Level res to game res ratio is: "<<tempWidth<<" to "<<tempHeight<<endl;
         }
         //X clamping
         if(brick[i].position.x < 10)
@@ -149,7 +150,6 @@ void cGameManager::loadLevel()
             }
         }
         //
-        brick[i].type++;
         brick[i].enabled = true;
         i++;
         brickCount++;
@@ -194,39 +194,22 @@ void cGameManager::Draw()
     ClearBackground(BLACK);
 
     //Loop to draw bricks
-    Color bColor;
     for(int i = 0; i < brickCount - 1; i++)
     {
         if(brick[i].enabled)
         {
-            if(brick[i].type == 1)
-            {
-                bColor = SKYBLUE;
-            }
-            if(brick[i].type == 2)
-            {
-                bColor = BLUE;
-            }
-            if(brick[i].type == 3)
-            {
-                bColor = GRAY;
-            }
-            if(brick[i].type == 5)
-            {
-                bColor = GOLD;
-            }
-            if(brick[i].type == 4)
-            {
-                bColor = ORANGE;
-            }
-            DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, bColor);
+            DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, brick[i].getColor());
+
+            //Dev stuff:
+            #ifdef _DEBUG
+            DrawText(TextFormat("%d", i+1), brick[i].position.x + brick[i].brickWidth / 2, brick[i].position.y + brick[i].brickHeight / 2, 5, RED);
+            #endif // _DEBUG
         }
     }
     //
 
     // Draw border
     DrawRectangleRec(borderTop,BROWN);
-    DrawRectangleRec(borderBottom,RED);
     DrawRectangleRec(borderLeft,BROWN);
     DrawRectangleRec(borderRight,BROWN);
 
@@ -265,9 +248,11 @@ void cGameManager::Draw()
     }
 
     //Debug stuff here:
+    #ifdef _DEBUG
+    DrawRectangleRec(borderBottom,RED);
     DrawFPS(10,10);
-    float temp = GetFrameTime();
-    GuiStatusBar({0, GetScreenHeight() - 30, 100, 30}, TextFormat("%f", std::abs(temp)));
+    GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", std::abs(GetFrameTime())));
+    #endif // _DEBUG
 
     EndDrawing();
 }
@@ -309,10 +294,12 @@ void cGameManager::Input()
 
 
     // Enable auto-moving
+    #ifdef _DEBUG
     if(IsKeyPressed('W'))
     {
         auto_move = !auto_move;
     }
+    #endif // _DEBUG
 
     // Reset the level
     if(IsKeyPressed('R'))

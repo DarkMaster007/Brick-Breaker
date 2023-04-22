@@ -5,7 +5,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include <raylib.h>
 #include <raygui.h>
-#include "../Release/resources/includes/soundSelect.h"
+#include "soundSelect.h"
 
 #define MAX_INPUT_CHARS   9
 #define MAX_INPUT_INT     4
@@ -42,8 +42,6 @@ public:
     cSettings(int width, int height, int fullscreen_loaded)
     {
         fp = NULL;
-        font = LoadFont("fonts/rainyhearts16.ttf");
-        GuiSetFont(font);
         global_width = width;
         global_height = height;
         settings_screenWidth = global_width;
@@ -456,7 +454,11 @@ public:
                         }
                         if(pointLowerLeft){
                             brick[brick_id].position.x += 2;
-                            brick[brick_id].position.y += 2;
+                            brick[brick_id].position.y -= 2;
+                        }
+                        if(pointLowerRight){
+                            brick[brick_id].position.x -= 2;
+                            brick[brick_id].position.y -= 2;
                         }
                         return -1;
                     }
@@ -476,25 +478,25 @@ public:
         {
             if(brick[i].enabled)
             {
-                if(brick[i].type == 0)
+                if(brick[i].type == 1)
                 {
                     bColor = SKYBLUE;
                 }
-                if(brick[i].type == 1)
+                if(brick[i].type == 2)
                 {
                     bColor = BLUE;
                 }
-                if(brick[i].type == 2)
-                {
-                    bColor = GRAY;
-                }
                 if(brick[i].type == 3)
                 {
-                    bColor = GOLD;
+                    bColor = GRAY;
                 }
                 if(brick[i].type == 4)
                 {
                     bColor = ORANGE;
+                }
+                if(brick[i].type == 5)
+                {
+                    bColor = GOLD;
                 }
                 DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, bColor);
                 if(brick[i].selected)
@@ -553,6 +555,7 @@ public:
                         {
                             (float)(GetMouseX() - brick[brickCount].brickWidth / 2), (float)(GetMouseY() - brick[brickCount].brickHeight / 2)
                         };
+                        brick[brickCount].type = 1;
                         brickCount++;
                         printf("Brick amount on Screen: %d\n", brickCount);
                     }
@@ -614,30 +617,30 @@ public:
             {
                 if(brick[a].selected)
                 {
-                    if(brick[a].type != 4)      //????
+                    if(brick[a].type != 5)      //????
                     {
                         brick[a].type++;
                     }
                     else
                     {
-                        brick[a].type = 0;
+                        brick[a].type = 1;
                     }
                     switch(brick[a].type)
                     {
-                    case 0:
-                        printf("Normal\n");
-                        break;
                     case 1:
-                        printf("1HP\n");
+                        printf("Normal\n");
                         break;
                     case 2:
                         printf("2HP\n");
                         break;
                     case 3:
-                        printf("Gold(Unbreakable)\n");
+                        printf("3HP\n");
                         break;
                     case 4:
                         printf("Explosive\n\n");
+                        break;
+                    case 5:
+                        printf("Gold(Unbreakable)\n");
                         break;
                     }
                 }
@@ -709,16 +712,16 @@ public:
                 printf("Normal\n");
                 break;
             case 1:
-                printf("1HP\n");
-                break;
-            case 2:
                 printf("2HP\n");
                 break;
+            case 2:
+                printf("3HP\n");
+                break;
             case 3:
-                printf("Gold(Unbreakable)\n");
+                printf("Explosive\n\n");
                 break;
             case 4:
-                printf("Explosive\n\n");
+                printf("Gold(Unbreakable)\n");
                 break;
             }
         }

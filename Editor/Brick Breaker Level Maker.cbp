@@ -15,7 +15,6 @@
 					<Add option="-pg" />
 					<Add option="-g" />
 					<Add option="-O0" />
-					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-pg -lgmon" />
@@ -36,7 +35,6 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O3" />
-					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -60,6 +58,7 @@
 			<Add option="-Wnarrowing" />
 			<Add directory="../../Raylib Library/raylib/src" />
 			<Add directory="../../Raylib Library/raygui/src" />
+			<Add directory=".h" />
 		</Compiler>
 		<Linker>
 			<Add option="-static-libstdc++" />
@@ -71,8 +70,8 @@
 			<Add library="winmm" />
 			<Add directory="../../Raylib Library/raylib/src" />
 		</Linker>
-		<Unit filename="../Release/resources/includes/soundSelect.h" />
-		<Unit filename="editor.cpp" />
+		<Unit filename=".c/editor.cpp" />
+		<Unit filename=".h/soundSelect.h" />
 		<Unit filename="icon.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>

@@ -9,6 +9,7 @@ cBall::cBall(int posX, int posY, int ball_size)
     direction = STOP;
     originalSize = ball_size;
     current_size = ball_size;
+    speed = 300;
     randomizeMovement();
 }
 void cBall::Reset()

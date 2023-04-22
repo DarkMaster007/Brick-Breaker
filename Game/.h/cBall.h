@@ -9,7 +9,7 @@ private:
     float x, y;
     float originalX, originalY;
     int current_size, originalSize;
-    float speed{400};
+    float speed;
     eDir direction;
     float randomMovementOffset[2]{};
     std::mt19937 marsenneTwister{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count())};

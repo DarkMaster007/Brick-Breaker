@@ -12,7 +12,7 @@
 class cGameManager {
 private:
     FILE *fp;
-    Bricks *brick;
+    cBricks *brick;
     Image imgBrick;
     Texture2D texBrick;
     Texture2D texBall;

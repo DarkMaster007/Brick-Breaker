@@ -17,6 +17,7 @@
 					<Add option="-Og" />
 					<Add option="-g" />
 					<Add option="-O0" />
+					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Linker>
 					<Add option="-pg -lgmon" />

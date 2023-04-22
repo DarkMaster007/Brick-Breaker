@@ -1,96 +1,16 @@
 # depslib dependency file v1.0
-1638893665 source:c:\users\dark\desktop\c++\brick breaker raylib\editor\editor.cpp
-	<iostream>
-	"raylib.h"
-	<fstream>
-	<string>
-
-1635800772 c:\users\dark\desktop\c++\brick breaker raylib\editor\include\raylib.h
-	<stdarg.h>
-	<stdbool.h>
-
-1640894930 source:c:\users\dark\desktop\c++\brick-breaker\editor\editor.cpp
-	<iostream>
-	"raylib.h"
-	<fstream>
-	<string>
-	<stdlib.h>
-	<crtdbg.h>
-
-1635800772 c:\users\dark\desktop\c++\brick-breaker\editor\include\raylib.h
-	<stdarg.h>
-	<stdbool.h>
-
-1654511265 source:e:\windows folders\desktop\c++\brick-breaker\editor\editor.cpp
-	<iostream>
-	"raylib.h"
-	"raygui.h"
-	<fstream>
-	<cstring>
-	<math.h>
-
-1641589565 e:\windows folders\desktop\c++\brick-breaker\editor\include\raylib.h
-	<stdarg.h>
-	<stdbool.h>
-
-1642428584 source:e:\windows folders\desktop\c++\brick-breaker\editor\icon.rc
-
-1647505485 source:c:\users\dark\documents\github\brick-breaker\editor\editor.cpp
-	<iostream>
-	"raylib.h"
-	<fstream>
-	<cstring>
-
-1647465019 c:\users\dark\documents\github\brick-breaker\editor\include\raylib.h
-	<stdarg.h>
-	<stdbool.h>
-
-1647465019 source:c:\users\dark\documents\github\brick-breaker\editor\icon.rc
-
-1647872724 source:d:\c++\brick-breaker\editor\editor.cpp
-	<iostream>
-	"raylib.h"
-	<fstream>
-	<cstring>
-
-1647465019 d:\c++\brick-breaker\editor\include\raylib.h
-	<stdarg.h>
-	<stdbool.h>
-
-1647465019 source:d:\c++\brick-breaker\editor\icon.rc
-
-1646251548 e:\windows folders\desktop\c++\brick-breaker\editor\include\raygui.h
-	"raylib.h"
-	<stdio.h>
-	<stdlib.h>
-	<string.h>
-	<stdarg.h>
-	<math.h>
-
-1667069957 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\editor.cpp
-	<raylib.h>
-	<raygui.h>
-	"../Release/resources/includes/soundSelect.h"
-
-1641589565 e:\windowsfolders\desktop\c++\brick-breaker\editor\include\raylib.h
-	<stdarg.h>
-	<stdbool.h>
-
-1646251548 e:\windowsfolders\desktop\c++\brick-breaker\editor\include\raygui.h
-	"raylib.h"
-	<stdio.h>
-	<stdlib.h>
-	<string.h>
-	<stdarg.h>
-	<math.h>
-
 1642428584 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\icon.rc
 
-1666985995 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+1682189698 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\.c\editor.cpp
+	<raylib.h>
+	<raygui.h>
+	"soundSelect.h"
+
+1681731091 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
 	<stdarg.h>
 	<stdbool.h>
 
-1666986015 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
+1681731110 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
 	"raylib.h"
 	<stdio.h>
 	<stdlib.h>
@@ -98,5 +18,5 @@
 	<stdarg.h>
 	<math.h>
 
-1666986619 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundselect.h
+1681831779 e:\windowsfolders\desktop\c++\brick-breaker\editor\.h\soundselect.h
 

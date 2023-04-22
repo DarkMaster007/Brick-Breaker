@@ -1,101 +1,10 @@
 #define RAYGUI_IMPLEMENTATION
-#include <raylib.h>
-#include <raygui.h>
-#include <stdio.h>
-#include "soundDeath.h"
-#include "soundSelect.h"
-#include "soundBounceGeneral.h"
-#include "soundBouncePaddle.h"
-#include <math.h>
-#include <time.h>
-#include <random>
-#include <chrono>
-
-#define MAX_BRICKS 300
-#define MAX_POWERUPS 6
-
-enum eDir{ STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
-enum eActivePowerups{ LASER = 0, CROSSHAIR = 1, EXTEND = 2, PIERCE = 3, FIREBALL = 4, NEXTLEVEL = 5 };
-
-class cBall {
-private:
-    float x, y;
-    float originalX, originalY;
-    int current_size, originalSize;
-    float speed{400};
-    eDir direction;
-    float randomMovementOffset[2]{};
-    std::mt19937 marsenneTwister{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count())};
-    std::uniform_int_distribution<> randomNrDistribution{1, 4};
-    std::uniform_int_distribution<> randomNrDirection{1, 4};
-public:
-    cBall(int posX, int posY, int ball_size) {
-        originalX = posX;
-        originalY = posY;
-        x = posX;
-        y = posY;
-        direction = STOP;
-        originalSize = ball_size;
-        current_size = ball_size;
-        randomizeMovement();
-    }
-    void Reset() {
-        x = originalX;
-        y = originalY;
-        direction = STOP;
-        current_size = originalSize;
-    }
-    void changeDirection(eDir d) {
-        direction = d;
-    }
-    void randomDirection() {
-        direction = (eDir)(randomNrDirection(marsenneTwister));
-    }
-    inline int getX() {
-        return x;
-    }
-    inline int getY() {
-        return y;
-    }
-    inline eDir getDirection() {
-        return direction;
-    }
-    inline void changeSize(int ball_size) {
-        current_size = ball_size;
-    }
-    inline int getSize() {
-        return current_size;
-    }
-    inline void randomizeMovement(){
-        randomMovementOffset[0] = randomNrDistribution(marsenneTwister) / 10.0f;
-        randomMovementOffset[1] = randomNrDistribution(marsenneTwister) / 10.0f;
-    }
-    void Move() {
-        switch (direction) {
-        case STOP:
-            break;
-        case UPLEFT:
-            x-=(speed + randomMovementOffset[0]) * GetFrameTime();
-            y-=(speed + randomMovementOffset[1]) * GetFrameTime();
-            break;
-        case DOWNLEFT:
-            x-=(speed + randomMovementOffset[0]) * GetFrameTime();
-            y+=(speed + randomMovementOffset[1]) * GetFrameTime();
-            break;
-        case UPRIGHT:
-            x+=(speed + randomMovementOffset[0]) * GetFrameTime();
-            y-=(speed + randomMovementOffset[1]) * GetFrameTime();
-            break;
-        case DOWNRIGHT:
-            x+=(speed + randomMovementOffset[0]) * GetFrameTime();
-            y+=(speed + randomMovementOffset[1]) * GetFrameTime();
-            break;
-        default:
-            direction = STOP;
-            break;
-        }
-    }
-};
+#include "defines.h"
+#include "cBall.h"
+#include "cBricks.h"
+#include "cPaddle.h"
+#include "cPowerup.h"
+#include "cCollisionManager.h"
 
 typedef struct powerup {
     eActivePowerups type;

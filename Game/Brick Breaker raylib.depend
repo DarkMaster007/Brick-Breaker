@@ -53,7 +53,7 @@
 	<random>
 	<chrono>
 
-1666982395 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+1681731091 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
 	<stdarg.h>
 	<stdbool.h>
 
@@ -65,7 +65,7 @@
 
 1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncepaddle.h
 
-1668113218 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
+1681731110 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
 	"raylib.h"
 	<stdio.h>
 	<stdlib.h>
@@ -73,7 +73,8 @@
 	<stdarg.h>
 	<math.h>
 
-1682173945 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cball.cpp
+1682177152 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cball.cpp
+	"cBall.h"
 
 1682173938 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cbricks.cpp
 
@@ -84,4 +85,44 @@
 1682173947 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpaddle.cpp
 
 1682173950 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpowerup.cpp
+
+1682176518 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\main.cpp
+	"defines.h"
+	"cBall.h"
+	"cBricks.h"
+	"cPaddle.h"
+	"cPowerup.h"
+	"cCollisionManager.h"
+
+1682176518 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\defines.h
+	<raylib.h>
+	<raygui.h>
+	<stdio.h>
+	"soundDeath.h"
+	"soundSelect.h"
+	"soundBounceGeneral.h"
+	"soundBouncePaddle.h"
+	<math.h>
+	<time.h>
+	<random>
+	<chrono>
+
+1681831779 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\sounddeath.h
+
+1681831779 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\soundselect.h
+
+1681831779 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\soundbouncegeneral.h
+
+1681831779 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\soundbouncepaddle.h
+
+1682177165 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cball.h
+	"defines.h"
+
+1682174010 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cbricks.h
+
+1682174002 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpaddle.h
+
+1682173994 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpowerup.h
+
+1682174012 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\ccollisionmanager.h
 

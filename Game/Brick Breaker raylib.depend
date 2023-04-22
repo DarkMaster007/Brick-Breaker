@@ -40,7 +40,7 @@
 
 1642428584 source:e:\windowsfolders\desktop\c++\brick-breaker\game\icon.rc
 
-1681491985 source:e:\windowsfolders\desktop\c++\brick-breaker\game\main.cpp
+1669840031 source:e:\windowsfolders\desktop\c++\brick-breaker\game\main.cpp
 	<raylib.h>
 	<raygui.h>
 	<stdio.h>
@@ -53,19 +53,19 @@
 	<random>
 	<chrono>
 
-1679076459 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+1666982395 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
 	<stdarg.h>
 	<stdbool.h>
 
-1667864731 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\sounddeath.h
+1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\sounddeath.h
 
-1667864731 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundselect.h
+1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundselect.h
 
-1667864731 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncegeneral.h
+1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncegeneral.h
 
-1667864731 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncepaddle.h
+1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncepaddle.h
 
-1678229469 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
+1668113218 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
 	"raylib.h"
 	<stdio.h>
 	<stdlib.h>
@@ -73,84 +73,15 @@
 	<stdarg.h>
 	<math.h>
 
-1681491919 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\powerup.cpp
-	"Powerup.h"
+1682173945 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cball.cpp
 
-1681492009 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\powerup.h
-	<raylib.h>
+1682173938 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cbricks.cpp
 
-1681730127 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cball.cpp
-	"cBall.h"
+1682173935 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\ccollisionmanager.cpp
 
-1681725788 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cball.h
-	"defines.h"
+1682173941 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cgamemanager.cpp
 
-1681579965 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\defines.h
-	<raylib.h>
-	<raygui.h>
-	<stdio.h>
-	"soundDeath.h"
-	"soundSelect.h"
-	"soundBounceGeneral.h"
-	"soundBouncePaddle.h"
-	<math.h>
-	<time.h>
-	<random>
-	<chrono>
+1682173947 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpaddle.cpp
 
-1667864731 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\sounddeath.h
-
-1667864731 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\soundselect.h
-
-1667864731 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\soundbouncegeneral.h
-
-1667864731 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\soundbouncepaddle.h
-
-1681553792 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\main.cpp
-	"defines.h"
-	"cGameManager.h"
-
-1681499785 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpowerup.h
-	"defines.h"
-
-1681497510 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpowerup.cpp
-	"cPowerup.h"
-
-1681494791 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cball.h
-	"defines.h"
-
-1681494272 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpowerup.h
-	"defines.h"
-
-1681730127 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpaddle.cpp
-	"cPaddle.h"
-
-1681725863 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpaddle.h
-	"defines.h"
-
-1681729978 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cgamemanager.h
-	"defines.h"
-	"cBall.h"
-	"cPaddle.h"
-	"cPowerup.h"
-	"cBricks.h"
-	"cCollisionManager.h"
-
-1681730398 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cgamemanager.cpp
-	"cGameManager.h"
-
-1681730127 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cbricks.cpp
-	"cBricks.h"
-
-1681725895 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cbricks.h
-	"defines.h"
-
-1681727906 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\ccollisionmanager.cpp
-	"cCollisionManager.h"
-
-1681727925 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\ccollisionmanager.h
-	"defines.h"
-	"cBall.h"
-	"cPaddle.h"
-	"cBricks.h"
+1682173950 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpowerup.cpp
 

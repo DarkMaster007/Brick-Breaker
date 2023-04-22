@@ -1,5 +1,17 @@
 #include "cBricks.h"
 
+Texture2D cBricks::texture;
+
+cBricks::cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, int loadedType, Texture2D tex){
+    position.x = loadedX;
+    position.y = loadedY;
+    brickWidth = loadedWidth;
+    brickHeight = loadedHeight;
+    type = loadedType;
+    enabled = true;
+    if(texture.id == 0) texture = tex;
+}
+
 Color cBricks::getColor(){
     switch(type){
         case 1: return SKYBLUE;

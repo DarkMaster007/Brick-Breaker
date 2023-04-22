@@ -1,5 +1,7 @@
 #include "cGameManager.h"
 
+double cGameManager::startTimer = 0;
+
 cGameManager::cGameManager()
 {
     SetRandomSeed(time(NULL));
@@ -36,13 +38,14 @@ cGameManager::cGameManager()
 
     //Load and resize image and then convert it to texture
     imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
+    ImageResize(&imgBrick, 100*10, 70*10);
+    texBrick = LoadTextureFromImage(imgBrick);
     Image imgBall = LoadImage("..//resources//Breakout-Ball.gif");
     ImageResize(&imgBall, ball->getSize() * 2, ball->getSize() * 2);
     texBall = LoadTextureFromImage(imgBall);
     texPaddleEdge_L = LoadTexture("..//resources//Breakout-Paddle_L.png");
     texPaddleEdge_R = LoadTexture("..//resources//Breakout-Paddle_R.png");
     texPaddleBody = LoadTexture("..//resources//Breakout-Paddle_middle.png");
-    texPowerup = LoadTexture("..//resources//powerup_placeholder.png");
     Image imgPowerup = LoadImage("..//resources//powerup_placeholder.png");
     ImageResize(&imgPowerup, GetScreenWidth() * 0.04, GetScreenHeight() * 0.04);
     texPowerup = LoadTextureFromImage(imgPowerup);
@@ -98,64 +101,64 @@ void cGameManager::loadLevel()
     int i = 0;
     int tempWidth, tempHeight;
     int levelWidth, levelHeight;
-    int brickPosX, brickPosY, brickWidth, brickHeight, brickType;
+    float brickPosX, brickPosY;
+    int brickWidth, brickHeight, brickType;
     brickCount = 0;
+
     while(!feof(fp))
     {
-        fscanf(fp, "%d %d %f %f %d %d %d", &levelWidth, &levelHeight, &brick[i].position.x, &brick[i].position.y, &brick[i].brickWidth, &brick[i].brickHeight, &brick[i].type);
+        fscanf(fp, "%d %d %f %f %d %d %d", &levelWidth, &levelHeight, &brickPosX, &brickPosY, &brickWidth, &brickHeight, &brickType);
         if(width != levelWidth || height != levelHeight)
         {
             tempWidth = width / levelWidth;
             tempHeight = height / levelHeight;
-            brick[i].position.x *= tempWidth;
-            brick[i].position.y *= tempHeight;
-            brick[i].brickWidth *= (tempWidth*1.5);
-            brick[i].brickHeight *= (tempHeight*1.2);
+            brickPosX *= tempWidth;
+            brickPosY *= tempHeight;
+            brickWidth *= (tempWidth*1.5);
+            brickHeight *= (tempHeight*1.2);
             //cout<<"X mod: "<<tempWidth<<endl<<"Y mod: "<<tempHeight<<endl;
             //cout<<"Level res to game res ratio is: "<<tempWidth<<" to "<<tempHeight<<endl;
         }
         //X clamping
-        if(brick[i].position.x < 10)
+        if(brickPosX < 10)
         {
-            brick[i].position.x += 50;
-            if(brick[i].position.x < 10)
+            brickPosX += 50;
+            if(brickPosX < 10)
             {
-                brick[i].position.x = 11;
+                brickPosX = 11;
             }
         }
-        if(brick[i].position.x + brick[i].brickWidth > width - 10)
+        if(brickPosX + brickWidth > width - 10)
         {
-            brick[i].position.x -= 50;
-            if(brick[i].position.x < 10)
+            brickPosX -= 50;
+            if(brickPosX < 10)
             {
-                brick[i].position.x = width - 11 - brick[i].brickWidth;
+                brickPosX = width - 11 - brickWidth;
             }
         }
         //
         //Y clamping
-        if(brick[i].position.y + brick[i].brickHeight > GetScreenHeight() - 350)
+        if(brickPosY + brickHeight > GetScreenHeight() - 350)
         {
-            brick[i].position.y -= 25;
-            if(brick[i].position.y > GetScreenHeight() - 350)
+            brickPosY -= 25;
+            if(brickPosY > GetScreenHeight() - 350)
             {
-                brick[i].position.y = GetScreenHeight() - 351 - brick[i].brickHeight;
+                brickPosY = GetScreenHeight() - 351 - brickHeight;
             }
         }
-        if(brick[i].position.y < 0)
+        if(brickPosY < 0)
         {
-            brick[i].position.y += 50;
-            if(brick[i].position.y < 0)
+            brickPosY += 50;
+            if(brickPosY < 0)
             {
-                brick[i].position.y = 11;
+                brickPosY = 11;
             }
         }
         //
-        brick[i].enabled = true;
+        new (&brick[i]) cBricks(brickPosX, brickPosY, brickWidth, brickHeight, brickType, texBrick);
         i++;
         brickCount++;
     }
-    ImageResize(&imgBrick, brick[0].brickWidth, brick[0].brickHeight);
-    texBrick = LoadTextureFromImage(imgBrick);
     fclose(fp);
 }
 
@@ -198,10 +201,11 @@ void cGameManager::Draw()
     {
         if(brick[i].enabled)
         {
-            DrawTexture(texBrick, brick[i].position.x, brick[i].position.y, brick[i].getColor());
+            DrawTexturePro(texBrick, Rectangle{0, 0, texBrick.width, texBrick.height}, Rectangle{brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight},Vector2{0,0}, 0.0f, brick[i].getColor());
 
             //Dev stuff:
             #ifdef _DEBUG
+            DrawText(TextFormat("%d", i+1), brick[i].position.x + brick[i].brickWidth / 2, brick[i].position.y + brick[i].brickHeight / 2, 5, RED);
             DrawText(TextFormat("%d", i+1), brick[i].position.x + brick[i].brickWidth / 2, brick[i].position.y + brick[i].brickHeight / 2, 5, RED);
             #endif // _DEBUG
         }
@@ -251,7 +255,11 @@ void cGameManager::Draw()
     #ifdef _DEBUG
     DrawRectangleRec(borderBottom,RED);
     DrawFPS(10,10);
-    GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", std::abs(GetFrameTime())));
+    //GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", std::abs(GetFrameTime())));
+    if(ball->getDirection() != STOP)
+    GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", GetTime() - startTimer));
+    else
+    GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, "0.00000");
     #endif // _DEBUG
 
     EndDrawing();
@@ -330,6 +338,7 @@ void cGameManager::Input()
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
         {
             ball->changeDirection(UPRIGHT);
+            startTimer = GetTime();
         }
     }
 }
@@ -410,6 +419,14 @@ Vector2 cGameManager::BrickCollision()
 
 void cGameManager::Logic()
 {
+    if(GetTime() - startTimer > 60.0f){
+        if(fmod(GetTime() - startTimer,10.0) < 0.05){
+            for(int i = 0; i < brickCount; i++){
+                brick[i].position.y += 5;
+            }
+        }
+    }
+
     Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
 
     int movement_speed_paddle = movement_speed_paddle_base;

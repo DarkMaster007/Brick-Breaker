@@ -11,6 +11,7 @@
 
 class cGameManager {
 private:
+    static double startTimer;
     FILE *fp;
     cBricks *brick;
     Image imgBrick;

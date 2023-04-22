@@ -6,52 +6,6 @@
 #include "cPowerup.h"
 #include "cCollisionManager.h"
 
-typedef struct powerup {
-    eActivePowerups type;
-    Vector2 position;
-    bool enabled;
-} powerup;
-
-class cPaddle {
-private:
-    int x, y;
-    int originalX, originalY;
-    int paddle_width, paddle_height;
-    int bounceReverseArea;           // How big the area is where the ball goes back instead of forward
-public:
-    cPaddle(int posX, int posY, int width, int height) {
-        originalX = posX;
-        originalY = posY;
-        x = posX;
-        y = posY;
-        paddle_width = width;
-        paddle_height = height;
-        bounceReverseArea = 13;
-    }
-    inline int getX() {
-        return x;
-    }
-    inline int getY() {
-        return y;
-    }
-    void Reset() {
-        x = originalX;
-        y = originalY;
-    }
-    inline void moveLeft(int pixels) {
-        x -= pixels;
-    }
-    inline void moveRight(int pixels) {
-        x += pixels;
-    }
-    inline Vector2 getSize() {
-        return {(float)paddle_width, (float)paddle_height};
-    }
-    inline int getBounceReverseArea() {
-        return bounceReverseArea;
-    }
-};
-
 typedef struct Bricks {
     Vector2 position;
     int brickWidth;

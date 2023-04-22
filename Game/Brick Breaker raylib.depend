@@ -86,7 +86,7 @@
 
 1682173950 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpowerup.cpp
 
-1682176518 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\main.cpp
+1682178717 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\main.cpp
 	"defines.h"
 	"cBall.h"
 	"cBricks.h"
@@ -120,9 +120,10 @@
 
 1682174010 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cbricks.h
 
-1682174002 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpaddle.h
+1682178814 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpaddle.h
+	"defines.h"
 
-1682173994 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpowerup.h
+1682178427 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpowerup.h
 
 1682174012 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\ccollisionmanager.h
 

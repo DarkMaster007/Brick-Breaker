@@ -14,8 +14,6 @@ private:
     static double startTimer;
     FILE *fp;
     cBricks *brick;
-    Image imgBrick;
-    Texture2D texBrick;
     Texture2D texBall;
     Texture2D texPaddleEdge_L;
     Texture2D texPaddleEdge_R;
@@ -61,6 +59,6 @@ public:
     void Logic();
     void reset();
     void checkWin();
-    void cleanup();
     int Run();
+    ~cGameManager();
 };

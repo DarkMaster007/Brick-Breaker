@@ -15,6 +15,7 @@
 #include <chrono>
 
 #define MAX_BRICKS 300
+#define MAX_BALLS 10
 #define MAX_POWERUPS 6
 
 enum eDir{ STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};

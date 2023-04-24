@@ -37,9 +37,6 @@ cGameManager::cGameManager()
     c_powerup = (powerup *)MemAlloc(6*sizeof(powerup));
 
     //Load and resize image and then convert it to texture
-    imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
-    ImageResize(&imgBrick, 100*10, 70*10);
-    texBrick = LoadTextureFromImage(imgBrick);
     Image imgBall = LoadImage("..//resources//Breakout-Ball.gif");
     ImageResize(&imgBall, ball->getSize() * 2, ball->getSize() * 2);
     texBall = LoadTextureFromImage(imgBall);
@@ -97,6 +94,9 @@ cGameManager::cGameManager()
 
 void cGameManager::loadLevel()
 {
+    Image imgBrick = LoadImage("..//resources//Breakout-Brick.gif");
+    ImageResize(&imgBrick, 100*10, 70*10);
+    Texture2D texBrick = LoadTextureFromImage(imgBrick);
     fp = fopen("..\\config\\level.txt", "r");
     int i = 0;
     int tempWidth, tempHeight;
@@ -201,7 +201,7 @@ void cGameManager::Draw()
     {
         if(brick[i].enabled)
         {
-            DrawTexturePro(texBrick, Rectangle{0, 0, texBrick.width, texBrick.height}, Rectangle{brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight},Vector2{0,0}, 0.0f, brick[i].getColor());
+            DrawTexturePro(cBricks::texture, Rectangle{0, 0, cBricks::texture.width, cBricks::texture.height}, Rectangle{brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight},Vector2{0,0}, 0.0f, brick[i].getColor());
 
             //Dev stuff:
             #ifdef _DEBUG
@@ -603,20 +603,22 @@ void cGameManager::checkWin()
     a -= 1;
     if(a == 0)
     {
-        //win = 1;
-        //cout<<"WIN!!!!"<<endl;
         reset();
     }
 }
 
-void cGameManager::cleanup()
+cGameManager::~cGameManager()
 {
+    for(int i = 0; i < brickCount; i++){
+        brick[i].~cBricks();
+    }
     MemFree(brick);
     MemFree(c_powerup);
     delete[] ball;
     delete[] paddle;
     _fcloseall();
     CloseWindow();
+    printf("Destructor finished.\n");
 }
 
 int cGameManager::Run()
@@ -629,6 +631,5 @@ int cGameManager::Run()
         checkWin();
         Draw();
     }
-    cleanup();
     return 0;
 }

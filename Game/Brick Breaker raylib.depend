@@ -73,7 +73,7 @@
 	<stdarg.h>
 	<math.h>
 
-1682193182 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cball.cpp
+1682357776 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cball.cpp
 	"cBall.h"
 
 1682196175 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cbricks.cpp
@@ -81,7 +81,7 @@
 
 1682173935 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\ccollisionmanager.cpp
 
-1682197417 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cgamemanager.cpp
+1682356785 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cgamemanager.cpp
 	"cGameManager.h"
 
 1682178814 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpaddle.cpp
@@ -92,7 +92,7 @@
 1682180740 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\main.cpp
 	"cGameManager.h"
 
-1682176518 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\defines.h
+1682347307 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\defines.h
 	<raylib.h>
 	<raygui.h>
 	<stdio.h>
@@ -113,7 +113,7 @@
 
 1681831779 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\soundbouncepaddle.h
 
-1682193182 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cball.h
+1682357776 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cball.h
 	"defines.h"
 
 1682196025 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cbricks.h
@@ -126,7 +126,7 @@
 
 1682174012 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\ccollisionmanager.h
 
-1682198223 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cgamemanager.h
+1682357730 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cgamemanager.h
 	"defines.h"
 	"cBall.h"
 	"cBricks.h"

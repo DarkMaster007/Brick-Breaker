@@ -35,7 +35,7 @@
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-flto" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 				</Compiler>
 				<Linker>
 					<Add option="-flto" />

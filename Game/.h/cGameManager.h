@@ -14,7 +14,6 @@ private:
     static double startTimer;
     FILE *fp;
     cBricks *brick;
-    Texture2D texBall;
     Texture2D texPaddleEdge_L;
     Texture2D texPaddleEdge_R;
     Texture2D texPaddleBody;
@@ -25,7 +24,7 @@ private:
     Rectangle borderRight;          // right border rectangle, for collision and drawing
     Rectangle borderTop;            // top border rectangle, for collision and drawing
     Rectangle borderBottom;         // bottom border rectangle, for collision and drawing
-    powerup *c_powerup;              // Handles powerups
+    cPowerup *c_powerup;              // Handles powerups
 
     Wave waveBounceGeneral;
     Wave waveBouncePaddle;
@@ -42,9 +41,6 @@ private:
     int width,height;               // Screen width and height
     bool fullscreen;                // whether it's full-screen or not
     bool quit;                      // whether the game should quit or not
-    int brickCount;
-    float movement_speed_paddle_base; // base speed for paddle
-    float movement_speed_ball_base;   // base speed for ball
     bool auto_move;                  // whether the paddle automatically moves or not. helps with testing simple stuff
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
     bool pause;

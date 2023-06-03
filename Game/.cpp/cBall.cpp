@@ -1,7 +1,14 @@
 #include "cBall.h"
+#include "defines.h"
+
+Texture2D cBall::texBall;
 
 cBall::cBall(int posX, int posY, int ball_size)
 {
+    Image imgBall = LoadImage(TEX_BALL);
+    ImageResize(&imgBall, ball_size * 2, ball_size * 2);
+    texBall = LoadTextureFromImage(imgBall);
+
     originalX = posX;
     originalY = posY;
     x = posX;

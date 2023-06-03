@@ -5,21 +5,19 @@ double cGameManager::startTimer = 0;
 cGameManager::cGameManager()
 {
     SetRandomSeed(time(NULL));
-    fp = NULL;
     //Open settings.txt file
     fp = fopen("..\\config\\settings.txt", "r");
     //Initialize all vars with their proper values
-    brickCount = 0;
     quit = 0;
-    movement_speed_paddle_base = 8;
-    movement_speed_ball_base = 1.6;
     auto_move = 0;
     win = 0;
     pause = 0;
 
     //Load the settings file
     fscanf(fp, "%d %d %d", &width, &height, (int*)&fullscreen);
-    //printf("Width: %d\nHeight: %d\nFullscreen: %d\n", width, height, fullscreen);
+#ifdef _DEBUG
+    printf("Width: %d\nHeight: %d\nFullscreen: %d\n", width, height, fullscreen);
+#endif // _DEBUG
 
     fclose(fp);
 
@@ -34,12 +32,9 @@ cGameManager::cGameManager()
     ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10);
     paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
     brick = (cBricks *)MemAlloc(MAX_BRICKS*sizeof(cBricks));  //MemAlloc() is equivalent to malloc();
-    c_powerup = (powerup *)MemAlloc(6*sizeof(powerup));
+    c_powerup = (cPowerup *)MemAlloc(6*sizeof(cPowerup));
 
     //Load and resize image and then convert it to texture
-    Image imgBall = LoadImage("..//resources//Breakout-Ball.gif");
-    ImageResize(&imgBall, ball->getSize() * 2, ball->getSize() * 2);
-    texBall = LoadTextureFromImage(imgBall);
     texPaddleEdge_L = LoadTexture("..//resources//Breakout-Paddle_L.png");
     texPaddleEdge_R = LoadTexture("..//resources//Breakout-Paddle_R.png");
     texPaddleBody = LoadTexture("..//resources//Breakout-Paddle_middle.png");
@@ -103,7 +98,7 @@ void cGameManager::loadLevel()
     int levelWidth, levelHeight;
     float brickPosX, brickPosY;
     int brickWidth, brickHeight, brickType;
-    brickCount = 0;
+    cBricks::brickCount = 0;
 
     while(!feof(fp))
     {
@@ -116,8 +111,10 @@ void cGameManager::loadLevel()
             brickPosY *= tempHeight;
             brickWidth *= (tempWidth*1.5);
             brickHeight *= (tempHeight*1.2);
-            //cout<<"X mod: "<<tempWidth<<endl<<"Y mod: "<<tempHeight<<endl;
-            //cout<<"Level res to game res ratio is: "<<tempWidth<<" to "<<tempHeight<<endl;
+#ifdef _DEBUG
+            printf("X mod: %d/nY mod: %d/n",tempWidth,tempHeight);
+            printf("Level res to game res ratio is: %d to %d./n",tempWidth,tempHeight);
+#endif // _DEBUG
         }
         //X clamping
         if(brickPosX < 10)
@@ -157,37 +154,25 @@ void cGameManager::loadLevel()
         //
         new (&brick[i]) cBricks(brickPosX, brickPosY, brickWidth, brickHeight, brickType, texBrick);
         i++;
-        brickCount++;
+        cBricks::brickCount++;
     }
     fclose(fp);
 }
 
 void cGameManager::SpawnPowerup(int brickIndex)
 {
-    int change_percent = 35;        // change this to change chance; I think that's how this works right?
-    int generated_num = GetRandomValue(0, 1000);
-    if(generated_num <= change_percent * 10)
+    if(!brick[brickIndex].enabled)
     {
-        if(!brick[brickIndex].enabled)
+        int i, change = 0;
+        for(i = 0; i < 6; i++)
         {
-            int i = 0;
-            bool changed = 0;
-            do
+            if(!c_powerup[i].getEnabled())
             {
-                if(c_powerup[i].enabled == 0)
-                {
-                    printf("Powerup enabled!");
-                    c_powerup[i].enabled = 1;
-                    c_powerup[i].type = (eActivePowerups)GetRandomValue(0, 5);      // TODO (DarkMaster#7#10/13/22): Implement and actual method to get powerups. Next level should be low chance.
-                    printf(" Type: %i\n", c_powerup[i].type);
-                    changed = 1;                    // TODO (DarkMaster#4#10/12/22): To change, I don't think "changed" does anything
-                    c_powerup[i].position.x = brick[brickIndex].position.x;
-                    c_powerup[i].position.y = brick[brickIndex].position.y;
-                }
-                i++;
+                break;
             }
-            while(changed == 0 && i < 6);
+            i++;
         }
+        c_powerup[i].spawnPowerup(brick[brickIndex]);
     }
 }
 
@@ -197,17 +182,17 @@ void cGameManager::Draw()
     ClearBackground(BLACK);
 
     //Loop to draw bricks
-    for(int i = 0; i < brickCount - 1; i++)
+    for(int i = 0; i < cBricks::brickCount - 1; i++)
     {
         if(brick[i].enabled)
         {
             DrawTexturePro(cBricks::texture, Rectangle{0, 0, cBricks::texture.width, cBricks::texture.height}, Rectangle{brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight},Vector2{0,0}, 0.0f, brick[i].getColor());
 
             //Dev stuff:
-            #ifdef _DEBUG
+#ifdef _DEBUG
             DrawText(TextFormat("%d", i+1), brick[i].position.x + brick[i].brickWidth / 2, brick[i].position.y + brick[i].brickHeight / 2, 5, RED);
             DrawText(TextFormat("%d", i+1), brick[i].position.x + brick[i].brickWidth / 2, brick[i].position.y + brick[i].brickHeight / 2, 5, RED);
-            #endif // _DEBUG
+#endif // _DEBUG
         }
     }
     //
@@ -236,61 +221,53 @@ void cGameManager::Draw()
     DrawTexturePro(texPaddleBody, Source, Destination, {0,0}, 0, WHITE);
 
     //Ball draw
-    DrawTexture(texBall, ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), WHITE);
+    DrawTexture(cBall::texBall, ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), WHITE);
 
     //Powerup / powerdown draw
     for(int i = 0; i < 6; i++)
     {
-        if(c_powerup[i].enabled)
+        if(c_powerup[i].getEnabled())
         {
-            int movement_speed_powerup = movement_speed_ball_base + GetRandomValue(0, 5);
-            movement_speed_powerup = movement_speed_powerup + movement_speed_powerup * GetFrameTime();
-            //printf("Powerup drawn!\n");
-            DrawTexture(texPowerup, c_powerup[i].position.x - 50, c_powerup[i].position.y - 25, WHITE);
-            c_powerup[i].position.y += movement_speed_powerup;
+            int movement_speed_powerup = GetRandomValue(300, 400) * GetFrameTime();
+            DrawTexture(texPowerup, c_powerup[i].getPosition().x - 50, c_powerup[i].getPosition().y - 25, WHITE);
+            c_powerup[i].setPosition(Vector2{c_powerup[i].getPosition().x,c_powerup[i].getPosition().y + movement_speed_powerup});
         }
     }
 
     //Debug stuff here:
-    #ifdef _DEBUG
+#ifdef _DEBUG
     DrawRectangleRec(borderBottom,RED);
     DrawFPS(10,10);
-    //GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", std::abs(GetFrameTime())));
     if(ball->getDirection() != STOP)
-    GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", GetTime() - startTimer));
+        GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", GetTime() - startTimer));
     else
-    GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, "0.00000");
-    #endif // _DEBUG
+        GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, "0.00000");
+#endif // _DEBUG
 
     EndDrawing();
 }
 
 void cGameManager::Input()
 {
-    int movement_speed_paddle = movement_speed_paddle_base;
-    movement_speed_paddle = movement_speed_paddle + movement_speed_paddle * GetFrameTime();
-    if(movement_speed_paddle > movement_speed_paddle_base * 1.5)
-    {
-        movement_speed_paddle = movement_speed_paddle_base * 1.5;
-    }
-
     //Mouse movement
     if(!auto_move && !pause)
     {
-        if(paddle->getX() - movement_speed_paddle >= 10)
+        if(paddle->getX() - paddle->getSpeed() >= 10)
         {
-            if(GetMouseDelta().x < 0 || IsKeyDown('A'))
+            if(paddle->getX() + paddle->getSize().x + paddle->getSpeed() <= GetScreenWidth() - 10)
             {
-                paddle->moveLeft(movement_speed_paddle + abs(GetMouseDelta().x));
+                if(GetMouseDelta().x < 0 || IsKeyDown('A'))
+                {
+                    paddle->moveLeft();
+                }
+                if(GetMouseDelta().x > 0 || IsKeyDown('D'))
+                {
+                    paddle->moveRight();
+                }
             }
+            else paddle->moveLeft(1);
         }
-        if(paddle->getX() + movement_speed_paddle + paddle->getSize().x <= GetScreenWidth() - 10)
-        {
-            if(GetMouseDelta().x > 0 || IsKeyDown('D'))
-            {
-                paddle->moveRight(movement_speed_paddle + abs(GetMouseDelta().x));
-            }
-        }
+        else paddle->moveRight(1);
     }
     //
 
@@ -302,12 +279,12 @@ void cGameManager::Input()
 
 
     // Enable auto-moving
-    #ifdef _DEBUG
+#ifdef _DEBUG
     if(IsKeyPressed('W'))
     {
         auto_move = !auto_move;
     }
-    #endif // _DEBUG
+#endif // _DEBUG
 
     // Reset the level
     if(IsKeyPressed('R'))
@@ -331,16 +308,6 @@ void cGameManager::Input()
         soundMute = !soundMute;
         SetMasterVolume(soundVolume * !soundMute);
     }
-
-    // Click to start the ball movement thing
-    if(ball->getDirection() == STOP)
-    {
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-        {
-            ball->changeDirection(UPRIGHT);
-            startTimer = GetTime();
-        }
-    }
 }
 
 Vector2 cGameManager::BrickCollision()
@@ -348,7 +315,7 @@ Vector2 cGameManager::BrickCollision()
     //Brick Collision
     Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
     Rectangle brick_collision;
-    for(int i = 0; i < brickCount - 1; i++)
+    for(int i = 0; i < cBricks::brickCount - 1; i++)
     {
         brick_collision = {brick[i].position.x, brick[i].position.y, (float)brick[i].brickWidth, (float)brick[i].brickHeight};
         if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && brick[i].enabled)
@@ -419,38 +386,48 @@ Vector2 cGameManager::BrickCollision()
 
 void cGameManager::Logic()
 {
-    if(GetTime() - startTimer > 60.0f){
-        if(fmod(GetTime() - startTimer,10.0) < 0.05){
-            for(int i = 0; i < brickCount; i++){
-                brick[i].position.y += 5;
+    // Click to start the ball movement thing
+    if(ball->getDirection() == STOP)
+    {
+        startTimer = GetTime();
+        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        {
+            ball->changeDirection(UPRIGHT);
+        }
+    }
+
+    //Make bricks fall after 60 seconds
+    if(ball->getDirection() != STOP && !pause)
+    {
+        if(GetTime() - startTimer > 60.0f)
+        {
+            if(fmod(GetTime() - startTimer,10.0) < 0.05)
+            {
+                for(int i = 0; i < cBricks::brickCount; i++)
+                {
+                    brick[i].position.y += 5;
+                }
             }
         }
     }
 
     Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
 
-    int movement_speed_paddle = movement_speed_paddle_base;
-    movement_speed_paddle = movement_speed_paddle + movement_speed_paddle * GetFrameTime();
-    if(movement_speed_paddle > movement_speed_paddle_base * 1.5)
-    {
-        movement_speed_paddle = movement_speed_paddle_base * 1.5;
-    }
-
     //Auto-movement for the paddle (doesn't work well anymore since I added the ability to send the ball back in same direction)
     if(auto_move)
     {
-        if(paddle->getX() - movement_speed_paddle > 10)
+        if(paddle->getX() - paddle->getSpeed() > 10)
         {
             if(ball->getX() < paddle->getX() + 25)
             {
-                paddle->moveLeft(movement_speed_paddle);
+                paddle->moveLeft();
             }
         }
-        if(paddle->getX() + movement_speed_paddle + paddle->getSize().x < GetScreenWidth() - 10)
+        if(paddle->getX() + paddle->getSize().x + paddle->getSpeed() < GetScreenWidth() - 10)
         {
             if(ball->getX() > paddle->getX() + 25)
             {
-                paddle->moveRight(movement_speed_paddle);
+                paddle->moveRight();
             }
         }
     }
@@ -510,7 +487,6 @@ void cGameManager::Logic()
     ball_collision = {(float)ball->getX(), (float)ball->getY()};
     if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderBottom))
     {
-        //cout<<"You Lose!"<<endl;
         PlaySound(soundDeath);
         reset();
     }
@@ -526,12 +502,10 @@ void cGameManager::Logic()
             if(ball->getX() < paddle->getX() + paddle->getBounceReverseArea())
             {
                 ball->changeDirection(UPLEFT);
-                //cout<<"LEFT"<<endl;
             }
             if(ball->getX() > paddle->getX() + paddle->getSize().x - paddle->getBounceReverseArea())
             {
                 ball->changeDirection(UPRIGHT);
-                //cout<<"RIGHT"<<endl;
             }
             if(ball->getX() >= paddle->getX() + paddle->getBounceReverseArea() && ball->getX() <= paddle->getX() + paddle->getSize().x - paddle->getBounceReverseArea())
             {
@@ -543,7 +517,6 @@ void cGameManager::Logic()
                 {
                     ball->changeDirection(UPRIGHT);
                 }
-                //cout<<"MIDDLE"<<endl;
             }
         }
         else
@@ -571,9 +544,9 @@ void cGameManager::Logic()
 
     for(int i = 0; i < 6; i++)
     {
-        if(c_powerup[i].position.y > GetScreenHeight() - 10)
+        if(c_powerup[i].getPosition().y > GetScreenHeight() - 10)
         {
-            c_powerup[i].enabled = 0;
+            c_powerup[i].setEnabled(0);
         }
     }
 }
@@ -585,7 +558,7 @@ void cGameManager::reset()
     loadLevel();
     for(int i = 0; i < 6; i++)
     {
-        c_powerup[i].enabled = 0;
+        c_powerup[i].setEnabled(0);
     }
     SetRandomSeed(time(NULL));
 }
@@ -593,7 +566,7 @@ void cGameManager::reset()
 void cGameManager::checkWin()
 {
     int a = 0;
-    for(int i = 0; i <= brickCount; i++)
+    for(int i = 0; i <= cBricks::brickCount; i++)
     {
         if(brick[i].type != 5)
         {
@@ -609,7 +582,8 @@ void cGameManager::checkWin()
 
 cGameManager::~cGameManager()
 {
-    for(int i = 0; i < brickCount; i++){
+    for(int i = 0; i < cBricks::brickCount; i++)
+    {
         brick[i].~cBricks();
     }
     MemFree(brick);

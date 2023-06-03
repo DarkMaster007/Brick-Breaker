@@ -8,6 +8,7 @@
 class cBricks{
 public:
     static Texture2D texture;
+    static int brickCount;
     Vector2 position;
     int brickWidth;
     int brickHeight;

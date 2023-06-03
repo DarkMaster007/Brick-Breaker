@@ -8,7 +8,8 @@ class cBall {
 private:
     float x, y;
     float originalX, originalY;
-    int current_size, originalSize;
+    int current_size;
+    int originalSize;
     float speed;
     eDir direction;
     float randomMovementOffset[2]{};
@@ -16,6 +17,8 @@ private:
     std::uniform_int_distribution<> randomNrDistribution{1, 4};
     std::uniform_int_distribution<> randomNrDirection{1, 4};
 public:
+    static Texture2D texBall;
+
     cBall(int posX, int posY, int ball_size);
     void Reset();
     inline void changeDirection(eDir d);

@@ -2,6 +2,8 @@
 
 Texture2D cBricks::texture;
 
+int cBricks::brickCount = 0;
+
 cBricks::cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, int loadedType, Texture2D tex){
     position.x = loadedX;
     position.y = loadedY;

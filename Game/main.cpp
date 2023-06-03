@@ -1,12 +1,9 @@
 //Original branch - just bug-fixing and cleanup necessary
-#include <iostream>
 #include <fstream>
 #include "include/raylib.h"
 #include <string.h>
 using std::fstream;
-using std::endl;
 using std::string;
-using std::cout;
 using std::ios;
 
 fstream loadLevelFile;
@@ -154,7 +151,6 @@ private:
     int movement_speed_ball_base;
     int ball_size;
     int auto_move;
-    int exceptions;
     bool win;
 public:
     cGameManager()
@@ -168,7 +164,6 @@ public:
         movement_speed = 10;
         ball_size = 10;
         auto_move = 0;
-        exceptions = 0;
         win = 0;
 
         game_settings>>width>>height;

@@ -5,8 +5,8 @@
 
 #include "defines.h"
 
-class cBricks{
-public:
+class cBricks {
+  public:
     static Texture2D texture;
     static int brickCount;
     Vector2 position;
@@ -15,6 +15,10 @@ public:
     int type;           //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
     bool enabled;
 
-    cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, int loadedType, Texture2D tex);
+    cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, int loadedType);
     Color getColor();
+    void Reset();
+    void Logic();
+    static void Draw(cBricks *brick);
+    void Input();
 };

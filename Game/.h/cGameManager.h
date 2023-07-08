@@ -10,21 +10,17 @@
 #include "cCollisionManager.h"
 
 class cGameManager {
-private:
+  private:
     static double startTimer;
     FILE *fp;
     cBricks *brick;
-    Texture2D texPaddleEdge_L;
-    Texture2D texPaddleEdge_R;
-    Texture2D texPaddleBody;
-    Texture2D texPowerup;
     cBall *ball;                    // ball object
     cPaddle *paddle;                // paddle object
     Rectangle borderLeft;           // left border rectangle, for collision and drawing
     Rectangle borderRight;          // right border rectangle, for collision and drawing
     Rectangle borderTop;            // top border rectangle, for collision and drawing
     Rectangle borderBottom;         // bottom border rectangle, for collision and drawing
-    cPowerup *c_powerup;              // Handles powerups
+    cPowerup *powerup;              // Handles powerups
 
     Wave waveBounceGeneral;
     Wave waveBouncePaddle;
@@ -38,14 +34,13 @@ private:
     float soundVolume;
     bool soundMute;
 
-    int width,height;               // Screen width and height
     bool fullscreen;                // whether it's full-screen or not
     bool quit;                      // whether the game should quit or not
     bool auto_move;                  // whether the paddle automatically moves or not. helps with testing simple stuff
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
     bool pause;
 
-public:
+  public:
     cGameManager();
     void loadLevel();
     void SpawnPowerup(int brickIndex);

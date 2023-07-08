@@ -3,8 +3,7 @@
 
 Texture2D cBall::texBall;
 
-cBall::cBall(int posX, int posY, int ball_size)
-{
+cBall::cBall(int posX, int posY, int ball_size) {
     Image imgBall = LoadImage(TEX_BALL);
     ImageResize(&imgBall, ball_size * 2, ball_size * 2);
     texBall = LoadTextureFromImage(imgBall);
@@ -16,25 +15,25 @@ cBall::cBall(int posX, int posY, int ball_size)
     direction = STOP;
     originalSize = ball_size;
     current_size = ball_size;
-    speed = 300;
+    speed = 250;
+    originalSpeed = speed;
+    acceleration = 0.017;
     randomizeMovement();
 }
-void cBall::Reset()
-{
+void cBall::Reset() {
     x = originalX;
     y = originalY;
     direction = STOP;
     current_size = originalSize;
+    speed = originalSpeed;
 }
-void cBall::randomizeMovement()
-{
+void cBall::randomizeMovement() {
     randomMovementOffset[0] = randomNrDistribution(marsenneTwister) / 10.0f;
     randomMovementOffset[1] = randomNrDistribution(marsenneTwister) / 10.0f;
 }
-void cBall::Move()
-{
-    switch (direction)
-    {
+void cBall::Move() {
+    if(direction != STOP) speed += speed * acceleration * GetFrameTime();
+    switch (direction) {
     case STOP:
         break;
     case UPLEFT:
@@ -57,4 +56,13 @@ void cBall::Move()
         direction = STOP;
         break;
     }
+}
+void cBall::Logic() {
+    //
+}
+void cBall::Draw(cBall *ball) {
+    DrawTexture(texBall, ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), WHITE);
+}
+void cBall::Input() {
+    //
 }

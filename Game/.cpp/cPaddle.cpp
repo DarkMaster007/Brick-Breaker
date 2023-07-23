@@ -62,6 +62,19 @@ void cPaddle::Draw(cPaddle *paddle) {
     Destination = {(float)(paddle->getX() + paddle->getBounceReverseArea()), (float)paddle->getY(), paddle->getSize().x -  2 * paddle->getBounceReverseArea(), paddle->getSize().y};
     DrawTexturePro(paddle->textureBody, Source, Destination, {0,0}, 0, WHITE);
 }
-void cPaddle::Input() {
+void cPaddle::Input(int autoMove, bool isPaused) {
+    //Paddle movement
+    if(!autoMove && !isPaused) {
+        if(getX() - getSpeed() >= 10) {
+            if(getX() + getSize().x + getSpeed() <= GetScreenWidth() - 10) {
+                if(GetMouseDelta().x < 0 || IsKeyDown('A')) {
+                    moveLeft();
+                }
+                if(GetMouseDelta().x > 0 || IsKeyDown('D')) {
+                    moveRight();
+                }
+            } else moveLeft(1);
+        } else moveRight(1);
+    }
     //
 }

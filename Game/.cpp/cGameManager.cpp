@@ -7,7 +7,7 @@ cGameManager::cGameManager() {
 
     //Initialize all vars with their proper values
     quit = 0;
-    auto_move = 0;
+    autoMove = 0;
     win = 0;
     pause = 0;
     //
@@ -131,7 +131,6 @@ void cGameManager::Draw() {
     DrawRectangleRec(borderTop,BROWN);
     DrawRectangleRec(borderLeft,BROWN);
     DrawRectangleRec(borderRight,BROWN);
-
     //Debug Red Bottom Border:
 #ifdef _DEBUG
     DrawRectangleRec(borderBottom,RED);
@@ -146,31 +145,10 @@ void cGameManager::Draw() {
 }
 
 void cGameManager::Input() {
-    //Mouse movement
-    if(!auto_move && !pause) {
-        if(paddle->getX() - paddle->getSpeed() >= 10) {
-            if(paddle->getX() + paddle->getSize().x + paddle->getSpeed() <= GetScreenWidth() - 10) {
-                if(GetMouseDelta().x < 0 || IsKeyDown('A')) {
-                    paddle->moveLeft();
-                }
-                if(GetMouseDelta().x > 0 || IsKeyDown('D')) {
-                    paddle->moveRight();
-                }
-            } else paddle->moveLeft(1);
-        } else paddle->moveRight(1);
-    }
-    //
-
-    //Lock mouse position so it doesn't go outside of screen
-    if(!pause) {
-        SetMousePosition(GetScreenWidth() / 2,GetScreenHeight() / 2);
-    }
-
-
     // Enable auto-moving
 #ifdef _DEBUG
     if(IsKeyPressed('W')) {
-        auto_move = !auto_move;
+        autoMove = !autoMove;
     }
 #endif // _DEBUG
 
@@ -191,6 +169,13 @@ void cGameManager::Input() {
     if(IsKeyPressed('M')) {
         soundMute = !soundMute;
         SetMasterVolume(soundVolume * !soundMute);
+    }
+
+    paddle->Input(autoMove, pause);
+
+    //Lock mouse position so it doesn't go outside of screen
+    if(!pause) {
+        SetMousePosition(GetScreenWidth() / 2,GetScreenHeight() / 2);
     }
 }
 
@@ -273,7 +258,7 @@ void cGameManager::Logic() {
     Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
 
     //Auto-movement for the paddle (doesn't work well anymore since I added the ability to send the ball back in same direction)
-    if(auto_move) {
+    if(autoMove) {
         if(paddle->getX() - paddle->getSpeed() > 10) {
             if(ball->getX() < paddle->getX() + 25) {
                 paddle->moveLeft();

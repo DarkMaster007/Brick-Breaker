@@ -30,7 +30,7 @@ class cPaddle {
     void Reset();
     void Logic();
     static void Draw(cPaddle *paddle);
-    void Input();
+    void Input(int autoMove, bool isPaused);
 };
 
 int cPaddle::getX() {

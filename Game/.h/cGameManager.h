@@ -36,7 +36,7 @@ class cGameManager {
 
     bool fullscreen;                // whether it's full-screen or not
     bool quit;                      // whether the game should quit or not
-    bool auto_move;                  // whether the paddle automatically moves or not. helps with testing simple stuff
+    bool autoMove;                  // whether the paddle automatically moves or not. helps with testing simple stuff
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
     bool pause;
 

@@ -11,16 +11,17 @@
 
 class cGameManager {
   private:
-    static double startTimer;
     FILE *fp;
+
     cBricks *brick;
     cBall *ball;                    // ball object
     cPaddle *paddle;                // paddle object
+    cPowerup *powerup;              // Handles powerups
+
     Rectangle borderLeft;           // left border rectangle, for collision and drawing
     Rectangle borderRight;          // right border rectangle, for collision and drawing
     Rectangle borderTop;            // top border rectangle, for collision and drawing
     Rectangle borderBottom;         // bottom border rectangle, for collision and drawing
-    cPowerup *powerup;              // Handles powerups
 
     Wave waveBounceGeneral;
     Wave waveBouncePaddle;
@@ -38,7 +39,8 @@ class cGameManager {
     bool quit;                      // whether the game should quit or not
     bool autoMove;                  // whether the paddle automatically moves or not. helps with testing simple stuff
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
-    bool pause;
+    bool isPaused;
+    static double startTimer;
 
   public:
     cGameManager();

@@ -1,4 +1,5 @@
 #include "cBricks.h"
+#include "cPowerup.h"
 
 Texture2D cBricks::texture;
 
@@ -62,8 +63,58 @@ Color cBricks::getColor() {
         return GOLD;
     }
 }
-void cBricks::Logic() {
-    //
+void cBricks::Logic(cBricks *brick, cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
+    //Brick Collision
+    Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
+    Rectangle brick_collision;
+    for(int i = 0; i < cBricks::brickCount - 1; i++) {
+        brick_collision = {brick[i].position.x, brick[i].position.y, (float)brick[i].brickWidth, (float)brick[i].brickHeight};
+        if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && brick[i].enabled) {
+            if(ball->getX() <= brick[i].position.x) {
+                if(ball->getDirection() == UPRIGHT) {
+                    ball->changeDirection(UPLEFT);
+                } else {
+                    ball->changeDirection(DOWNLEFT);
+                }
+            } else if(ball->getX() >= brick[i].position.x + brick[i].brickWidth) {
+                if(ball->getDirection() == UPLEFT) {
+                    ball->changeDirection(UPRIGHT);
+                } else {
+                    ball->changeDirection(DOWNRIGHT);
+                }
+            } else if(ball->getY() <= brick[i].position.y) {
+                if(ball->getDirection() == DOWNLEFT) {
+                    ball->changeDirection(UPLEFT);
+                } else {
+                    ball->changeDirection(UPRIGHT);
+                }
+            } else if(ball->getY() >= brick[i].position.y + brick[i].brickHeight) {
+                if(ball->getDirection() == UPRIGHT) {
+                    ball->changeDirection(DOWNRIGHT);
+                } else {
+                    ball->changeDirection(DOWNLEFT);
+                }
+            }
+            if(brick[i].type == 4) {
+                brick[i].type = 0;
+            } else if(brick[i].type != 5) {   //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
+                brick[i].type -= 1;
+            }
+            if(brick[i].type == 0) {
+                brick[i].enabled = 0;
+                for(int j = 0; j < 6; j++) {
+                    if(!powerup[j].getEnabled()) {
+                        powerup[j].spawnPowerup(brick[i]);
+                        break;
+                    }
+                    i++;
+                }
+            }
+
+            PlaySound(soundBounceGeneral);
+            ball->randomizeMovement();
+        }
+    }
 }
 void cBricks::Draw(cBricks *brick) {
     for(int i = 0; i < brickCount - 1; i++) {

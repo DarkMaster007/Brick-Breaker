@@ -41,8 +41,50 @@ void cPaddle::moveRight() {
 void cPaddle::moveRight(int a) {
     x += a;
 }
-void cPaddle::Logic() {
-    //
+void cPaddle::Logic(cBall *ball, bool autoMove, bool isPaused, Sound soundBouncePaddle) {
+    //Paddle Collision
+    Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
+    Rectangle paddle_collision = {(float)getX(), (float)getY(), getSize().x, getSize().y};
+    bool collisionStatus = CheckCollisionCircleRec(ball_collision,ball->getSize(), paddle_collision);
+    if(collisionStatus) {
+        if(getSize().x > 30) {
+            if(ball->getX() < getX() + getBounceReverseArea()) {
+                ball->changeDirection(UPLEFT);
+            }
+            if(ball->getX() > getX() + getSize().x - getBounceReverseArea()) {
+                ball->changeDirection(UPRIGHT);
+            }
+            if(ball->getX() >= getX() + getBounceReverseArea() && ball->getX() <= getX() + getSize().x - getBounceReverseArea()) {
+                if(ball->getDirection() == DOWNLEFT) {
+                    ball->changeDirection(UPLEFT);
+                } else {
+                    ball->changeDirection(UPRIGHT);
+                }
+            }
+        } else {
+            if(ball->getDirection() == DOWNLEFT) {
+                ball->changeDirection(UPLEFT);
+            } else ball->changeDirection(UPRIGHT);
+        }
+        isColliding = true;
+    } else if(isColliding) {
+        PlaySound(soundBouncePaddle);
+        isColliding = false;
+    }
+
+    //Auto-movement for the paddle (works fine but it's jittery)
+    if(autoMove) {
+        if(getX() - getSpeed() > 10) {
+            if(ball->getX() < getX() + 25) {
+                moveLeft();
+            }
+        }
+        if(getX() + getSize().x + getSpeed() < GetScreenWidth() - 10) {
+            if(ball->getX() > getX() + 25) {
+                moveRight();
+            }
+        }
+    }
 }
 void cPaddle::Draw(cPaddle *paddle) {
     DrawRectangle(paddle->getX(),paddle->getY(),paddle->getSize().x,paddle->getSize().y,WHITE);
@@ -62,7 +104,7 @@ void cPaddle::Draw(cPaddle *paddle) {
     Destination = {(float)(paddle->getX() + paddle->getBounceReverseArea()), (float)paddle->getY(), paddle->getSize().x -  2 * paddle->getBounceReverseArea(), paddle->getSize().y};
     DrawTexturePro(paddle->textureBody, Source, Destination, {0,0}, 0, WHITE);
 }
-void cPaddle::Input(int autoMove, bool isPaused) {
+void cPaddle::Input(bool autoMove, bool isPaused) {
     //Paddle movement
     if(!autoMove && !isPaused) {
         if(getX() - getSpeed() >= 10) {

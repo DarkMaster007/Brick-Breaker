@@ -9,7 +9,7 @@ cGameManager::cGameManager() {
     quit = 0;
     autoMove = 0;
     win = 0;
-    pause = 0;
+    isPaused = 0;
     //
 
     SetRandomSeed(time(NULL)); //Set seed for random values with current time
@@ -159,7 +159,7 @@ void cGameManager::Input() {
 
     //Pause the game
     if(IsKeyPressed('P')) {
-        pause = !pause;
+        isPaused = !isPaused;
     }
 
     if(IsKeyPressed('F')) {
@@ -171,10 +171,10 @@ void cGameManager::Input() {
         SetMasterVolume(soundVolume * !soundMute);
     }
 
-    paddle->Input(autoMove, pause);
+    paddle->Input(autoMove, isPaused);
 
     //Lock mouse position so it doesn't go outside of screen
-    if(!pause) {
+    if(!isPaused) {
         SetMousePosition(GetScreenWidth() / 2,GetScreenHeight() / 2);
     }
 }
@@ -235,17 +235,18 @@ Vector2 cGameManager::BrickCollision() {
 }
 
 void cGameManager::Logic() {
-    // Click to start the ball movement thing
-    if(ball->getDirection() == STOP) {
-        startTimer = GetTime();
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            ball->changeDirection(UPRIGHT);
-        }
-    }
+
+    ball->Logic(startTimer, isPaused);
+
+    paddle->Logic(ball, autoMove, isPaused, soundBouncePaddle);
+
+    cBricks::Logic(brick, ball, powerup, soundBounceGeneral);
+
+    cPowerup::Logic(powerup);
 
     //Make bricks fall after 60 seconds
     // TODO (Administrator#8#): Change how timer works so that it stops when pausing
-    if(ball->getDirection() != STOP && !pause) {
+    if(ball->getDirection() != STOP && !isPaused) {
         if(GetTime() - startTimer > 60.0f) {
             if(fmod(GetTime() - startTimer,10.0) < 0.05) {
                 for(int i = 0; i < cBricks::brickCount; i++) {
@@ -255,29 +256,8 @@ void cGameManager::Logic() {
         }
     }
 
-    Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
-
-    //Auto-movement for the paddle (doesn't work well anymore since I added the ability to send the ball back in same direction)
-    if(autoMove) {
-        if(paddle->getX() - paddle->getSpeed() > 10) {
-            if(ball->getX() < paddle->getX() + 25) {
-                paddle->moveLeft();
-            }
-        }
-        if(paddle->getX() + paddle->getSize().x + paddle->getSpeed() < GetScreenWidth() - 10) {
-            if(ball->getX() > paddle->getX() + 25) {
-                paddle->moveRight();
-            }
-        }
-    }
-
-    //Move only if game is NOT paused
-    if(!pause) {
-        ball->Move();
-    }
-
     //Left wall collision
-    ball_collision = {(float)ball->getX(), (float)ball->getY()};
+    Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
     if(CheckCollisionCircleRec(ball_collision,ball->getSize(), borderLeft)) {
         if(ball->getDirection() == UPLEFT) {
             ball->changeDirection(UPRIGHT);
@@ -317,49 +297,6 @@ void cGameManager::Logic() {
     if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderBottom)) {
         PlaySound(soundDeath);
         reset();
-    }
-
-
-    //Paddle Collision
-    ball_collision = {(float)ball->getX(), (float)ball->getY()};
-    Rectangle paddle_collision = {(float)paddle->getX(), (float)paddle->getY(), paddle->getSize().x, paddle->getSize().y};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(), paddle_collision)) {
-        if(paddle->getSize().x > 30) {
-            if(ball->getX() < paddle->getX() + paddle->getBounceReverseArea()) {
-                ball->changeDirection(UPLEFT);
-            }
-            if(ball->getX() > paddle->getX() + paddle->getSize().x - paddle->getBounceReverseArea()) {
-                ball->changeDirection(UPRIGHT);
-            }
-            if(ball->getX() >= paddle->getX() + paddle->getBounceReverseArea() && ball->getX() <= paddle->getX() + paddle->getSize().x - paddle->getBounceReverseArea()) {
-                if(ball->getDirection() == DOWNLEFT) {
-                    ball->changeDirection(UPLEFT);
-                } else {
-                    ball->changeDirection(UPRIGHT);
-                }
-            }
-        } else {
-            if(ball->getDirection() == DOWNLEFT) {
-                ball->changeDirection(UPLEFT);
-            } else ball->changeDirection(UPRIGHT);
-        }
-        while(CheckCollisionCircleRec(ball_collision,ball->getSize(), paddle_collision)) {
-            if(!pause) {
-                Draw();
-                ball->Move();
-                ball_collision = BrickCollision();
-            }
-        }
-        PlaySound(soundBouncePaddle);
-    }
-
-    //Brick Collision
-    ball_collision = BrickCollision();
-
-    for(int i = 0; i < 6; i++) {
-        if(powerup[i].getPosition().y > GetScreenHeight() - 10) {
-            powerup[i].setEnabled(0);
-        }
     }
 }
 

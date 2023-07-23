@@ -4,6 +4,9 @@
 #endif // CBRICKS_H
 
 #include "defines.h"
+#include "cBall.h"
+
+class cPowerup;
 
 class cBricks {
   public:
@@ -18,7 +21,7 @@ class cBricks {
     cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, int loadedType);
     Color getColor();
     void Reset();
-    void Logic();
+    static void Logic(cBricks *brick, cBall *ball, cPowerup *powerup, Sound soundBounceGeneral);
     static void Draw(cBricks *brick);
-    void Input();
+    static void Input();
 };

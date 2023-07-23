@@ -4,7 +4,8 @@
 #endif // CPOWERUP_H
 
 #include "defines.h"
-#include "cBricks.h"
+
+class cBricks;
 
 class cPowerup {
     eActivePowerups type;
@@ -34,7 +35,7 @@ class cPowerup {
         enabled = newEnabled;
     }
     bool spawnPowerup(cBricks brick);
-    void Logic();
+    static void Logic(cPowerup *powerup);
     static void Draw(cPowerup *powerup);
-    void Input();
+    static void Input();
 };

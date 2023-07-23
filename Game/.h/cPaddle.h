@@ -4,6 +4,7 @@
 #endif // CPADDLE_H
 
 #include "defines.h"
+#include "cBall.h"
 
 class cPaddle {
   private:
@@ -12,6 +13,7 @@ class cPaddle {
     int originalX, originalY;
     int paddle_width, paddle_height;
     int bounceReverseArea;           // How big the area is where the ball goes back instead of forward
+    bool isColliding;
   public:
     static Texture2D textureBody;
     static Texture2D textureEdge_L;
@@ -28,9 +30,9 @@ class cPaddle {
     void moveRight();
     void moveRight(int);
     void Reset();
-    void Logic();
+    void Logic(cBall *ball, bool autoMove, bool isPaused, Sound soundBouncePaddle);
     static void Draw(cPaddle *paddle);
-    void Input(int autoMove, bool isPaused);
+    void Input(bool autoMove, bool isPaused);
 };
 
 int cPaddle::getX() {

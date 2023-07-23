@@ -1,4 +1,5 @@
 #include "cPowerup.h"
+#include "cBricks.h"
 
 Texture2D cPowerup::texPowerup;
 
@@ -22,8 +23,13 @@ bool cPowerup::spawnPowerup(cBricks brick) {
     return 0;
 }
 
-void cPowerup::Logic() {
-    //
+void cPowerup::Logic(cPowerup *powerup) {
+    // Disable out-of-bounds powerups
+    for(int i = 0; i < 6; i++) {
+        if(powerup[i].getPosition().y > GetScreenHeight() - 10) {
+            powerup[i].setEnabled(0);
+        }
+    }
 }
 void cPowerup::Draw(cPowerup *powerup) {
     for(int i = 0; i < 6; i++) {

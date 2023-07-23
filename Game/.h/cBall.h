@@ -32,7 +32,7 @@ class cBall {
     void randomizeMovement();
     void Move();
     void Reset();
-    void Logic();
+    void Logic(double &startTimer, bool isPaused);
     static void Draw(cBall *ball);
     void Input();
 };

@@ -11,24 +11,22 @@ cPowerup::cPowerup() {
     }
 }
 
-bool cPowerup::spawnPowerup(cBricks brick) {
+bool cPowerup::spawnPowerup(cBricks *brick) {
     if(GetRandomValue(0, 99) < 35) {
         printf("Powerup enabled!");
         setEnabled(1);
         type = (eActivePowerups)GetRandomValue(0, 5);      // TODO (DarkMaster#7#10/13/22): Implement and actual method to get powerups. Next level should be low chance.
         printf(" Type: %i\n", type);
-        position = brick.position;
+        position = brick->position;
         return 1;
     }
     return 0;
 }
 
-void cPowerup::Logic(cPowerup *powerup) {
+void cPowerup::Logic() {
     // Disable out-of-bounds powerups
-    for(int i = 0; i < 6; i++) {
-        if(powerup[i].getPosition().y > GetScreenHeight() - 10) {
-            powerup[i].setEnabled(0);
-        }
+    if(getPosition().y > GetScreenHeight() - 10) {
+        setEnabled(0);
     }
 }
 void cPowerup::Draw(cPowerup *powerup) {

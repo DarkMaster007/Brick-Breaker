@@ -19,9 +19,11 @@ class cBall {
     std::uniform_int_distribution<> randomNrDistribution{1, 4};
     std::uniform_int_distribution<> randomNrDirection{1, 4};
   public:
+    static int ballCount;
     static Texture2D texBall;
 
     cBall(int posX, int posY, int ball_size);
+    ~cBall();
     inline void changeDirection(eDir d);
     inline void randomDirection();
     inline int getX();

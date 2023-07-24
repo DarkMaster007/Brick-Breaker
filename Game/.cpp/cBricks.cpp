@@ -63,57 +63,54 @@ Color cBricks::getColor() {
         return GOLD;
     }
 }
-void cBricks::Logic(cBricks *brick, cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
+void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
     //Brick Collision
     Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
     Rectangle brick_collision;
-    for(int i = 0; i < cBricks::brickCount - 1; i++) {
-        brick_collision = {brick[i].position.x, brick[i].position.y, (float)brick[i].brickWidth, (float)brick[i].brickHeight};
-        if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && brick[i].enabled) {
-            if(ball->getX() <= brick[i].position.x) {
-                if(ball->getDirection() == UPRIGHT) {
-                    ball->changeDirection(UPLEFT);
-                } else {
-                    ball->changeDirection(DOWNLEFT);
-                }
-            } else if(ball->getX() >= brick[i].position.x + brick[i].brickWidth) {
-                if(ball->getDirection() == UPLEFT) {
-                    ball->changeDirection(UPRIGHT);
-                } else {
-                    ball->changeDirection(DOWNRIGHT);
-                }
-            } else if(ball->getY() <= brick[i].position.y) {
-                if(ball->getDirection() == DOWNLEFT) {
-                    ball->changeDirection(UPLEFT);
-                } else {
-                    ball->changeDirection(UPRIGHT);
-                }
-            } else if(ball->getY() >= brick[i].position.y + brick[i].brickHeight) {
-                if(ball->getDirection() == UPRIGHT) {
-                    ball->changeDirection(DOWNRIGHT);
-                } else {
-                    ball->changeDirection(DOWNLEFT);
-                }
+    brick_collision = {position.x, position.y, (float)brickWidth, (float)brickHeight};
+    if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && enabled) {
+        if(ball->getX() <= position.x) {
+            if(ball->getDirection() == UPRIGHT) {
+                ball->changeDirection(UPLEFT);
+            } else {
+                ball->changeDirection(DOWNLEFT);
             }
-            if(brick[i].type == 4) {
-                brick[i].type = 0;
-            } else if(brick[i].type != 5) {   //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
-                brick[i].type -= 1;
+        } else if(ball->getX() >= position.x + brickWidth) {
+            if(ball->getDirection() == UPLEFT) {
+                ball->changeDirection(UPRIGHT);
+            } else {
+                ball->changeDirection(DOWNRIGHT);
             }
-            if(brick[i].type == 0) {
-                brick[i].enabled = 0;
-                for(int j = 0; j < 6; j++) {
-                    if(!powerup[j].getEnabled()) {
-                        powerup[j].spawnPowerup(brick[i]);
-                        break;
-                    }
-                    i++;
-                }
+        } else if(ball->getY() <= position.y) {
+            if(ball->getDirection() == DOWNLEFT) {
+                ball->changeDirection(UPLEFT);
+            } else {
+                ball->changeDirection(UPRIGHT);
             }
-
-            PlaySound(soundBounceGeneral);
-            ball->randomizeMovement();
+        } else if(ball->getY() >= position.y + brickHeight) {
+            if(ball->getDirection() == UPRIGHT) {
+                ball->changeDirection(DOWNRIGHT);
+            } else {
+                ball->changeDirection(DOWNLEFT);
+            }
         }
+        if(type == 4) {
+            type = 0;
+        } else if(type != 5) {   //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
+            type -= 1;
+        }
+        if(type == 0) {
+            enabled = 0;
+            for(int j = 0; j < MAX_POWERUPS; j++) {
+                if(!powerup[j].getEnabled()) {
+                    powerup[j].spawnPowerup(this);
+                    break;
+                }
+            }
+        }
+
+        PlaySound(soundBounceGeneral);
+        ball->randomizeMovement();
     }
 }
 void cBricks::Draw(cBricks *brick) {

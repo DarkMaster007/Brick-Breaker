@@ -34,8 +34,8 @@ class cPowerup {
     void setEnabled(bool newEnabled) {
         enabled = newEnabled;
     }
-    bool spawnPowerup(cBricks brick);
-    static void Logic(cPowerup *powerup);
+    bool spawnPowerup(cBricks *brick);
+    void Logic();
     static void Draw(cPowerup *powerup);
     static void Input();
 };

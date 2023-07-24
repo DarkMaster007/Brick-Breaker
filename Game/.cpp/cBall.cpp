@@ -1,6 +1,7 @@
 #include "cBall.h"
 #include "defines.h"
 
+int cBall::ballCount = 0;
 Texture2D cBall::texBall;
 
 cBall::cBall(int posX, int posY, int ball_size) {
@@ -19,6 +20,10 @@ cBall::cBall(int posX, int posY, int ball_size) {
     originalSpeed = speed;
     acceleration = 0.017;
     randomizeMovement();
+    ballCount++;
+}
+cBall::~cBall(){
+    ballCount--;
 }
 void cBall::Reset() {
     x = originalX;

@@ -1,16 +1,16 @@
 # depslib dependency file v1.0
-1642428584 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\icon.rc
+1642424984 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\icon.rc
 
-1682189698 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\.c\editor.cpp
+1685786669 source:e:\windowsfolders\desktop\c++\brick-breaker\editor\.c\editor.cpp
 	<raylib.h>
 	<raygui.h>
 	"soundSelect.h"
 
-1681731091 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+1699047343 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
 	<stdarg.h>
 	<stdbool.h>
 
-1681731110 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
+1699047328 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
 	"raylib.h"
 	<stdio.h>
 	<stdlib.h>
@@ -18,5 +18,5 @@
 	<stdarg.h>
 	<math.h>
 
-1681831779 e:\windowsfolders\desktop\c++\brick-breaker\editor\.h\soundselect.h
+1685786669 e:\windowsfolders\desktop\c++\brick-breaker\editor\.h\soundselect.h
 

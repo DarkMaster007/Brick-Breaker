@@ -70,6 +70,7 @@
 			<Add directory="../../Raylib Library/raylib/src" />
 			<Add directory="../../Raylib Library/raygui/src" />
 		</Linker>
+		<Unit filename="../Release/resources/Shaders/bloom.fs" />
 		<Unit filename=".cpp/cBall.cpp" />
 		<Unit filename=".cpp/cBricks.cpp" />
 		<Unit filename=".cpp/cCollisionManager.cpp" />

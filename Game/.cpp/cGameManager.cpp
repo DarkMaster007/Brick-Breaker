@@ -1,6 +1,10 @@
 #include "cGameManager.h"
 
+// TODO (Administrator#8#11/12/23): Game is not pausing time and powerup movement when pausing the game
+
+
 double cGameManager::startTimer = 0;
+float animationFrame = 0;
 
 cGameManager::cGameManager() {
     int width, height;
@@ -10,6 +14,7 @@ cGameManager::cGameManager() {
     autoMove = 0;
     win = 0;
     isPaused = 0;
+    levelCounter = 0;
     //
 
     SetRandomSeed(time(NULL)); //Set seed for random values with current time
@@ -23,7 +28,7 @@ cGameManager::cGameManager() {
 #endif // _DEBUG
 
     fclose(fp);
-
+    SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(width,height,"Editor");
     InitAudioDevice();
     SetTargetFPS(120); // TODO (Administrator#7#): Make everything use deltaTime so you can remove the FPS limit
@@ -31,11 +36,14 @@ cGameManager::cGameManager() {
     if(fullscreen == 1) {
         ToggleFullscreen();
     }
+    previousTime = GetTime();
+    updateInterval = 0.05; //50 ms
 
-    ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10);
+    ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250);
     paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
     brick = (cBricks *)MemAlloc(MAX_BRICKS*sizeof(cBricks));  //MemAlloc() is equivalent to malloc();
     powerup = new cPowerup[6];
+    texBackground = LoadTexture("..//resources//background.png");
 
     //Load sound from .h files
     waveDeath.channels = WAVEDEATH_CHANNELS;
@@ -79,18 +87,25 @@ cGameManager::cGameManager() {
     borderRight = {(float)(GetScreenWidth() - 10), 0, (float)GetScreenWidth(), (float)GetScreenHeight()};
     borderTop = {0, 0, (float)GetScreenWidth(), 10};
     borderBottom = {0, (float)(GetScreenHeight() - 10), (float)GetScreenWidth(), 10};
-
 }
 
-void cGameManager::loadLevel() {
+int cGameManager::loadLevel() {
     int i = 0;
     int tempWidth, tempHeight;
     int levelWidth, levelHeight;
     float brickPosX, brickPosY;
     int brickWidth, brickHeight, brickType;
 
-    cBricks::brickCount = 0;
-    fp = fopen("..\\config\\level.txt", "r");
+    fp = fopen(TextFormat("..\\config\\level%i.txt", levelCounter), "r");
+    if(!fp) {
+        if(levelCounter == 0) {
+            return -1;
+        } else {
+            levelCounter--;
+            fp = fopen(TextFormat("..\\config\\level%i.txt", levelCounter), "r");
+            if(!fp) return -1;
+        }
+    }
 
     while(!feof(fp)) {
         fscanf(fp, "%d %d %f %f %d %d %d", &levelWidth, &levelHeight, &brickPosX, &brickPosY, &brickWidth, &brickHeight, &brickType);
@@ -110,16 +125,22 @@ void cGameManager::loadLevel() {
 
         new (&brick[i]) cBricks(brickPosX, brickPosY, brickWidth, brickHeight, brickType);
         i++;
-        cBricks::brickCount++;
     }
     fclose(fp);
+    return 0;
 }
 
 void cGameManager::Draw() {
     BeginDrawing();
+    double currentTime = GetTime();
+    if(currentTime - previousTime >= updateInterval) {
+        if(animationFrame >= 100) animationFrame = 0;
+        animationFrame++;
+        previousTime = currentTime;
+    }
     ClearBackground(BLACK);
 
-    cBricks::Draw(brick);
+    cBricks::Draw(brick, animationFrame);
 
     cPaddle::Draw(paddle);
 
@@ -185,11 +206,11 @@ void cGameManager::Logic() {
 
     paddle->Logic(ball, autoMove, isPaused, soundBouncePaddle);
 
-    for(int i = 0; i < cBricks::brickCount; i++){
+    for(int i = 0; i < cBricks::brickCount; i++) {
         brick[i].Logic(ball, powerup, soundBounceGeneral);
     }
 
-    for(int i = 0; i < MAX_POWERUPS; i++){
+    for(int i = 0; i < MAX_POWERUPS; i++) {
         powerup[i].Logic();
     }
 
@@ -199,51 +220,51 @@ void cGameManager::Logic() {
         if(GetTime() - startTimer > 60.0f) {
             if(fmod(GetTime() - startTimer,10.0) < 0.05) {
                 for(int i = 0; i < cBricks::brickCount; i++) {
-                    brick[i].position.y += 5;
+                    brick[i].setY(brick[i].getY() + 5);
                 }
             }
         }
     }
 
     //Left wall collision
-    Vector2 ball_collision = {(float)ball->getX(), (float)ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(), borderLeft)) {
+    Vector2 ball_collision = {ball->getX(), ball->getY()};
+    if(CheckCollisionCircleRec(ball_collision,ball->getDimensions(), borderLeft)) {
         if(ball->getDirection() == UPLEFT) {
-            ball->changeDirection(UPRIGHT);
+            ball->setDirection(UPRIGHT);
         }
         if(ball->getDirection() == DOWNLEFT) {
-            ball->changeDirection(DOWNRIGHT);
+            ball->setDirection(DOWNRIGHT);
         }
         PlaySound(soundBounceGeneral);
     }
 
     //Right wall collision
-    ball_collision = {(float)ball->getX(), (float)ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderRight)) {
+    ball_collision = {ball->getX(), ball->getY()};
+    if(CheckCollisionCircleRec(ball_collision,ball->getDimensions(),borderRight)) {
         if(ball->getDirection() == UPRIGHT) {
-            ball->changeDirection(UPLEFT);
+            ball->setDirection(UPLEFT);
         }
         if(ball->getDirection() == DOWNRIGHT) {
-            ball->changeDirection(DOWNLEFT);
+            ball->setDirection(DOWNLEFT);
         }
         PlaySound(soundBounceGeneral);
     }
 
     //Top wall collision
-    ball_collision = {(float)ball->getX(), (float)ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderTop)) {
+    ball_collision = {ball->getX(), ball->getY()};
+    if(CheckCollisionCircleRec(ball_collision,ball->getDimensions(),borderTop)) {
         if(ball->getDirection() == UPRIGHT) {
-            ball->changeDirection(DOWNRIGHT);
+            ball->setDirection(DOWNRIGHT);
         }
         if(ball->getDirection() == UPLEFT) {
-            ball->changeDirection(DOWNLEFT);
+            ball->setDirection(DOWNLEFT);
         }
         PlaySound(soundBounceGeneral);
     }
 
     //Bottom wall collision
-    ball_collision = {(float)ball->getX(), (float)ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderBottom)) {
+    ball_collision = {ball->getX(), ball->getY()};
+    if(CheckCollisionCircleRec(ball_collision,ball->getDimensions(),borderBottom)) {
         PlaySound(soundDeath);
         reset();
     }
@@ -262,12 +283,16 @@ void cGameManager::reset() {
 void cGameManager::checkWin() {
     int brickAmount = 0;
     for(int i = 0; i <= cBricks::brickCount; i++) {
-        if(brick[i].type != 5) {
-            brickAmount = brickAmount + brick[i].enabled;
+        if(brick[i].getType() != 5) {
+            brickAmount = brickAmount + brick[i].getEnabled();
         }
     }
-    if(brickAmount == 0) {
+    /*if(brickAmount == 0) {
         reset();
+    }*/
+    if(brickAmount == 0) {
+        levelCounter++;
+        reset(); // TODO (Administrator#9#12/12/23): Reset does not work
     }
 }
 
@@ -285,7 +310,7 @@ cGameManager::~cGameManager() {
 }
 
 int cGameManager::Run() {
-    loadLevel();
+    if(loadLevel() != 0) return -1;
     while(!WindowShouldClose() & !win) {
         Input();
         Logic();

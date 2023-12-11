@@ -2,8 +2,10 @@
 #include "cBricks.h"
 
 Texture2D cPowerup::texPowerup;
+extern int frame;
 
 cPowerup::cPowerup() {
+    spawnChance = 35;
     if(texPowerup.id == 0) {
         Image imgPowerup = LoadImage(TEX_POWERUP);
         ImageResize(&imgPowerup, GetScreenWidth() * 0.04, GetScreenHeight() * 0.04);
@@ -12,12 +14,13 @@ cPowerup::cPowerup() {
 }
 
 bool cPowerup::spawnPowerup(cBricks *brick) {
-    if(GetRandomValue(0, 99) < 35) {
+    if(GetRandomValue(0, 99) < spawnChance) {
         printf("Powerup enabled!");
         setEnabled(1);
         type = (eActivePowerups)GetRandomValue(0, 5);      // TODO (DarkMaster#7#10/13/22): Implement and actual method to get powerups. Next level should be low chance.
         printf(" Type: %i\n", type);
-        position = brick->position;
+        x = brick->getX();
+        y = brick->getY();
         return 1;
     }
     return 0;
@@ -34,7 +37,7 @@ void cPowerup::Draw(cPowerup *powerup) {
         if(powerup[i].getEnabled()) {
             int movement_speed_powerup = GetRandomValue(300, 400) * GetFrameTime();
             DrawTexture(powerup->texPowerup, powerup[i].getPosition().x - 50, powerup[i].getPosition().y - 25, WHITE);
-            powerup[i].setPosition(Vector2{powerup[i].getPosition().x,powerup[i].getPosition().y + movement_speed_powerup});
+            powerup[i].setPosition(powerup[i].getPosition().x,powerup[i].getPosition().y + movement_speed_powerup);
         }
     }
 }

@@ -4,7 +4,7 @@
 #endif // CBALL_H
 #include "defines.h"
 
-class cBall {
+class cAnimBall {
   private:
     float x, y;
     float originalX, originalY;
@@ -19,11 +19,11 @@ class cBall {
     std::uniform_int_distribution<> randomNrDistribution{1, 4};
     std::uniform_int_distribution<> randomNrDirection{1, 4};
   public:
+    int id;
     static int ballCount;
-    static Texture2D texBall;
 
-    cBall(int posX, int posY, int ball_size, float ballSpeed);
-    ~cBall();
+    cAnimBall(int posX, int posY, int ball_size, float ballSpeed);
+    ~cAnimBall();
     inline void setDirection(eDir d);
     inline void randomDirection();
     inline float getX();
@@ -31,48 +31,48 @@ class cBall {
     inline void setX(float newX);
     inline void setY(float newY);
     inline eDir getDirection();
-    inline void setDimensions(int ball_size);
-    inline int getDimensions();
+    inline void setSize(int ball_size);
+    inline int getSize();
     inline int getAcceleration();
     inline void setAcceleration(float newAccel);
     void randomizeMovement();
     void Move();
     void Reset();
     void Logic(double &startTimer, bool isPaused);
-    static void Draw(cBall *ball);
+    static void Draw(cAnimBall *ball);
     void Input();
 };
 
-void cBall::setDirection(eDir d) {
+void cAnimBall::setDirection(eDir d) {
     direction = d;
 }
-void cBall::randomDirection() {
+void cAnimBall::randomDirection() {
     direction = (eDir)(randomNrDirection(marsenneTwister));
 }
-float cBall::getX() {
+float cAnimBall::getX() {
     return x;
 }
-float cBall::getY() {
+float cAnimBall::getY() {
     return y;
 }
-void cBall::setX(float newX) {
+void cAnimBall::setX(float newX) {
     x = newX;
 }
-void cBall::setY(float newY) {
+void cAnimBall::setY(float newY) {
     y = newY;
 }
-eDir cBall::getDirection() {
+eDir cAnimBall::getDirection() {
     return direction;
 }
-void cBall::setDimensions(int ball_size) {
+void cAnimBall::setSize(int ball_size) {
     current_size = ball_size;
 }
-int cBall::getDimensions() {
+int cAnimBall::getSize() {
     return current_size;
 }
-int cBall::getAcceleration(){
+int cAnimBall::getAcceleration() {
     return acceleration;
 }
-void cBall::setAcceleration(float newAccel = 0.017){
+void cAnimBall::setAcceleration(float newAccel = 0.017) {
     acceleration = newAccel;
 }

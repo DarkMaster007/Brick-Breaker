@@ -1,7 +1,7 @@
 #pragma once
+
 #ifndef DEFINES_H
 #define DEFINES_H
-#endif // DEFINES_H
 #include <raylib.h>
 #include <raygui.h>
 #include <stdio.h>
@@ -18,8 +18,12 @@
 #define MAX_BALLS 10
 #define MAX_POWERUPS 6
 
-#define TEX_BALL "..//resources//Breakout-Ball.gif"
-#define TEX_BRICKS "..//resources//Breakout-Brick.gif"
+#define TEX_BALL "..//resources//ball.png"
+#define TEX_BRICK_NORMAL "..//resources//Breakout-Brick-Neon.png"
+#define TEX_BRICK_2HP "..//resources//Breakout-Brick-Neon.png"
+#define TEX_BRICK_3HP "..//resources//Breakout-Brick-Neon.png"
+#define TEX_BRICK_EXPLOSIVE "..//resources//Breakout-Brick-Neon.png"
+#define TEX_BRICK_GOLD "..//resources//Breakout-Brick-Neon.png"
 #define TEX_PADDLE_BODY "..//resources//Breakout-Paddle_middle.png"
 #define TEX_PADDLE_EDGE_L "..//resources//Breakout-Paddle_L.png"
 #define TEX_PADDLE_EDGE_R "..//resources//Breakout-Paddle_R.png"
@@ -27,3 +31,5 @@
 
 enum eDir { STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
 enum eActivePowerups { LASER = 0, CROSSHAIR = 1, EXTEND = 2, PIERCE = 3, FIREBALL = 4, NEXTLEVEL = 5 };
+
+#endif // DEFINES_H

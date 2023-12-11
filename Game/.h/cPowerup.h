@@ -9,9 +9,9 @@ class cBricks;
 
 class cPowerup {
     eActivePowerups type;
-    Vector2 position;
+    float x, y;
     bool enabled;
-    int spawnChance{35};
+    int spawnChance;
   public:
     static Texture2D texPowerup;
 
@@ -23,10 +23,15 @@ class cPowerup {
         type = newType;
     }
     Vector2 getPosition() {
-        return position;
+        return {x ,y};
+    }
+    void setPosition(float newX, float newY) {
+        x = newX;
+        y = newY;
     }
     void setPosition(Vector2 newPosition) {
-        position = newPosition;
+        x = newPosition.x;
+        y = newPosition.y;
     }
     bool getEnabled() {
         return enabled;

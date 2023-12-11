@@ -1,13 +1,13 @@
 #include "cBall.h"
-#include "defines.h"
 
 int cBall::ballCount = 0;
 Texture2D cBall::texBall;
+extern int frame;
 
-cBall::cBall(int posX, int posY, int ball_size) {
-    Image imgBall = LoadImage(TEX_BALL);
-    ImageResize(&imgBall, ball_size * 2, ball_size * 2);
-    texBall = LoadTextureFromImage(imgBall);
+cBall::cBall(int posX, int posY, int ball_size, float ballSpeed) {
+    //Image imgBall = LoadImage(TEX_BALL);
+    //ImageResize(&imgBall, ball_size * 2, ball_size * 2);
+    //texBall = LoadTextureFromImage(imgBall);
 
     originalX = posX;
     originalY = posY;
@@ -16,7 +16,7 @@ cBall::cBall(int posX, int posY, int ball_size) {
     direction = STOP;
     originalSize = ball_size;
     current_size = ball_size;
-    speed = 250;
+    speed = ballSpeed;
     originalSpeed = speed;
     acceleration = 0.017;
     randomizeMovement();
@@ -37,25 +37,26 @@ void cBall::randomizeMovement() {
     randomMovementOffset[1] = randomNrDistribution(marsenneTwister) / 10.0f;
 }
 void cBall::Move() {
-    if(direction != STOP) speed += speed * acceleration * GetFrameTime();
+    float frameTime = fmod(GetFrameTime(), 1.0f);
+    if(direction != STOP) speed += speed * acceleration * frameTime;
     switch (direction) {
     case STOP:
         break;
     case UPLEFT:
-        x-=(speed + randomMovementOffset[0]) * GetFrameTime();
-        y-=(speed + randomMovementOffset[1]) * GetFrameTime();
+        x-=(speed + randomMovementOffset[0]) * frameTime;
+        y-=(speed + randomMovementOffset[1]) * frameTime;
         break;
     case DOWNLEFT:
-        x-=(speed + randomMovementOffset[0]) * GetFrameTime();
-        y+=(speed + randomMovementOffset[1]) * GetFrameTime();
+        x-=(speed + randomMovementOffset[0]) * frameTime;
+        y+=(speed + randomMovementOffset[1]) * frameTime;
         break;
     case UPRIGHT:
-        x+=(speed + randomMovementOffset[0]) * GetFrameTime();
-        y-=(speed + randomMovementOffset[1]) * GetFrameTime();
+        x+=(speed + randomMovementOffset[0]) * frameTime;
+        y-=(speed + randomMovementOffset[1]) * frameTime;
         break;
     case DOWNRIGHT:
-        x+=(speed + randomMovementOffset[0]) * GetFrameTime();
-        y+=(speed + randomMovementOffset[1]) * GetFrameTime();
+        x+=(speed + randomMovementOffset[0]) * frameTime;
+        y+=(speed + randomMovementOffset[1]) * frameTime;
         break;
     default:
         direction = STOP;
@@ -67,7 +68,7 @@ void cBall::Logic(double &startTimer, bool isPaused) {
     if(getDirection() == STOP) {
         startTimer = GetTime();
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            changeDirection(UPRIGHT);
+            setDirection(UPRIGHT);
         }
     }
 
@@ -77,7 +78,8 @@ void cBall::Logic(double &startTimer, bool isPaused) {
     }
 }
 void cBall::Draw(cBall *ball) {
-    DrawTexture(texBall, ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), WHITE);
+    //DrawTexture(texBall, ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), WHITE);
+    DrawCircle(ball->getX(), ball->getY(), ball->getDimensions(), WHITE);
 }
 void cBall::Input() {
     //

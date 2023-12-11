@@ -1,13 +1,14 @@
 #pragma once
 #ifndef CGAMEMANAGER_H
 #define CGAMEMANAGER_H
-#endif // CGAMEMANAGER_H
+
 #include "defines.h"
 #include "cBall.h"
 #include "cBricks.h"
 #include "cPaddle.h"
 #include "cPowerup.h"
 #include "cCollisionManager.h"
+#include "cAnimBall.h"
 
 class cGameManager {
   private:
@@ -17,6 +18,7 @@ class cGameManager {
     cBall *ball;                    // ball object
     cPaddle *paddle;                // paddle object
     cPowerup *powerup;              // Handles powerups
+    Texture texBackground;
 
     Rectangle borderLeft;           // left border rectangle, for collision and drawing
     Rectangle borderRight;          // right border rectangle, for collision and drawing
@@ -41,10 +43,13 @@ class cGameManager {
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
     bool isPaused;
     static double startTimer;
+    int levelCounter;
+    double previousTime;
+    double updateInterval; //50 ms
 
   public:
     cGameManager();
-    void loadLevel();
+    int loadLevel();
     void SpawnPowerup(int brickIndex);
     void Draw();
     void Input();
@@ -55,3 +60,5 @@ class cGameManager {
     int Run();
     ~cGameManager();
 };
+
+#endif // CGAMEMANAGER_H

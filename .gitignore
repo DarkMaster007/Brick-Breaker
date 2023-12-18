@@ -1,7 +1,6 @@
 
 *.save
 *.out
-*.exe
 *.layout
 *.depend
 *.o

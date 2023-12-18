@@ -17,13 +17,10 @@
 #define MAX_BRICKS 300
 #define MAX_BALLS 10
 #define MAX_POWERUPS 6
+#define MAX_ANIM_BALL_COUNT 200
+#define STANDARD_ANIM_BALL_COUNT 8
 
 #define TEX_BALL "..//resources//ball.png"
-#define TEX_BRICK_NORMAL "..//resources//Breakout-Brick-Neon.png"
-#define TEX_BRICK_2HP "..//resources//Breakout-Brick-Neon.png"
-#define TEX_BRICK_3HP "..//resources//Breakout-Brick-Neon.png"
-#define TEX_BRICK_EXPLOSIVE "..//resources//Breakout-Brick-Neon.png"
-#define TEX_BRICK_GOLD "..//resources//Breakout-Brick-Neon.png"
 #define TEX_PADDLE_BODY "..//resources//Breakout-Paddle_middle.png"
 #define TEX_PADDLE_EDGE_L "..//resources//Breakout-Paddle_L.png"
 #define TEX_PADDLE_EDGE_R "..//resources//Breakout-Paddle_R.png"

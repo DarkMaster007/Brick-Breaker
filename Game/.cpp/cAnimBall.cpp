@@ -13,12 +13,12 @@ cAnimBall::cAnimBall(int posX, int posY, int ball_size, float ballSpeed) {
     current_size = ball_size;
     speed = ballSpeed;
     originalSpeed = speed;
-    acceleration = 0.017;
+    acceleration = 0;
     randomizeMovement();
     id = ballCount;
     ballCount++;
 }
-cAnimBall::~cAnimBall(){
+cAnimBall::~cAnimBall() {
     ballCount--;
 }
 void cAnimBall::Reset() {

@@ -31,8 +31,8 @@ class cBall {
     inline void setX(float newX);
     inline void setY(float newY);
     inline eDir getDirection();
-    inline void setDimensions(int ball_size);
-    inline int getDimensions();
+    inline void setSize(int ball_size);
+    inline int getSize();
     inline int getAcceleration();
     inline void setAcceleration(float newAccel);
     void randomizeMovement();
@@ -40,7 +40,6 @@ class cBall {
     void Reset();
     void Logic(double &startTimer, bool isPaused);
     static void Draw(cBall *ball);
-    void Input();
 };
 
 void cBall::setDirection(eDir d) {
@@ -64,15 +63,15 @@ void cBall::setY(float newY) {
 eDir cBall::getDirection() {
     return direction;
 }
-void cBall::setDimensions(int ball_size) {
+void cBall::setSize(int ball_size) {
     current_size = ball_size;
 }
-int cBall::getDimensions() {
+int cBall::getSize() {
     return current_size;
 }
-int cBall::getAcceleration(){
+int cBall::getAcceleration() {
     return acceleration;
 }
-void cBall::setAcceleration(float newAccel = 0.017){
+void cBall::setAcceleration(float newAccel = 0.017) {
     acceleration = newAccel;
 }

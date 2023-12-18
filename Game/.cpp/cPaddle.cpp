@@ -45,7 +45,7 @@ void cPaddle::moveRight(float step) {
 void cPaddle::Logic(cBall *ball, bool autoMove, bool isPaused, Sound soundBouncePaddle) {
     //Paddle Collision
     Vector2 ball_collision = {ball->getX(), ball->getY()};
-    bool collisionStatus = CheckCollisionCircleRec(ball_collision,ball->getDimensions(), getDimensionsRec());
+    bool collisionStatus = CheckCollisionCircleRec(ball_collision,ball->getSize(), getDimensionsRec());
     if(collisionStatus) {
         if(getDimensions().x > 30) {
             if(ball->getX() < getX() + getBounceReverseArea()) {
@@ -87,10 +87,10 @@ void cPaddle::Logic(cBall *ball, bool autoMove, bool isPaused, Sound soundBounce
     }
 }
 void cPaddle::Draw(cPaddle *paddle) {
-    DrawRectangle(paddle->getX(),paddle->getY(),paddle->getDimensions().x,paddle->getDimensions().y,WHITE);
+    //DrawRectangle(paddle->getX(),paddle->getY(),paddle->getDimensions().x,paddle->getDimensions().y,WHITE);
 
-    DrawRectangle(paddle->getX(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y, YELLOW);
-    DrawRectangle(paddle->getX() + paddle->getDimensions().x - paddle->getBounceReverseArea(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y, YELLOW);
+    //DrawRectangle(paddle->getX(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y, YELLOW);
+    //DrawRectangle(paddle->getX() + paddle->getDimensions().x - paddle->getBounceReverseArea(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y, YELLOW);
 
     Rectangle Source = {0, 0, (float)paddle->textureEdge_L.width, (float)paddle->textureEdge_L.height};
     Rectangle Destination = {paddle->getX(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y};

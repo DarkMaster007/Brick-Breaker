@@ -3,7 +3,7 @@
 // TODO (Administrator#8#11/12/23): Game is not pausing time and powerup movement when pausing the game
 
 
-double cGameManager::startTimer = 0;
+double cGameManager::timer = 0;
 float animationFrame = 0;
 
 cGameManager::cGameManager() {
@@ -15,19 +15,19 @@ cGameManager::cGameManager() {
     win = 0;
     isPaused = 0;
     levelCounter = 0;
+    previousTime = GetTime();
+    updateInterval = 0.05; //50 ms
     //
 
-    SetRandomSeed(time(NULL)); //Set seed for random values with current time
-
     fp = fopen("..\\config\\settings.txt", "r"); //Open settings.txt file
-
     fscanf(fp, "%d %d %d", &width, &height, (int*)&fullscreen); //Load the settings file
+    fclose(fp);
 
 #ifdef _DEBUG
     printf("Width: %d\nHeight: %d\nFullscreen: %d\n", width, height, fullscreen);
 #endif // _DEBUG
 
-    fclose(fp);
+    SetRandomSeed(time(NULL)); //Set seed for random values with current time
     SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(width,height,"Editor");
     InitAudioDevice();
@@ -36,8 +36,6 @@ cGameManager::cGameManager() {
     if(fullscreen == 1) {
         ToggleFullscreen();
     }
-    previousTime = GetTime();
-    updateInterval = 0.05; //50 ms
 
     ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250);
     paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
@@ -106,7 +104,6 @@ int cGameManager::loadLevel() {
             if(!fp) return -1;
         }
     }
-
     while(!feof(fp)) {
         fscanf(fp, "%d %d %f %f %d %d %d", &levelWidth, &levelHeight, &brickPosX, &brickPosY, &brickWidth, &brickHeight, &brickType);
         if(GetScreenWidth() != levelWidth || GetScreenHeight() != levelHeight) {
@@ -116,13 +113,11 @@ int cGameManager::loadLevel() {
             brickPosY *= tempHeight;
             brickWidth *= (tempWidth*1.5);
             brickHeight *= (tempHeight*1.2);
-
 #ifdef _DEBUG
             printf("X mod: %d/nY mod: %d/n",tempWidth,tempHeight);
             printf("Level res to game res ratio is: %d to %d./n",tempWidth,tempHeight);
 #endif // _DEBUG
         }
-
         new (&brick[i]) cBricks(brickPosX, brickPosY, brickWidth, brickHeight, brickType);
         i++;
     }
@@ -132,10 +127,13 @@ int cGameManager::loadLevel() {
 
 void cGameManager::Draw() {
     BeginDrawing();
+    if(ball->getDirection() != STOP && !isPaused) timer += GetFrameTime();
     double currentTime = GetTime();
     if(currentTime - previousTime >= updateInterval) {
         if(animationFrame >= 100) animationFrame = 0;
-        animationFrame++;
+        if(!isPaused) {
+            animationFrame++;
+        }
         previousTime = currentTime;
     }
     ClearBackground(BLACK);
@@ -157,11 +155,10 @@ void cGameManager::Draw() {
     DrawRectangleRec(borderBottom,RED);
     DrawFPS(10,10);
     if(ball->getDirection() != STOP)
-        GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", GetTime() - startTimer));
+        GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, TextFormat("%f", timer));
     else
         GuiStatusBar({0, (float)GetScreenHeight() - 30, 100, 30}, "0.00000");
 #endif // _DEBUG
-
     EndDrawing();
 }
 
@@ -202,7 +199,7 @@ void cGameManager::Input() {
 
 void cGameManager::Logic() {
 
-    ball->Logic(startTimer, isPaused);
+    ball->Logic(timer, isPaused);
 
     paddle->Logic(ball, autoMove, isPaused, soundBouncePaddle);
 
@@ -217,8 +214,8 @@ void cGameManager::Logic() {
     //Make bricks fall after 60 seconds
     // TODO (Administrator#8#): Change how timer works so that it stops when pausing
     if(ball->getDirection() != STOP && !isPaused) {
-        if(GetTime() - startTimer > 60.0f) {
-            if(fmod(GetTime() - startTimer,10.0) < 0.05) {
+        if(timer > 60.0f) {
+            if(fmod(timer, 10.0) < 0.10) {
                 for(int i = 0; i < cBricks::brickCount; i++) {
                     brick[i].setY(brick[i].getY() + 5);
                 }
@@ -228,7 +225,7 @@ void cGameManager::Logic() {
 
     //Left wall collision
     Vector2 ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getDimensions(), borderLeft)) {
+    if(CheckCollisionCircleRec(ball_collision,ball->getSize(), borderLeft)) {
         if(ball->getDirection() == UPLEFT) {
             ball->setDirection(UPRIGHT);
         }
@@ -240,7 +237,7 @@ void cGameManager::Logic() {
 
     //Right wall collision
     ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getDimensions(),borderRight)) {
+    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderRight)) {
         if(ball->getDirection() == UPRIGHT) {
             ball->setDirection(UPLEFT);
         }
@@ -252,7 +249,7 @@ void cGameManager::Logic() {
 
     //Top wall collision
     ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getDimensions(),borderTop)) {
+    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderTop)) {
         if(ball->getDirection() == UPRIGHT) {
             ball->setDirection(DOWNRIGHT);
         }
@@ -264,13 +261,14 @@ void cGameManager::Logic() {
 
     //Bottom wall collision
     ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getDimensions(),borderBottom)) {
+    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderBottom)) {
         PlaySound(soundDeath);
         reset();
     }
 }
 
 void cGameManager::reset() {
+    timer = 0;
     paddle->Reset();
     ball->Reset();
     loadLevel();
@@ -287,12 +285,9 @@ void cGameManager::checkWin() {
             brickAmount = brickAmount + brick[i].getEnabled();
         }
     }
-    /*if(brickAmount == 0) {
-        reset();
-    }*/
     if(brickAmount == 0) {
         levelCounter++;
-        reset(); // TODO (Administrator#9#12/12/23): Reset does not work
+        reset();
     }
 }
 

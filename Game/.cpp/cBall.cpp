@@ -5,24 +5,20 @@ Texture2D cBall::texBall;
 extern int frame;
 
 cBall::cBall(int posX, int posY, int ball_size, float ballSpeed) {
-    //Image imgBall = LoadImage(TEX_BALL);
-    //ImageResize(&imgBall, ball_size * 2, ball_size * 2);
-    //texBall = LoadTextureFromImage(imgBall);
-
-    originalX = posX;
-    originalY = posY;
-    x = posX;
-    y = posY;
-    direction = STOP;
-    originalSize = ball_size;
-    current_size = ball_size;
+    setX(posX);
+    setY(posY);
+    originalX = x;
+    originalY = y;
+    setDirection(STOP);
+    setSize(ball_size);
+    originalSize = getSize();
     speed = ballSpeed;
     originalSpeed = speed;
     acceleration = 0.017;
     randomizeMovement();
     ballCount++;
 }
-cBall::~cBall(){
+cBall::~cBall() {
     ballCount--;
 }
 void cBall::Reset() {
@@ -66,7 +62,6 @@ void cBall::Move() {
 void cBall::Logic(double &startTimer, bool isPaused) {
     // Click to start the ball movement thing
     if(getDirection() == STOP) {
-        startTimer = GetTime();
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             setDirection(UPRIGHT);
         }
@@ -78,9 +73,5 @@ void cBall::Logic(double &startTimer, bool isPaused) {
     }
 }
 void cBall::Draw(cBall *ball) {
-    //DrawTexture(texBall, ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), WHITE);
-    DrawCircle(ball->getX(), ball->getY(), ball->getDimensions(), WHITE);
-}
-void cBall::Input() {
-    //
+    DrawCircle(ball->getX(), ball->getY(), ball->getSize(), WHITE);
 }

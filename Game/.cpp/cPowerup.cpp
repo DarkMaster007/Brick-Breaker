@@ -2,9 +2,12 @@
 #include "cBricks.h"
 
 Texture2D cPowerup::texPowerup;
+int cPowerup::powerupCount = 0;
 extern int frame;
 
 cPowerup::cPowerup() {
+    ID = powerupCount;
+    powerupCount++;
     spawnChance = 35;
     if(texPowerup.id == 0) {
         Image imgPowerup = LoadImage(TEX_POWERUP);

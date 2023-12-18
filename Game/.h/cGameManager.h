@@ -42,7 +42,7 @@ class cGameManager {
     bool autoMove;                  // whether the paddle automatically moves or not. helps with testing simple stuff
     bool win;                       // whether you won or not. winning is when all bricks that can be destroyed are destroyed
     bool isPaused;
-    static double startTimer;
+    static double timer;
     int levelCounter;
     double previousTime;
     double updateInterval; //50 ms

@@ -43,13 +43,15 @@ float cPaddle::getX() {
 float cPaddle::getY() {
     return y;
 }
-Vector2 cPaddle::getPosition(){
-    return (Vector2){getX(), getY()};
+Vector2 cPaddle::getPosition() {
+    return (Vector2) {
+        getX(), getY()
+    };
 }
 Vector2 cPaddle::getDimensions() {
     return {paddleWidth, paddleHeight};
 }
-Rectangle cPaddle::getDimensionsRec(){
+Rectangle cPaddle::getDimensionsRec() {
     return {getX(), getY(), getDimensions().x, getDimensions().y};
 }
 float cPaddle::getSpeed() {

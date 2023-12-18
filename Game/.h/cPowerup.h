@@ -9,10 +9,12 @@ class cBricks;
 
 class cPowerup {
     eActivePowerups type;
+    int ID;
     float x, y;
     bool enabled;
     int spawnChance;
   public:
+    static int powerupCount;
     static Texture2D texPowerup;
 
     cPowerup();
@@ -23,7 +25,7 @@ class cPowerup {
         type = newType;
     }
     Vector2 getPosition() {
-        return {x ,y};
+        return {x,y};
     }
     void setPosition(float newX, float newY) {
         x = newX;

@@ -45,27 +45,30 @@ cBricks::cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, in
     type = loadedType;
     enabled = true;
 
-    Image imgBrick[5];
-    if(texture[0].id == 0)
-        imgBrick[0] = LoadImage(TEX_BRICK_NORMAL);
-    if(texture[1].id == 0)
-        imgBrick[1] = LoadImage(TEX_BRICK_2HP);
-    if(texture[2].id == 0)
-        imgBrick[2] = LoadImage(TEX_BRICK_3HP);
-    if(texture[3].id == 0)
-        imgBrick[3] = LoadImage(TEX_BRICK_EXPLOSIVE);
-    if(texture[4].id == 0)
-        imgBrick[4] = LoadImage(TEX_BRICK_GOLD);
-    for(int i = 0; i < 5; i++) {
-        if(texture[i].id == 0) {
-            ImageResize(&imgBrick[i], 100*10, 70*10);
-            texture[i] = LoadTextureFromImage(imgBrick[i]);
+    if(type == 4) {
+        int ballSize = 3;
+        int ballSpeed = 50;
+        animationBalls = new cAnimBall[STANDARD_ANIM_BALL_COUNT] {
+            {GetRandomValue(x + 6, x + brickWidth - 6), GetRandomValue(y + 6, y + brickHeight - 6), ballSize, ballSpeed},
+            {GetRandomValue(x + 6, x + brickWidth - 6), GetRandomValue(y + 6, y + brickHeight - 6), ballSize, ballSpeed},
+            {GetRandomValue(x + 6, x + brickWidth - 6), GetRandomValue(y + 6, y + brickHeight - 6), ballSize, ballSpeed},
+            {GetRandomValue(x + 6, x + brickWidth - 6), GetRandomValue(y + 6, y + brickHeight - 6), ballSize, ballSpeed},
+            {GetRandomValue(x + 6, x + brickWidth - 6), GetRandomValue(y + 6, y + brickHeight - 6), ballSize, ballSpeed},
+            {GetRandomValue(x + 6, x + brickWidth - 6), GetRandomValue(y + 6, y + brickHeight - 6), ballSize, ballSpeed},
+            {GetRandomValue(x + 6, x + brickWidth - 6), GetRandomValue(y + 6, y + brickHeight - 6), ballSize, ballSpeed},
+            {GetRandomValue(x + 6, x + brickWidth - 6), GetRandomValue(y + 6, y + brickHeight - 6), ballSize, ballSpeed}
+        };
+        for(int i = 0; i < STANDARD_ANIM_BALL_COUNT; i++) {
+            animationBalls[i].randomDirection();
         }
-    }
+    } else animationBalls = nullptr;
+
     brickCount++;
 }
 
-cBricks::~cBricks(){
+cBricks::~cBricks() {
+    if(animationBalls != nullptr)
+        delete[] animationBalls;
     brickCount--;
 }
 
@@ -84,12 +87,13 @@ Color cBricks::getColor() {
     }
     return BLACK;
 }
+
 void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
     //Brick Collision
     Vector2 ball_collision = {ball->getX(), ball->getY()};
     Rectangle brick_collision;
     brick_collision = {x, y, brickWidth, brickHeight};
-    if(CheckCollisionCircleRec(ball_collision, ball->getDimensions(), brick_collision) && enabled) {
+    if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && enabled) {
         if(ball->getX() <= x) {
             if(ball->getDirection() == UPRIGHT) {
                 ball->setDirection(UPLEFT);
@@ -134,14 +138,16 @@ void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
         ball->randomizeMovement();
     }
 }
+
 void cBricks::Draw(cBricks *brick, float animationFrame) {
     for(int i = 0; i < brickCount - 1; i++) {
         if(brick[i].enabled) {
             if(brick[i].type < 4) {
                 brick[i].drawBrickPulse((int)animationFrame, brick[i].type);
+            } else if(brick[i].type == 4) {
+                brick[i].drawBrickBallBounce((int)animationFrame, 1, brick[i].getDimensionsRec());
             } else
                 DrawRectangle(brick[i].x, brick[i].y, brick[i].brickWidth, brick[i].brickHeight, brick[i].getColor());
-            //DrawTexturePro(texture[brick[i].type - 1], Rectangle{0, 0, texture[brick[i].type - 1].width, texture[brick[i].type - 1].height}, Rectangle{brick[i].position.x, brick[i].position.y, brick[i].brickWidth, brick[i].brickHeight},Vector2{0,0}, 0.0f, brick[i].getColor());
 #ifdef _DEBUG
             //Draw brick number on bricks if DEBUG:
             DrawText(TextFormat("%d", i+1), brick[i].x + brick[i].brickWidth / 2 - 2.5, brick[i].y + brick[i].brickHeight / 2 - 5, 5, RED);
@@ -149,9 +155,7 @@ void cBricks::Draw(cBricks *brick, float animationFrame) {
         }
     }
 }
-void cBricks::Input() {
-    //
-}
+
 void cBricks::drawBrickPulse(int i, int lineAmount) {
     Rectangle rec;
     //Calculate ratios used to make time to shrink similar between width and height
@@ -181,4 +185,41 @@ void cBricks::drawBrickPulse(int i, int lineAmount) {
 
     //Draw first rectangle
     DrawRectangleRoundedLines({x, y, brickWidth, brickHeight}, 0.1, 1000, 3, ORANGE);
+}
+
+void cBricks::drawBrickBallBounce(int i, int lineAmount, Rectangle drawnRectangle) {
+    Rectangle rec;
+    float calcHoriz, calcVert;
+
+    //Calculate x and y
+    int limitX = (drawnRectangle.x + drawnRectangle.width - lineAmount);
+    int limitY = (drawnRectangle.y + drawnRectangle.height - lineAmount);
+    if(animationBalls[0].ballCount % STANDARD_ANIM_BALL_COUNT != 0) throw;
+    for(int kk = 0; kk < STANDARD_ANIM_BALL_COUNT; kk++) {
+        if(animationBalls[kk].getX() > limitX) {
+            if(animationBalls[kk].getDirection() == DOWNRIGHT) {
+                animationBalls[kk].setDirection(DOWNLEFT);
+            } else animationBalls[kk].setDirection(UPLEFT);
+        }
+        if(animationBalls[kk].getX() < (drawnRectangle.x + 9)) {
+            if(animationBalls[kk].getDirection() == DOWNLEFT) {
+                animationBalls[kk].setDirection(DOWNRIGHT);
+            } else animationBalls[kk].setDirection(UPRIGHT);
+        }
+        if(animationBalls[kk].getY() > limitY) {
+            if(animationBalls[kk].getDirection() == DOWNRIGHT) {
+                animationBalls[kk].setDirection(UPRIGHT);
+            } else animationBalls[kk].setDirection(UPLEFT);
+        }
+        if(animationBalls[kk].getY() < (drawnRectangle.y + 9)) {
+            if(animationBalls[kk].getDirection() == UPRIGHT) {
+                animationBalls[kk].setDirection(DOWNRIGHT);
+            } else animationBalls[kk].setDirection(DOWNLEFT);
+        }
+        animationBalls[kk].Move();
+        //DrawCircle
+        cAnimBall::Draw(&animationBalls[kk]);
+    }
+    //Draw first rectangle
+    DrawRectangleRoundedLines(drawnRectangle, 0.1, 1000, 3, ORANGE);
 }

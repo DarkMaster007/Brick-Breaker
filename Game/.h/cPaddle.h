@@ -1,7 +1,5 @@
-#pragma once
 #ifndef CPADDLE_H
 #define CPADDLE_H
-#endif // CPADDLE_H
 
 #include "defines.h"
 #include "cBall.h"
@@ -20,13 +18,13 @@ class cPaddle {
     static Texture2D textureEdge_R;
 
     cPaddle(float posX, float posY, float width, float height);
-    inline float getX();
-    inline float getY();
-    inline Vector2 getPosition();
-    inline Vector2 getDimensions();
-    inline Rectangle getDimensionsRec();
-    inline float getSpeed();
-    inline float getBounceReverseArea();
+    inline float getX() const;
+    inline float getY() const;
+    inline Vector2 getPosition() const;
+    inline Vector2 getDimensions() const;
+    inline Rectangle getDimensionsRec() const;
+    inline float getSpeed() const;
+    inline float getBounceReverseArea() const;
     void moveLeft();
     void moveLeft(float);
     void moveRight();
@@ -37,26 +35,28 @@ class cPaddle {
     void Input(bool autoMove, bool isPaused);
 };
 
-float cPaddle::getX() {
+float cPaddle::getX() const{
     return x;
 }
-float cPaddle::getY() {
+float cPaddle::getY() const{
     return y;
 }
-Vector2 cPaddle::getPosition() {
+Vector2 cPaddle::getPosition() const{
     return (Vector2) {
         getX(), getY()
     };
 }
-Vector2 cPaddle::getDimensions() {
+Vector2 cPaddle::getDimensions() const{
     return {paddleWidth, paddleHeight};
 }
-Rectangle cPaddle::getDimensionsRec() {
+Rectangle cPaddle::getDimensionsRec() const{
     return {getX(), getY(), getDimensions().x, getDimensions().y};
 }
-float cPaddle::getSpeed() {
+float cPaddle::getSpeed() const{
     return speed;
 }
-float cPaddle::getBounceReverseArea() {
+float cPaddle::getBounceReverseArea() const{
     return bounceReverseArea;
 }
+
+#endif // CPADDLE_H

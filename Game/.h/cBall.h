@@ -1,7 +1,6 @@
-#pragma once
 #ifndef CBALL_H
 #define CBALL_H
-#endif // CBALL_H
+
 #include "defines.h"
 
 class cBall {
@@ -26,14 +25,14 @@ class cBall {
     ~cBall();
     inline void setDirection(eDir d);
     inline void randomDirection();
-    inline float getX();
-    inline float getY();
+    inline float getX() const;
+    inline float getY() const;
     inline void setX(float newX);
     inline void setY(float newY);
-    inline eDir getDirection();
+    inline eDir getDirection() const;
     inline void setSize(int ball_size);
-    inline int getSize();
-    inline int getAcceleration();
+    inline int getSize() const;
+    inline int getAcceleration() const;
     inline void setAcceleration(float newAccel);
     void randomizeMovement();
     void Move();
@@ -48,10 +47,10 @@ void cBall::setDirection(eDir d) {
 void cBall::randomDirection() {
     direction = (eDir)(randomNrDirection(marsenneTwister));
 }
-float cBall::getX() {
+float cBall::getX() const {
     return x;
 }
-float cBall::getY() {
+float cBall::getY() const {
     return y;
 }
 void cBall::setX(float newX) {
@@ -60,18 +59,20 @@ void cBall::setX(float newX) {
 void cBall::setY(float newY) {
     y = newY;
 }
-eDir cBall::getDirection() {
+eDir cBall::getDirection() const {
     return direction;
 }
 void cBall::setSize(int ball_size) {
     current_size = ball_size;
 }
-int cBall::getSize() {
+int cBall::getSize() const {
     return current_size;
 }
-int cBall::getAcceleration() {
+int cBall::getAcceleration() const {
     return acceleration;
 }
 void cBall::setAcceleration(float newAccel = 0.017) {
     acceleration = newAccel;
 }
+
+#endif // CBALL_H

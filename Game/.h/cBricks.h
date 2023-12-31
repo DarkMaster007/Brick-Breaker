@@ -1,7 +1,5 @@
-#pragma once
 #ifndef CBRICKS_H
 #define CBRICKS_H
-#endif // CBRICKS_H
 
 #include "defines.h"
 #include "cBall.h"
@@ -21,40 +19,40 @@ class cBricks {
     static int brickCount;
 
     int ID;
-    cAnimBall *animationBalls;
+    int animBallIndex;
 
-    cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, int loadedType);
+    cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, int loadedType, int newAnimBallIndex);
     ~cBricks();
     Color getColor();
     void Reset();
     void Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral);
     static void Draw(cBricks *brick, float animFrame);
-    void drawBrickPulse(int i, int lineAmount);
-    void drawBrickBallBounce(int i, int lineAmount, Rectangle drawnRectangle);
-    inline float getX();
-    inline float getY();
-    inline Vector2 getDimensions();
-    inline Rectangle getDimensionsRec();
+    /*void drawBrickPulse(int i, int lineAmount);
+    void drawBrickBallBounce(int i, int lineAmount, Rectangle drawnRectangle);*/
+    inline float getX() const;
+    inline float getY() const;
+    inline Vector2 getDimensions() const;
+    inline Rectangle getDimensionsRec() const;
     inline void setX(float);
     inline void setY(float);
     inline void setDimensions(float, float);
     inline void setDimensionsRec(Rectangle);
-    inline int getType();
+    inline int getType() const;
     inline void setType(int);
-    inline bool getEnabled();
+    inline bool getEnabled() const;
     inline void setEnabled(bool);
 };
 
-float cBricks::getX() {
+float cBricks::getX() const{
     return x;
 }
-float cBricks::getY() {
+float cBricks::getY() const{
     return y;
 }
-Vector2 cBricks::getDimensions() {
+Vector2 cBricks::getDimensions() const{
     return {brickWidth, brickHeight};
 }
-Rectangle cBricks::getDimensionsRec() {
+Rectangle cBricks::getDimensionsRec() const{
     return {getX(), getY(), getDimensions().x, getDimensions().y};
 }
 void cBricks::setX(float newX) {
@@ -72,15 +70,17 @@ void cBricks::setDimensionsRec(Rectangle newRectangle) {
     setY(newRectangle.y);
     setDimensions(newRectangle.width, newRectangle.height);
 }
-int cBricks::getType() {
+int cBricks::getType() const{
     return type;
 }
 void cBricks::setType(int newType) {
     type = newType;
 }
-bool cBricks::getEnabled() {
+bool cBricks::getEnabled() const{
     return enabled;
 }
 void cBricks::setEnabled(bool newEnabled) {
     enabled = newEnabled;
 }
+
+#endif // CBRICKS_H

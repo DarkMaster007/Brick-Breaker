@@ -1,7 +1,5 @@
-#pragma once
 #ifndef CPOWERUP_H
 #define CPOWERUP_H
-#endif // CPOWERUP_H
 
 #include "defines.h"
 
@@ -18,7 +16,7 @@ class cPowerup {
     static Texture2D texPowerup;
 
     cPowerup();
-    eActivePowerups getType() {
+    eActivePowerups getType() const{
         return type;
     }
     void setType(eActivePowerups newType) {
@@ -35,7 +33,7 @@ class cPowerup {
         x = newPosition.x;
         y = newPosition.y;
     }
-    bool getEnabled() {
+    bool getEnabled() const{
         return enabled;
     }
     void setEnabled(bool newEnabled) {
@@ -46,3 +44,5 @@ class cPowerup {
     static void Draw(cPowerup *powerup);
     static void Input();
 };
+
+#endif // CPOWERUP_H

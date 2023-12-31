@@ -71,19 +71,17 @@
 			<Add directory="../../Raylib Library/raygui/src" />
 		</Linker>
 		<Unit filename="../Release/resources/Shaders/bloom.fs" />
+		<Unit filename=".cpp/DrawFunctions.cpp" />
 		<Unit filename=".cpp/cAnimBall.cpp" />
 		<Unit filename=".cpp/cBall.cpp" />
 		<Unit filename=".cpp/cBricks.cpp" />
-		<Unit filename=".cpp/cCollisionManager.cpp" />
-		<Unit filename=".cpp/cGameManager.cpp" />
 		<Unit filename=".cpp/cPaddle.cpp" />
 		<Unit filename=".cpp/cPowerup.cpp" />
 		<Unit filename=".cpp/main.cpp" />
+		<Unit filename=".h/DrawFunctions.h" />
 		<Unit filename=".h/cAnimBall.h" />
 		<Unit filename=".h/cBall.h" />
 		<Unit filename=".h/cBricks.h" />
-		<Unit filename=".h/cCollisionManager.h" />
-		<Unit filename=".h/cGameManager.h" />
 		<Unit filename=".h/cPaddle.h" />
 		<Unit filename=".h/cPowerup.h" />
 		<Unit filename=".h/defines.h" />

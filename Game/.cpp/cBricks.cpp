@@ -46,10 +46,16 @@ cBricks::cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, in
     type = loadedType;
     enabled = true;
     brickCount++;
+    #ifdef _DEBUG
+    printf("Constructor called for brick ID: %i\n", ID);
+    #endif // _DEBUG
 }
 
 cBricks::~cBricks() {
     brickCount--;
+    #ifdef _DEBUG
+    printf("Destructor called for brick ID: %i\n", ID);
+    #endif // _DEBUG
 }
 
 Color cBricks::getColor() {
@@ -66,6 +72,17 @@ Color cBricks::getColor() {
         return GOLD;
     }
     return BLACK;
+}
+
+int cBricks::callOnCollision() {
+    if(type > 0 && type < 4) { //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
+        type -= 1;
+    }
+    if(type == 0 || type == 4) {
+        enabled = 0;
+        return 0;
+    }
+    return type;
 }
 
 void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
@@ -99,11 +116,13 @@ void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
                 ball->setDirection(DOWNLEFT);
             }
         }
-        if(type > 0 && type < 4){ //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
+        if(type > 0 && type < 4) { //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
             type -= 1;
         }
         if(type == 0 || type == 4) {
             enabled = 0;
+        }
+        if(enabled == 0) {
             for(int j = 0; j < MAX_POWERUPS; j++) {
                 if(!powerup[j].getEnabled()) {
                     powerup[j].spawnPowerup(this);

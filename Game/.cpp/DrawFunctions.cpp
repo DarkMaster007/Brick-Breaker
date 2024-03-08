@@ -56,7 +56,6 @@ void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[], int curren
                 animationBalls[kk].setDirection(DOWNRIGHT);
             } else animationBalls[kk].setDirection(DOWNLEFT);
         }
-        animationBalls[kk].Move();
         //DrawCircle
         cAnimBall::Draw(&animationBalls[kk]);
     }
@@ -66,4 +65,18 @@ void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[], int curren
 
 void DrawBricksUnbreakable() {
     // Implementation of DrawBricksUnbreakable
+}
+
+void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL, Texture2D edgeTextureR, Texture2D bodyTexture){
+    Rectangle Source = {0, 0, edgeTextureL.width, edgeTextureL.height};
+    Rectangle Destination = {paddle.x, paddle.y, reverseAreaSize, paddle.height};
+    DrawTexturePro(edgeTextureL, Source, Destination, { 0, 0 }, 0, WHITE);
+
+    Source = {0, 0, edgeTextureR.width, edgeTextureR.height};
+    Destination = {paddle.x + paddle.width - reverseAreaSize, paddle.y, reverseAreaSize, paddle.height};
+    DrawTexturePro(edgeTextureR, Source, Destination, { 0, 0 }, 0, WHITE);
+
+    Source = {0, 0, bodyTexture.width, bodyTexture.height};
+    Destination = {paddle.x + reverseAreaSize, paddle.y, paddle.width - 2 * reverseAreaSize, paddle.height};
+    DrawTexturePro(bodyTexture, Source, Destination, { 0, 0 }, 0, WHITE);
 }

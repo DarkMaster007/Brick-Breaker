@@ -27,6 +27,7 @@ class cAnimBall {
     inline void randomDirection();
     inline float getX() const;
     inline float getY() const;
+    inline Vector2 getV() const;
     inline void setX(float newX);
     inline void setY(float newY);
     inline eDir getDirection() const;
@@ -53,6 +54,9 @@ float cAnimBall::getX() const{
 }
 float cAnimBall::getY() const{
     return y;
+}
+Vector2 cAnimBall::getV() const{
+    return {x, y};
 }
 void cAnimBall::setX(float newX) {
     x = newX;

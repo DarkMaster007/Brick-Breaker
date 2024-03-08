@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef DEFINES_H
 #define DEFINES_H
 
@@ -18,8 +16,11 @@
 #define MAX_BRICKS 300
 #define MAX_BALLS 10
 #define MAX_POWERUPS 6
-#define STANDARD_ANIM_BALL_COUNT 8
+#define STANDARD_ANIM_BALL_COUNT 20
 #define MAX_ANIM_BALL_COUNT STANDARD_ANIM_BALL_COUNT * MAX_BRICKS
+
+#define MAX_INPUT_CHARS   9
+#define MAX_INPUT_INT     4
 
 #define TEX_BALL "..//resources//ball.png"
 #define TEX_PADDLE_BODY "..//resources//Breakout-Paddle_middle.png"

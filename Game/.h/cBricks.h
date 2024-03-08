@@ -27,8 +27,7 @@ class cBricks {
     void Reset();
     void Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral);
     static void Draw(cBricks *brick, float animFrame);
-    /*void drawBrickPulse(int i, int lineAmount);
-    void drawBrickBallBounce(int i, int lineAmount, Rectangle drawnRectangle);*/
+    int callOnCollision();
     inline float getX() const;
     inline float getY() const;
     inline Vector2 getDimensions() const;
@@ -43,16 +42,16 @@ class cBricks {
     inline void setEnabled(bool);
 };
 
-float cBricks::getX() const{
+float cBricks::getX() const {
     return x;
 }
-float cBricks::getY() const{
+float cBricks::getY() const {
     return y;
 }
-Vector2 cBricks::getDimensions() const{
+Vector2 cBricks::getDimensions() const {
     return {brickWidth, brickHeight};
 }
-Rectangle cBricks::getDimensionsRec() const{
+Rectangle cBricks::getDimensionsRec() const {
     return {getX(), getY(), getDimensions().x, getDimensions().y};
 }
 void cBricks::setX(float newX) {
@@ -70,13 +69,13 @@ void cBricks::setDimensionsRec(Rectangle newRectangle) {
     setY(newRectangle.y);
     setDimensions(newRectangle.width, newRectangle.height);
 }
-int cBricks::getType() const{
+int cBricks::getType() const {
     return type;
 }
 void cBricks::setType(int newType) {
     type = newType;
 }
-bool cBricks::getEnabled() const{
+bool cBricks::getEnabled() const {
     return enabled;
 }
 void cBricks::setEnabled(bool newEnabled) {

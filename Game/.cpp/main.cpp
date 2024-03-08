@@ -1,12 +1,12 @@
 #define RAYGUI_IMPLEMENTATION
 #include "defines.h"
 #include "DrawFunctions.h"
+#include "editor.h"
 #include "cBricks.h"
 #include "cBall.h"
 #include "cPaddle.h"
 #include "cPowerup.h"
-
-FILE *fp;
+#include "cSettings.h"
 
 cBricks *brick;
 cAnimBall *animationBalls;
@@ -42,7 +42,10 @@ int levelCounter;
 double previousTime;
 double updateInterval; //50 ms
 int animationFrame;
+bool configLoadError;
 
+void OpenWindow();
+int MainMenu();
 void Init();
 int LoadLevel();
 void SpawnPowerup(int brickIndex);
@@ -57,23 +60,151 @@ void Unload();
 
 int main() {
     int exitCode = 0;
-    Init();
-    if(LoadLevel() != 0) {
-        exitCode = -1;
-    };
-    while(!WindowShouldClose() & !win) {
-        Input();
-        Logic();
-        checkWin();
-        Draw();
+    OpenWindow();
+    int state = MainMenu();
+    if(state == 3) {
+        //Editor
+        Editor_Init();
+        Editor_Info();
+        while(!WindowShouldClose() && !quit) {
+            EditorLogic();
+            timer += GetFrameTime();
+            double currentTime = GetTime();
+            if(currentTime - previousTime >= updateInterval) {
+                if(animationFrame >= 100) animationFrame = 0;
+                if(!isPaused) {
+                    animationFrame++;
+                }
+                previousTime = currentTime;
+            }
+            EditorDraw();
+        }
+        EditorCleanup();
     }
-    Unload();
+    if(state == 4) {
+        //Game
+        Init();
+        if(LoadLevel() != 0) {
+            exitCode = -1;
+        };
+        while(!WindowShouldClose() && !win && !quit) {
+            Input();
+            if(!isPaused) Logic();
+            checkWin();
+            if(ball->getDirection() != STOP && !isPaused) timer += GetFrameTime();
+            double currentTime = GetTime();
+            if(currentTime - previousTime >= updateInterval) {
+                if(animationFrame >= 100) animationFrame = 0;
+                if(!isPaused) {
+                    animationFrame++;
+                }
+                previousTime = currentTime;
+            }
+            Draw();
+        }
+        //
+        Unload();
+    }
     return exitCode;
 }
 
-void Init() {
+void OpenWindow() {
+    FILE *fp;
     int width, height;
+    char path[255];
+    sprintf(path, "%s\\config\\settings.txt", GetPrevDirectoryPath(GetWorkingDirectory()));
+    fp = fopen(path, "r"); //Open settings.txt file
+    if(fp == nullptr) {
+        fclose(fp);
+        width = 800, height = 600, fullscreen = 0;
+        fp = fopen(path, "w"); //Open settings.txt file
+        if(fp != nullptr) {
+            fprintf(fp, "%d %d %d ", width, height, fullscreen);
+            configLoadError = 0;
+        } else configLoadError = 1;
+    } else {
+        configLoadError = 0;
+        fscanf(fp, "%d %d %d", &width, &height, (int*)&fullscreen); //Load the settings file
+    }
+    fclose(fp);
 
+#ifdef _DEBUG
+    printf("Width: %d\nHeight: %d\nFullscreen: %d\n", width, height, fullscreen);
+#endif // _DEBUG
+
+    SetRandomSeed(time(NULL)); //Set seed for random values with current time
+    SetConfigFlags(FLAG_VSYNC_HINT);
+    InitWindow(width,height,"RayBreaker");
+    InitAudioDevice();
+    SetTargetFPS(120); // TODO (Administrator#7#): Make everything use deltaTime so you can remove the FPS limit
+    if(fullscreen == 1) {
+        ToggleFullscreen();
+    }
+}
+
+int MainMenu() {
+    int currentScreen = 0;
+
+    //Load Textures
+    Texture title = LoadTexture("..//resources//title_main.png");
+    //Draw
+    char msg_error[95] = "settings.txt file failed to load and was recreated. \nPlease Press \'Esc\' to quit and relaunch.";
+    int textsize;
+
+    while(!WindowShouldClose()) {
+        //Main screen
+        int box_width = 180;
+        int box_height = 60;
+        int x = GetScreenWidth() / 2 - box_width / 2;
+        int y = GetScreenHeight() * 0.35;
+        Rectangle button_settings = { (float)x, (float)y, (float)box_width, (float)box_height };
+        Rectangle button_extra = { (float)x, (float)(y + box_height + 20), (float)box_width, (float)box_height };
+        Rectangle button_editor = { (float)x, (float)(y + box_height * 2 + 20 * 2), (float)box_width, (float)box_height };
+        Rectangle button_start = { (float)x, (float)(y + box_height + 20 + 200), (float)box_width, (float)box_height };
+        //
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        DrawTexture(title, GetScreenWidth() /2 - title.width / 2, 80, WHITE); // Draw Settings texture (to change)
+
+        if(!configLoadError) {
+            //General Menu
+            if(currentScreen == 0) {
+                if(GuiButton(button_settings, "Settings")) {
+                    PlaySound(LoadSoundFromWave(waveSelect));
+                    currentScreen = 1;
+                }
+
+                if(GuiButton(button_extra, "Extra")) {
+                    PlaySound(LoadSoundFromWave(waveSelect));
+                    currentScreen = 2;
+                }
+
+                if(GuiButton(button_editor, "Editor")) {
+                    PlaySound(LoadSoundFromWave(waveSelect));
+                    return 3;
+                }
+
+
+                if(GuiButton(button_start, "Start")) {
+                    PlaySound(LoadSoundFromWave(waveSelect));
+                    return 4;
+                }
+            }
+            if(currentScreen == 1)
+                drawSettings(currentScreen);
+        } else {
+            textsize = MeasureText(msg_error,25);
+            DrawText(msg_error, (float)(GetScreenWidth() / 2 - textsize / 2), (float)(GetScreenHeight() / 2), 25, BLACK);
+        }
+
+        EndDrawing();
+    }
+    return 0;
+}
+
+void Init() {
+    HideCursor();
     //Initialize all vars with their proper values
     quit = 0;
     autoMove = 0;
@@ -85,24 +216,6 @@ void Init() {
     animationFrame = 0;
     timer = 0;
     //
-
-    fp = fopen("..\\config\\settings.txt", "r"); //Open settings.txt file
-    fscanf(fp, "%d %d %d", &width, &height, (int*)&fullscreen); //Load the settings file
-    fclose(fp);
-
-#ifdef _DEBUG
-    printf("Width: %d\nHeight: %d\nFullscreen: %d\n", width, height, fullscreen);
-#endif // _DEBUG
-
-    SetRandomSeed(time(NULL)); //Set seed for random values with current time
-    SetConfigFlags(FLAG_VSYNC_HINT);
-    InitWindow(width,height,"Editor");
-    InitAudioDevice();
-    SetTargetFPS(120); // TODO (Administrator#7#): Make everything use deltaTime so you can remove the FPS limit
-    HideCursor();
-    if(fullscreen == 1) {
-        ToggleFullscreen();
-    }
 
     ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250);
     paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
@@ -149,18 +262,20 @@ void Init() {
     SetMasterVolume(soundVolume);
 
     //Rectangles that will be used for collision
-    borderLeft = {0, 0, 10, (float)GetScreenHeight()};
-    borderRight = {(float)(GetScreenWidth() - 10), 0, (float)GetScreenWidth(), (float)GetScreenHeight()};
-    borderTop = {0, 0, (float)GetScreenWidth(), 10};
-    borderBottom = {0, (float)(GetScreenHeight() - 10), (float)GetScreenWidth(), 10};
+    float borderThickness = 15;
+    borderLeft = {0, borderThickness - 0.3f, borderThickness, (float)GetScreenHeight() - borderThickness};
+    borderRight = {(float)(GetScreenWidth() - borderThickness), borderThickness - 0.3f, borderThickness, (float)GetScreenHeight() - borderThickness};
+    borderTop = {0, 0, (float)GetScreenWidth(), borderThickness};
+    borderBottom = {0, (float)(GetScreenHeight() - borderThickness), (float)GetScreenWidth(), borderThickness};
 }
 
 int LoadLevel() {
-    int i = 0;
-    int tempWidth, tempHeight;
-    int levelWidth, levelHeight;
+    FILE *fp;
+    int i = 0, brickTotal = 0;
     float brickPosX, brickPosY;
-    int brickWidth, brickHeight, brickType;
+    float brickWidth, brickHeight;
+    int brickType;
+    Rectangle progressBarRec = {GetScreenWidth() * 0.12f, GetScreenHeight() / 2 - 50.0f, GetScreenWidth() - GetScreenWidth() * 0.24f, 100};
 
     fp = fopen(TextFormat("..\\config\\level%i.txt", levelCounter), "r");
     if(!fp) {
@@ -172,35 +287,33 @@ int LoadLevel() {
             if(!fp) return -1;
         }
     }
+    if(!feof(fp)) {
+        fscanf(fp, "%d", &brickTotal);
+    }
     while(!feof(fp)) {
-        fscanf(fp, "%d %d %f %f %d %d %d", &levelWidth, &levelHeight, &brickPosX, &brickPosY, &brickWidth, &brickHeight, &brickType);
-        if(GetScreenWidth() != levelWidth || GetScreenHeight() != levelHeight) {
-            tempWidth = GetScreenWidth() / levelWidth;
-            tempHeight = GetScreenHeight() / levelHeight;
-            brickPosX *= tempWidth;
-            brickPosY *= tempHeight;
-            brickWidth *= (tempWidth*1.5);
-            brickHeight *= (tempHeight*1.2);
-#ifdef _DEBUG
-            printf("X mod: %d/nY mod: %d/n",tempWidth,tempHeight);
-            printf("Level res to game res ratio is: %d to %d./n",tempWidth,tempHeight);
-#endif // _DEBUG
-        }
-        int ballAnimIndex;
-        int ballSize = 3;
-        int ballSpeed = 50;
-        if(brickType == 4)
-            ballAnimIndex = cAnimBall::ballCount;
-        else
-            ballAnimIndex = -1;
-        new (&brick[i]) cBricks(brickPosX, brickPosY, brickWidth, brickHeight, brickType, ballAnimIndex);
-        if(brickType == 4) {
-            for(int j = 0; j < STANDARD_ANIM_BALL_COUNT; j++) {
-                new (&animationBalls[ballAnimIndex + j]) cAnimBall(GetRandomValue(brickPosX + 6, brickPosX + brickWidth - 6), GetRandomValue(brickPosY + 6, brickPosY + brickHeight - 6), ballSize, ballSpeed);
-                animationBalls[ballAnimIndex + j].randomDirection();
+        float progress = i;
+        BeginDrawing();
+        ClearBackground(BLACK);
+        GuiProgressBar(progressBarRec, "0", "100", &progress, 0, brickTotal);
+        fscanf(fp, "%f %f %f %f %d", &brickPosX, &brickPosY, &brickWidth, &brickHeight, &brickType);
+        if(brickPosX > 0 && brickPosX < GetScreenWidth() && brickPosY > 0 && brickPosY < GetScreenHeight()) {
+            int ballAnimIndex;
+            int ballSize = 3;
+            int ballSpeed = 50;
+            if(brickType == 4)
+                ballAnimIndex = cAnimBall::ballCount;
+            else
+                ballAnimIndex = -1;
+            new (&brick[i]) cBricks(brickPosX, brickPosY, brickWidth, brickHeight, brickType, ballAnimIndex);
+            if(brickType == 4) {
+                for(int j = 0; j < STANDARD_ANIM_BALL_COUNT; j++) {
+                    new (&animationBalls[ballAnimIndex + j]) cAnimBall(GetRandomValue(brickPosX + 6, brickPosX + brickWidth - 6), GetRandomValue(brickPosY + 6, brickPosY + brickHeight - 6), ballSize, ballSpeed);
+                    animationBalls[ballAnimIndex + j].randomDirection();
+                }
             }
+            i++;
         }
-        i++;
+        EndDrawing();
     }
     if(cAnimBall::ballCount % STANDARD_ANIM_BALL_COUNT != 0) throw "Invalid animation ball count";
     fclose(fp);
@@ -209,18 +322,9 @@ int LoadLevel() {
 
 void Draw() {
     BeginDrawing();
-    if(ball->getDirection() != STOP && !isPaused) timer += GetFrameTime();
-    double currentTime = GetTime();
-    if(currentTime - previousTime >= updateInterval) {
-        if(animationFrame >= 100) animationFrame = 0;
-        if(!isPaused) {
-            animationFrame++;
-        }
-        previousTime = currentTime;
-    }
     ClearBackground(BLACK);
 
-    //cBricks::Draw(brick, animationFrame);
+    //Draw Bricks
     for(int i = 0; i < cBricks::brickCount; i++) {
         if(brick[i].getEnabled()) {
             Rectangle brickRec = brick[i].getDimensionsRec();
@@ -239,27 +343,89 @@ void Draw() {
             //Draw brick number on bricks if DEBUG:
             DrawText(TextFormat("%d", i+1), brickRec.x + brickRec.width / 2 - 2.5, brickRec.y + brickRec.height / 2 - 5, 5, RED);
 #endif // _DEBUG
-        }
-        else{
-            if(brick[i].getType() == 4){
-                for(int j = brick[i].animBallIndex; j < brick[i].animBallIndex + 6; j++){
-                    animationBalls[j].Move(); // TODO (DarkMaster#9#12/31/23): Move this shit to LOGIC
-                    cAnimBall::Draw(&animationBalls[j]);
+        } else {
+            if(brick[i].getType() == 4) {
+                for(int j = brick[i].animBallIndex; j < brick[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; j++) {
+                    if(animationBalls[j].getDirection() != STOP) cAnimBall::Draw(&animationBalls[j]);
                 }
             }
         }
     }
+    //
 
-    cPaddle::Draw(paddle);
+    //Draw Paddle
+    DrawPaddle(paddle->getDimensionsRec(), paddle->getBounceReverseArea(), paddle->textureEdge_L, paddle->textureEdge_R, paddle->textureBody);
+    //
 
-    cBall::Draw(ball);
+    //Draw Ball
+    DrawCircle(ball->getX(), ball->getY(), ball->getSize(), WHITE);
+    //
 
-    cPowerup::Draw(powerup);
+    //Draw Powerups
+    for(int i = 0; i < 6; i++) {
+        if(powerup[i].getEnabled()) {
+            DrawTexture(powerup->texPowerup, powerup[i].getPosition().x - 50, powerup[i].getPosition().y - 25, WHITE);
+            powerup[i].setPosition(powerup[i].getPosition().x, powerup[i].getPosition().y + GetRandomValue(300, 400) * GetFrameTime());
+        }
+    }
+    //
 
-    // Draw border
-    DrawRectangleRec(borderTop,BROWN);
-    DrawRectangleRec(borderLeft,BROWN);
-    DrawRectangleRec(borderRight,BROWN);
+    //Draw Borders
+    int distance = 0;
+    int ballSize;
+    // Define a maximum size for the ball and a factor for size decrease
+    int maxSize = ball[0].getSize() * 3;
+    int minSize = ball[0].getSize() + 4;
+    //DRAW BORDER TOP
+    DrawRectangleRec(borderTop, BLACK);
+    DrawRectangleLinesEx(borderTop, 1.5, BLUE);
+    if(CheckCollisionCircleRec({ball[0].getX(),ball[0].getY()}, ball[0].getSize(), borderTop)) {
+        distance = ball[0].getY() - borderTop.y - borderTop.height;
+        // Calculate the ball size based on the distance
+        ballSize = maxSize * (distance / 10.0f);
+        // Ensure the ball size does not go below the minimum size
+        if (ballSize > minSize) {
+            ballSize = minSize;
+        }
+        BeginScissorMode(borderTop.x, borderTop.y, borderTop.width, borderTop.height);
+        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize, SKYBLUE);
+        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize - 2, BLACK);
+        EndScissorMode();
+    }
+    //
+    DrawRectangleRec(borderLeft, BLACK);
+    DrawRectangleLinesEx(borderLeft, 1.5, BLUE);
+    if(CheckCollisionCircleRec({ball[0].getX(),ball[0].getY()}, ball[0].getSize(), borderLeft)) {
+        distance = ball[0].getX() - borderLeft.x - borderLeft.width;
+        // Calculate the ball size based on the distance
+        ballSize = maxSize * (distance / 10.0f);
+        // Ensure the ball size does not go below the minimum size
+        if (ballSize > minSize) {
+            ballSize = minSize;
+        }
+        BeginScissorMode(borderLeft.x, borderLeft.y, borderLeft.width, borderLeft.height);
+        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize, SKYBLUE);
+        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize - 2, BLACK);
+        EndScissorMode();
+    }
+    //
+    DrawRectangleRec(borderRight, BLACK);
+    DrawRectangleLinesEx(borderRight, 1.5, BLUE);
+    if(CheckCollisionCircleRec({ball[0].getX(),ball[0].getY()}, ball[0].getSize(), borderRight)) {
+        distance = borderRight.x - ball[0].getX();
+        // Calculate the ball size based on the distance
+        ballSize = maxSize * (distance / 10.0f);
+        // Ensure the ball size does not go below the minimum size
+        if (ballSize > minSize) {
+            ballSize = minSize;
+        }
+        BeginScissorMode(borderRight.x, borderRight.y, borderRight.width, borderRight.height);
+        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize, SKYBLUE);
+        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize - 2, BLACK);
+        EndScissorMode();
+    }
+    //
+
     //Debug Red Bottom Border:
 #ifdef _DEBUG
     DrawRectangleRec(borderBottom,RED);
@@ -308,21 +474,50 @@ void Input() {
 }
 
 void Logic() {
+    ball->Logic(timer);
 
-    ball->Logic(timer, isPaused);
-
-    paddle->Logic(ball, autoMove, isPaused, soundBouncePaddle);
+    paddle->Logic(ball, autoMove, soundBouncePaddle);
 
     for(int i = 0; i < cBricks::brickCount; i++) {
         brick[i].Logic(ball, powerup, soundBounceGeneral);
     }
+    for(int i = 0; i < cAnimBall::ballCount; i++) {
+        animationBalls[i].Move();
+    }
 
     for(int i = 0; i < MAX_POWERUPS; i++) {
-        powerup[i].Logic();
+        if(powerup[i].getPosition().y > GetScreenHeight() - 10) {
+            powerup[i].setEnabled(0);
+        }
+        if(CheckCollisionRecs(paddle->getDimensionsRec(),powerup[i].getDimensionsRec())) {
+            powerup[i].setEnabled(0);
+        }
+    }
+
+    //Animation ball collision
+    for(int i = 0; i < cBricks::brickCount; i++) {
+        if(brick[i].getType() != 4) continue;
+        if(brick[i].getEnabled()) continue;
+        for(int animBallID = brick[i].animBallIndex; animBallID < brick[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; animBallID++) {
+            if(animationBalls[animBallID].getY() + animationBalls[animBallID].getSize() > GetScreenHeight() * 0.8) animationBalls[animBallID].setDirection(STOP);
+            if(animationBalls[animBallID].getDirection() == STOP) continue;
+            for(int j = 0; j < cBricks::brickCount; j++) {
+                if(brick[j].getEnabled() == false) continue;
+                if(CheckCollisionCircleRec(animationBalls[animBallID].getV(), animationBalls[animBallID].getSize(), brick[j].getDimensionsRec())) {
+                    animationBalls[animBallID].setDirection(STOP);
+                    brick[j].callOnCollision();
+                    for(int k = 0; k < MAX_POWERUPS; k++) {
+                        if(!powerup[k].getEnabled()) {
+                            powerup[k].spawnPowerup(&brick[k]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     //Make bricks fall after 60 seconds
-    // TODO (Administrator#8#): Change how timer works so that it stops when pausing
     if(ball->getDirection() != STOP && !isPaused) {
         if(timer > 60.0f) {
             if(fmod(timer, 10.0) < 0.10) {
@@ -379,6 +574,14 @@ void Logic() {
 
 void reset() {
     timer = 0;
+    int totalBrickCount = cBricks::brickCount;
+    for(int i = 0; i < totalBrickCount; i++) {
+        brick[i].~cBricks();
+    }
+    int totalBallCount = cAnimBall::ballCount;
+    for(int i = 0; i < totalBallCount; i++) {
+        animationBalls[i].~cAnimBall();
+    }
     paddle->Reset();
     ball->Reset();
     LoadLevel();
@@ -402,15 +605,22 @@ void checkWin() {
 }
 
 void Unload() {
-    for(int i = 0; i < cBricks::brickCount; i++) {
+    int totalBrickCount = cBricks::brickCount;
+    for(int i = 0; i < totalBrickCount; i++) {
         brick[i].~cBricks();
     }
-    MemFree(brick);
+    int totalBallCount = cAnimBall::ballCount;
+    for(int i = 0; i < totalBallCount; i++) {
+        animationBalls[i].~cAnimBall();
+    }
     MemFree(animationBalls);
+    MemFree(brick);
     delete[] powerup;
     delete ball;
     delete paddle;
+#ifdef _DEBUG
+    printf("Destructor finished.\n");
+#endif // _DEBUG
     _fcloseall();
     CloseWindow();
-    printf("Destructor finished.\n");
 }

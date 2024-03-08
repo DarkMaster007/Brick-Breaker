@@ -53,7 +53,7 @@
 	<random>
 	<chrono>
 
-1702907071 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
+1705090137 e:\windowsfolders\desktop\c++\raylib library\raylib\src\raylib.h
 	<stdarg.h>
 	<stdbool.h>
 
@@ -65,7 +65,7 @@
 
 1667861131 e:\windowsfolders\desktop\c++\brick-breaker\release\resources\includes\soundbouncepaddle.h
 
-1702907078 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
+1705090130 e:\windowsfolders\desktop\c++\raylib library\raygui\src\raygui.h
 	"raylib.h"
 	<stdio.h>
 	<stdlib.h>
@@ -73,10 +73,10 @@
 	<stdarg.h>
 	<math.h>
 
-1703895448 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cball.cpp
+1704652455 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cball.cpp
 	"cBall.h"
 
-1704058364 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cbricks.cpp
+1709932439 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cbricks.cpp
 	"cBricks.h"
 	"cPowerup.h"
 
@@ -85,22 +85,24 @@
 1703895448 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cgamemanager.cpp
 	"cGameManager.h"
 
-1703895448 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpaddle.cpp
+1704652501 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpaddle.cpp
 	"cPaddle.h"
 
-1702907390 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpowerup.cpp
+1709921735 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\cpowerup.cpp
 	"cPowerup.h"
 	"cBricks.h"
 
-1704058281 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\main.cpp
+1709931200 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\main.cpp
 	"defines.h"
 	"DrawFunctions.h"
+	"editor.h"
 	"cBricks.h"
 	"cBall.h"
 	"cPaddle.h"
 	"cPowerup.h"
+	"cSettings.h"
 
-1704041385 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\defines.h
+1709476066 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\defines.h
 	<raylib.h>
 	<raygui.h>
 	<stdio.h>
@@ -121,19 +123,19 @@
 
 1702907390 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\soundbouncepaddle.h
 
-1704042655 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cball.h
+1704652455 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cball.h
 	"defines.h"
 
-1704042714 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cbricks.h
+1709932439 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cbricks.h
 	"defines.h"
 	"cBall.h"
 	"cAnimBall.h"
 
-1704042871 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpaddle.h
+1704652501 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpaddle.h
 	"defines.h"
 	"cBall.h"
 
-1704042871 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpowerup.h
+1709921621 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\cpowerup.h
 	"defines.h"
 
 1702907390 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\ccollisionmanager.h
@@ -147,16 +149,42 @@
 	"cCollisionManager.h"
 	"cAnimBall.h"
 
-1704042871 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\canimball.h
+1704647251 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\canimball.h
 	"defines.h"
 
-1703895448 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\canimball.cpp
+1709756279 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\canimball.cpp
 	"cAnimBall.h"
 
-1704058364 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\drawfunctions.cpp
+1704650120 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\drawfunctions.cpp
 	"DrawFunctions.h"
 
-1704045416 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\drawfunctions.h
+1704472817 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\drawfunctions.h
 	"defines.h"
 	"cAnimBall.h"
+
+1709931238 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\csettings.cpp
+	"cSettings.h"
+
+1709931200 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\csettings.h
+	"defines.h"
+
+1706347103 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\game.cpp
+	"game.h"
+
+1706347300 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\game.h
+	"defines.h"
+	"DrawFunctions.h"
+	"cBricks.h"
+	"cBall.h"
+	"cPaddle.h"
+	"cPowerup.h"
+
+1709757987 e:\windowsfolders\desktop\c++\brick-breaker\game\.h\editor.h
+	"defines.h"
+	"cBricks.h"
+
+1709898068 source:e:\windowsfolders\desktop\c++\brick-breaker\game\.cpp\editor.cpp
+	"editor.h"
+	"cstring"
+	"DrawFunctions.h"
 

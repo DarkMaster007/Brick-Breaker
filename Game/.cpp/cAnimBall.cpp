@@ -17,9 +17,15 @@ cAnimBall::cAnimBall(int posX, int posY, int ball_size, float ballSpeed) {
     randomizeMovement();
     id = ballCount;
     ballCount++;
+#ifdef _DEBUG
+    printf("AnimationBall constructor called for ID %i\n", id);
+#endif // _DEBUG
 }
 cAnimBall::~cAnimBall() {
     ballCount--;
+#ifdef _DEBUG
+    printf("AnimationBall destructor called for ID %i\n", id);
+#endif // _DEBUG
 }
 void cAnimBall::Reset() {
     x = originalX;

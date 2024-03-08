@@ -42,7 +42,7 @@ void cPaddle::moveRight() {
 void cPaddle::moveRight(float step) {
     x += step;
 }
-void cPaddle::Logic(cBall *ball, bool autoMove, bool isPaused, Sound soundBouncePaddle) {
+void cPaddle::Logic(cBall *ball, bool autoMove, Sound soundBouncePaddle) {
     //Paddle Collision
     Vector2 ball_collision = {ball->getX(), ball->getY()};
     bool collisionStatus = CheckCollisionCircleRec(ball_collision,ball->getSize(), getDimensionsRec());
@@ -85,24 +85,6 @@ void cPaddle::Logic(cBall *ball, bool autoMove, bool isPaused, Sound soundBounce
             }
         }
     }
-}
-void cPaddle::Draw(cPaddle *paddle) {
-    //DrawRectangle(paddle->getX(),paddle->getY(),paddle->getDimensions().x,paddle->getDimensions().y,WHITE);
-
-    //DrawRectangle(paddle->getX(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y, YELLOW);
-    //DrawRectangle(paddle->getX() + paddle->getDimensions().x - paddle->getBounceReverseArea(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y, YELLOW);
-
-    Rectangle Source = {0, 0, (float)paddle->textureEdge_L.width, (float)paddle->textureEdge_L.height};
-    Rectangle Destination = {paddle->getX(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y};
-    DrawTexturePro(paddle->textureEdge_L, Source, Destination, { 0, 0 }, 0, WHITE);
-
-    Source = {0, 0, (float)paddle->textureEdge_R.width, (float)paddle->textureEdge_R.height};
-    Destination = {paddle->getX() + paddle->getDimensions().x - paddle->getBounceReverseArea(), paddle->getY(), paddle->getBounceReverseArea(), paddle->getDimensions().y};
-    DrawTexturePro(paddle->textureEdge_R, Source, Destination, { 0, 0 }, 0, WHITE);
-
-    Source = {0, 0, (float)paddle->textureBody.width, (float)paddle->textureBody.height};
-    Destination = {paddle->getX() + paddle->getBounceReverseArea(), paddle->getY(), paddle->getDimensions().x - 2 * paddle->getBounceReverseArea(), paddle->getDimensions().y};
-    DrawTexturePro(paddle->textureBody, Source, Destination, { 0, 0 }, 0, WHITE);
 }
 void cPaddle::Input(bool autoMove, bool isPaused) {
     //Paddle movement

@@ -37,8 +37,7 @@ class cBall {
     void randomizeMovement();
     void Move();
     void Reset();
-    void Logic(double &startTimer, bool isPaused);
-    static void Draw(cBall *ball);
+    void Logic(double &startTimer);
 };
 
 void cBall::setDirection(eDir d) {

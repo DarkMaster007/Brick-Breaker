@@ -59,19 +59,12 @@ void cBall::Move() {
         break;
     }
 }
-void cBall::Logic(double &startTimer, bool isPaused) {
+void cBall::Logic(double &startTimer) {
     // Click to start the ball movement thing
     if(getDirection() == STOP) {
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             setDirection(UPRIGHT);
         }
     }
-
-    //Move only if game is NOT isPausedd
-    if(!isPaused) {
-        Move();
-    }
-}
-void cBall::Draw(cBall *ball) {
-    DrawCircle(ball->getX(), ball->getY(), ball->getSize(), WHITE);
+    Move();
 }

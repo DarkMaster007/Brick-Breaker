@@ -30,8 +30,7 @@ class cPaddle {
     void moveRight();
     void moveRight(float);
     void Reset();
-    void Logic(cBall *ball, bool autoMove, bool isPaused, Sound soundBouncePaddle);
-    static void Draw(cPaddle *paddle);
+    void Logic(cBall *ball, bool autoMove, Sound soundBouncePaddle);
     void Input(bool autoMove, bool isPaused);
 };
 

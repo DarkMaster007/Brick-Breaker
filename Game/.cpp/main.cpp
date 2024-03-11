@@ -14,6 +14,7 @@ cBall *ball;                    // ball object
 cPaddle *paddle;                // paddle object
 cPowerup *powerup;              // Handles powerups
 Texture texBackground;
+int activePowerups;             //|Pierce|+1 Life|Explode|FireBall|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (13 bits)
 
 Rectangle borderLeft;           // left border rectangle, for collision and drawing
 Rectangle borderRight;          // right border rectangle, for collision and drawing
@@ -31,6 +32,8 @@ Sound soundDeath;
 Sound soundSelect;
 float soundVolume;
 bool soundMute;
+
+extern RenderTexture2D texPowerup[13];
 
 bool fullscreen;                // whether it's full-screen or not
 bool quit;                      // whether the game should quit or not
@@ -204,8 +207,10 @@ int MainMenu() {
 }
 
 void Init() {
+    GeneratePowerupTextures();
     HideCursor();
     //Initialize all vars with their proper values
+    activePowerups = 0;
     quit = 0;
     autoMove = 0;
     win = 0;
@@ -330,10 +335,11 @@ void Draw() {
             Rectangle brickRec = brick[i].getDimensionsRec();
             switch(brick[i].getType()) {
             case 4:
-                DrawBricksBounce(brickRec, &animationBalls[brick[i].animBallIndex], animationFrame, 1);
+                DrawBricksBounce(brickRec, &animationBalls[brick[i].animBallIndex]);
                 break;
             case 5:
                 DrawRectangleRec(brickRec, brick[i].getColor());
+                DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
                 break;
             default:
                 DrawBricksPulse(brickRec, animationFrame, brick[i].getType());
@@ -364,8 +370,7 @@ void Draw() {
     //Draw Powerups
     for(int i = 0; i < 6; i++) {
         if(powerup[i].getEnabled()) {
-            DrawTexture(powerup->texPowerup, powerup[i].getPosition().x - 50, powerup[i].getPosition().y - 25, WHITE);
-            powerup[i].setPosition(powerup[i].getPosition().x, powerup[i].getPosition().y + GetRandomValue(300, 400) * GetFrameTime());
+            DrawTexture(texPowerup[0].texture, powerup[i].getPosition().x - 50, powerup[i].getPosition().y - 25, WHITE);
         }
     }
     //
@@ -465,57 +470,155 @@ void Input() {
         SetMasterVolume(soundVolume * !soundMute);
     }
 
-    paddle->Input(autoMove, isPaused);
-
-    //Lock mouse position so it doesn't go outside of screen
-    if(!isPaused) {
-        SetMousePosition(GetScreenWidth() / 2,GetScreenHeight() / 2);
-    }
+    if(GetMouseX() > 10 && GetMouseX() < GetScreenWidth() - 10)
+        paddle->Input(autoMove, isPaused);
 }
 
 void Logic() {
+    //Update title
+    char title[256];
+    sprintf(title, "RayBreaker");
+    if(activePowerups & (1 << 0)) { //Pierce
+        sprintf(title, "%s|Pierce", title);
+    }
+    if(activePowerups & (1 << 2)) { //Explode
+        sprintf(title, "%s|Explode", title);
+    }
+    if(activePowerups & (1 << 3)) { //FireBall
+        sprintf(title, "%s|FireBall", title);
+    }
+    if(activePowerups & (1 << 4)) { //Magnet
+        sprintf(title, "%s|Magnet", title);
+    }
+    if(activePowerups & (1 << 6)) { //ShrinkBall
+        sprintf(title, "%s|ShrinkBall", title);
+    }
+    if(activePowerups & (1 << 9)) { //FallingBricks
+        sprintf(title, "%s|FallingBricks", title);
+    }
+    SetWindowTitle(title);
+
     ball->Logic(timer);
 
     paddle->Logic(ball, autoMove, soundBouncePaddle);
 
+
     for(int i = 0; i < cBricks::brickCount; i++) {
+        //Brick logic
         brick[i].Logic(ball, powerup, soundBounceGeneral);
-    }
-    for(int i = 0; i < cAnimBall::ballCount; i++) {
-        animationBalls[i].Move();
-    }
-
-    for(int i = 0; i < MAX_POWERUPS; i++) {
-        if(powerup[i].getPosition().y > GetScreenHeight() - 10) {
-            powerup[i].setEnabled(0);
-        }
-        if(CheckCollisionRecs(paddle->getDimensionsRec(),powerup[i].getDimensionsRec())) {
-            powerup[i].setEnabled(0);
-        }
-    }
-
-    //Animation ball collision
-    for(int i = 0; i < cBricks::brickCount; i++) {
+        //Animation ball collision
+        int brickEnabled = brick[i].getEnabled();
+        Rectangle brickRec = brick[i].getDimensionsRec();
+        int limitX = (brickRec.x + brickRec.width - 1);
+        int limitY = (brickRec.y + brickRec.height - 1);
         if(brick[i].getType() != 4) continue;
-        if(brick[i].getEnabled()) continue;
-        for(int animBallID = brick[i].animBallIndex; animBallID < brick[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; animBallID++) {
-            if(animationBalls[animBallID].getY() + animationBalls[animBallID].getSize() > GetScreenHeight() * 0.8) animationBalls[animBallID].setDirection(STOP);
-            if(animationBalls[animBallID].getDirection() == STOP) continue;
-            for(int j = 0; j < cBricks::brickCount; j++) {
-                if(brick[j].getEnabled() == false) continue;
-                if(CheckCollisionCircleRec(animationBalls[animBallID].getV(), animationBalls[animBallID].getSize(), brick[j].getDimensionsRec())) {
-                    animationBalls[animBallID].setDirection(STOP);
-                    brick[j].callOnCollision();
-                    for(int k = 0; k < MAX_POWERUPS; k++) {
-                        if(!powerup[k].getEnabled()) {
-                            powerup[k].spawnPowerup(&brick[k]);
-                            break;
+        if(brickEnabled) {
+            for(int index = brick[i].animBallIndex; index < brick[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; index++) {
+                if(animationBalls[index].getX() > limitX) {
+                    if(animationBalls[index].getDirection() == DOWNRIGHT) {
+                        animationBalls[index].setDirection(DOWNLEFT);
+                    } else animationBalls[index].setDirection(UPLEFT);
+                    continue;
+                }
+                if(animationBalls[index].getX() < (brickRec.x + 9)) {
+                    if(animationBalls[index].getDirection() == DOWNLEFT) {
+                        animationBalls[index].setDirection(DOWNRIGHT);
+                    } else animationBalls[index].setDirection(UPRIGHT);
+                    continue;
+                }
+                if(animationBalls[index].getY() > limitY) {
+                    if(animationBalls[index].getDirection() == DOWNRIGHT) {
+                        animationBalls[index].setDirection(UPRIGHT);
+                    } else animationBalls[index].setDirection(UPLEFT);
+                    continue;
+                }
+                if(animationBalls[index].getY() < (brickRec.y + 9)) {
+                    if(animationBalls[index].getDirection() == UPRIGHT) {
+                        animationBalls[index].setDirection(DOWNRIGHT);
+                    } else animationBalls[index].setDirection(DOWNLEFT);
+                    continue;
+                }
+            }
+        }
+        if(!brickEnabled) {
+            for(int index = brick[i].animBallIndex; index < brick[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; index++) {
+                if(animationBalls[index].getY() + animationBalls[index].getSize() > GetScreenHeight() * 0.8) animationBalls[index].setDirection(STOP);
+                if(animationBalls[index].getDirection() == STOP) continue;
+                for(int j = 0; j < cBricks::brickCount; j++) {
+                    if(brick[j].getEnabled() == false) continue;
+                    if(CheckCollisionCircleRec(animationBalls[index].getV(), animationBalls[index].getSize(), brick[j].getDimensionsRec())) {
+                        animationBalls[index].setDirection(STOP);
+                        if(brick[j].getType() == 5) brick[j].setEnabled(0);
+                        else
+                            brick[j].callOnCollision();
+                        for(int k = 0; k < MAX_POWERUPS; k++) {
+                            if(!powerup[k].getEnabled()) {
+                                powerup[k].spawnPowerup(&brick[k]);
+                                break;
+                            }
                         }
                     }
                 }
             }
         }
     }
+    //
+
+    for(int i = 0; i < cAnimBall::ballCount; i++) {
+        animationBalls[i].Move();
+    }
+
+    //Powerups
+    for(int i = 0; i < MAX_POWERUPS; i++) {
+        if(!powerup[i].getEnabled()) continue;
+        if(CheckCollisionRecs(paddle->getDimensionsRec(),powerup[i].getDimensionsRec())) {
+            powerup[i].setEnabled(0);
+            powerup[i].triggerEffect();
+            continue;
+        }
+        if(powerup[i].getPosition().y > GetScreenHeight() - 10) {
+            powerup[i].setEnabled(0);
+            continue;
+        }
+        powerup[i].setPosition(powerup[i].getPosition().x, powerup[i].getPosition().y + GetRandomValue(300, 400) * GetFrameTime());
+    }
+    //Check powerup status and apply
+    /*if(activePowerups & (1 << 1)){  //+1 Life
+
+    }
+    if(activePowerups & (1 << 2)){  //Explode
+
+    }
+    if(activePowerups & (1 << 3)){  //FireBall
+
+    }
+    if(activePowerups & (1 << 4)){  //Magnet
+
+    }
+    if(activePowerups & (1 << 5)){  //Death
+
+    }
+    if(activePowerups & (1 << 6)){  //ShrinkBall
+
+    }
+    if(activePowerups & (1 << 7)){  //FastBall
+
+    }
+    if(activePowerups & (1 << 8)){  //SuperShrinkPaddle
+
+    }
+    if(activePowerups & (1 << 9)){  //FallingBricks
+
+    }
+    if(activePowerups & (1 << 10)){ //ExpandPaddle
+
+    }
+    if(activePowerups & (1 << 11)){ //ShrinkPaddle
+
+    }
+    if(activePowerups & (1 << 12)){ //SplitBall
+
+    }*/
 
     //Make bricks fall after 60 seconds
     if(ball->getDirection() != STOP && !isPaused) {
@@ -574,6 +677,7 @@ void Logic() {
 
 void reset() {
     timer = 0;
+    activePowerups = 0;
     int totalBrickCount = cBricks::brickCount;
     for(int i = 0; i < totalBrickCount; i++) {
         brick[i].~cBricks();
@@ -584,17 +688,17 @@ void reset() {
     }
     paddle->Reset();
     ball->Reset();
-    LoadLevel();
     for(int i = 0; i < 6; i++) {
         powerup[i].setEnabled(0);
     }
     SetRandomSeed(time(NULL));
+    LoadLevel();
 }
 
 void checkWin() {
     int brickAmount = 0;
     for(int i = 0; i <= cBricks::brickCount; i++) {
-        if(brick[i].getType() != 5) {
+        if(brick[i].getType() != 5 || (activePowerups & (1 << 0))) {
             brickAmount = brickAmount + brick[i].getEnabled();
         }
     }

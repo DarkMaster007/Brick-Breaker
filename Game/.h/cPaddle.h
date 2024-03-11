@@ -20,6 +20,8 @@ class cPaddle {
     cPaddle(float posX, float posY, float width, float height);
     inline float getX() const;
     inline float getY() const;
+    inline void setX(float newX);
+    inline void setY(float newY);
     inline Vector2 getPosition() const;
     inline Vector2 getDimensions() const;
     inline Rectangle getDimensionsRec() const;
@@ -34,27 +36,33 @@ class cPaddle {
     void Input(bool autoMove, bool isPaused);
 };
 
-float cPaddle::getX() const{
+float cPaddle::getX() const {
     return x;
 }
-float cPaddle::getY() const{
+float cPaddle::getY() const {
     return y;
 }
-Vector2 cPaddle::getPosition() const{
+void cPaddle::setX(float newX) {
+    x = newX;
+}
+void cPaddle::setY(float newY) {
+    y = newY;
+}
+Vector2 cPaddle::getPosition() const {
     return (Vector2) {
         getX(), getY()
     };
 }
-Vector2 cPaddle::getDimensions() const{
+Vector2 cPaddle::getDimensions() const {
     return {paddleWidth, paddleHeight};
 }
-Rectangle cPaddle::getDimensionsRec() const{
+Rectangle cPaddle::getDimensionsRec() const {
     return {getX(), getY(), getDimensions().x, getDimensions().y};
 }
-float cPaddle::getSpeed() const{
+float cPaddle::getSpeed() const {
     return speed;
 }
-float cPaddle::getBounceReverseArea() const{
+float cPaddle::getBounceReverseArea() const {
     return bounceReverseArea;
 }
 

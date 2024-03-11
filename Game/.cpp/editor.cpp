@@ -56,10 +56,11 @@ void EditorDraw() {
                 Rectangle brickRec = editorBricks[i].getDimensionsRec();
                 switch(editorBricks[i].getType()) {
                 case 4:
-                    DrawBricksBounce(brickRec, &animationBalls[editorBricks[i].animBallIndex], animationFrame, 1);
+                    DrawBricksBounce(brickRec, &animationBalls[editorBricks[i].animBallIndex]);
                     break;
                 case 5:
                     DrawRectangleRec(brickRec, editorBricks[i].getColor());
+                    DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
                     break;
                 default:
                     DrawBricksPulse(brickRec, animationFrame, editorBricks[i].getType());
@@ -152,6 +153,34 @@ void EditorLogic() {
     //Animation ball collision
     for(int i = 0; i < cBricks::brickCount; i++) {
         if(editorBricks[i].getType() != 4) continue;
+        if(editorBricks[i].getEnabled()) {
+            Rectangle brickRec = editorBricks[i].getDimensionsRec();
+            int limitX = (brickRec.x + brickRec.width - 1);
+            int limitY = (brickRec.y + brickRec.height - 1);
+            for(int k = 0; k < STANDARD_ANIM_BALL_COUNT; k++) {
+                int index = editorBricks[i].animBallIndex+k;
+                if(animationBalls[index].getX() > limitX) {
+                    if(animationBalls[index].getDirection() == DOWNRIGHT) {
+                        animationBalls[index].setDirection(DOWNLEFT);
+                    } else animationBalls[index].setDirection(UPLEFT);
+                }
+                if(animationBalls[index].getX() < (brickRec.x + 9)) {
+                    if(animationBalls[index].getDirection() == DOWNLEFT) {
+                        animationBalls[index].setDirection(DOWNRIGHT);
+                    } else animationBalls[index].setDirection(UPRIGHT);
+                }
+                if(animationBalls[index].getY() > limitY) {
+                    if(animationBalls[index].getDirection() == DOWNRIGHT) {
+                        animationBalls[index].setDirection(UPRIGHT);
+                    } else animationBalls[index].setDirection(UPLEFT);
+                }
+                if(animationBalls[index].getY() < (brickRec.y + 9)) {
+                    if(animationBalls[index].getDirection() == UPRIGHT) {
+                        animationBalls[index].setDirection(DOWNRIGHT);
+                    } else animationBalls[index].setDirection(DOWNLEFT);
+                }
+            }
+        }
         for(int animBallID = editorBricks[i].animBallIndex; animBallID < editorBricks[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; animBallID++) {
             if(animationBalls[animBallID].getY() + animationBalls[animBallID].getSize() > GetScreenHeight() * 0.8) animationBalls[animBallID].setDirection(STOP);
             if(animationBalls[animBallID].getDirection() == STOP) continue;
@@ -164,11 +193,11 @@ void EditorLogic() {
             }
         }
     }
-    if(GuiButton({GetScreenWidth() / 2 - 250, GetScreenHeight() - 160, 200, 80}, "Save and Quit")) {
+    if(GuiButton({GetScreenWidth() / 2.0f - 250, GetScreenHeight() - 160.0f, 200, 80}, "Save and Quit")) {
         EditorOutput();
         quit = 1;
     }
-    if(GuiButton({GetScreenWidth() / 2 + 50, GetScreenHeight() - 160, 200, 80}, "Quit")) {
+    if(GuiButton({GetScreenWidth() / 2.0f + 50, GetScreenHeight() - 160.0f, 200, 80}, "Quit")) {
         quit = 1;
     }
 }
@@ -232,14 +261,14 @@ void EditorOutput() { //output the current brick layout to the level.txt file
     // output brick layout to level.txt
     int brickTotal = cBricks::brickCount;
     fprintf(fp, "%d ", brickTotal);
-    for(int i = 0; i < cBricks::brickCount; i++) {
+    for(i = 0; i < cBricks::brickCount; i++) {
         fprintf(fp, "%f %f %f %f %d ", editorBricks[i].getX(), editorBricks[i].getY(), editorBricks[i].getDimensions().x, editorBricks[i].getDimensions().y, editorBricks[i].getType());
 #ifdef _DEBUG
         printf("\nBrick Position:\n");
         printf("     X: %f\n", editorBricks[i].getX());
         printf("     Y: %f\n", editorBricks[i].getY());
-        printf("Brick Width: %d\n", editorBricks[i].getDimensions().x);
-        printf("Brick Height: %d\n", editorBricks[i].getDimensions().y);
+        printf("Brick Width: %f\n", editorBricks[i].getDimensions().x);
+        printf("Brick Height: %f\n", editorBricks[i].getDimensions().y);
         printf("Brick type: ");
         switch(editorBricks[i].getType()) {
         case 0:

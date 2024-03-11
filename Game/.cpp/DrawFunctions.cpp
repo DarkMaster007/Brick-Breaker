@@ -1,5 +1,22 @@
 #include "DrawFunctions.h"
 
+extern RenderTexture2D texPowerup[13];
+
+void GeneratePowerupTextures() {
+    //|Pierce|+1 Life|Explode|FireBall|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (13 bits)
+    float powerupSize = 20.0f;
+    float sqrt2 = 1.4142f;
+    Rectangle textureRec = {(powerupSize * sqrt2) / 2, (powerupSize * sqrt2) / 2, powerupSize * sqrt2, powerupSize * sqrt2};
+    texPowerup[0] = LoadRenderTexture(powerupSize * 2, powerupSize * 2);
+    BeginTextureMode(texPowerup[0]);
+    DrawCircle(texPowerup[0].texture.width / 2, texPowerup[0].texture.height / 2, powerupSize, (Color) {
+        124, 221, 255, 200
+    });
+    DrawRectangle(textureRec.width / 4, textureRec.height / 2 - powerupSize / 4, textureRec.width / 2, -powerupSize / 2, DARKGRAY);
+    //DrawTriangle
+    EndTextureMode();
+}
+
 void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int pulseAmount) {
     Rectangle rec;
     //Calculate ratios used to make time to shrink similar between width and height
@@ -28,55 +45,33 @@ void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int pulseAmo
     }
 
     //Draw first rectangle
-    DrawRectangleRoundedLines(brickRec, 0.1, 1000, 3, ORANGE);
+    DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
 }
 
-void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[], int currentAnimationFrame, int brickWallThickness) {
+void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[]) {
     //Calculate x and y
-    int limitX = (brickRec.x + brickRec.width - brickWallThickness);
-    int limitY = (brickRec.y + brickRec.height - brickWallThickness);
     for(int kk = 0; kk < STANDARD_ANIM_BALL_COUNT; kk++) {
-        if(animationBalls[kk].getX() > limitX) {
-            if(animationBalls[kk].getDirection() == DOWNRIGHT) {
-                animationBalls[kk].setDirection(DOWNLEFT);
-            } else animationBalls[kk].setDirection(UPLEFT);
-        }
-        if(animationBalls[kk].getX() < (brickRec.x + 9)) {
-            if(animationBalls[kk].getDirection() == DOWNLEFT) {
-                animationBalls[kk].setDirection(DOWNRIGHT);
-            } else animationBalls[kk].setDirection(UPRIGHT);
-        }
-        if(animationBalls[kk].getY() > limitY) {
-            if(animationBalls[kk].getDirection() == DOWNRIGHT) {
-                animationBalls[kk].setDirection(UPRIGHT);
-            } else animationBalls[kk].setDirection(UPLEFT);
-        }
-        if(animationBalls[kk].getY() < (brickRec.y + 9)) {
-            if(animationBalls[kk].getDirection() == UPRIGHT) {
-                animationBalls[kk].setDirection(DOWNRIGHT);
-            } else animationBalls[kk].setDirection(DOWNLEFT);
-        }
         //DrawCircle
         cAnimBall::Draw(&animationBalls[kk]);
     }
     //Draw first rectangle
-    DrawRectangleRoundedLines(brickRec, 0.1, 1000, 3, ORANGE);
+    DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
 }
 
 void DrawBricksUnbreakable() {
     // Implementation of DrawBricksUnbreakable
 }
 
-void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL, Texture2D edgeTextureR, Texture2D bodyTexture){
-    Rectangle Source = {0, 0, edgeTextureL.width, edgeTextureL.height};
+void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL, Texture2D edgeTextureR, Texture2D bodyTexture) {
+    Rectangle Source = {0, 0, (float)edgeTextureL.width, (float)edgeTextureL.height};
     Rectangle Destination = {paddle.x, paddle.y, reverseAreaSize, paddle.height};
     DrawTexturePro(edgeTextureL, Source, Destination, { 0, 0 }, 0, WHITE);
 
-    Source = {0, 0, edgeTextureR.width, edgeTextureR.height};
+    Source = {0, 0, (float)edgeTextureR.width, (float)edgeTextureR.height};
     Destination = {paddle.x + paddle.width - reverseAreaSize, paddle.y, reverseAreaSize, paddle.height};
     DrawTexturePro(edgeTextureR, Source, Destination, { 0, 0 }, 0, WHITE);
 
-    Source = {0, 0, bodyTexture.width, bodyTexture.height};
+    Source = {0, 0, (float)bodyTexture.width, (float)bodyTexture.height};
     Destination = {paddle.x + reverseAreaSize, paddle.y, paddle.width - 2 * reverseAreaSize, paddle.height};
     DrawTexturePro(bodyTexture, Source, Destination, { 0, 0 }, 0, WHITE);
 }

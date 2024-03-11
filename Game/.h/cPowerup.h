@@ -6,20 +6,19 @@
 class cBricks;
 
 class cPowerup {
-    eActivePowerups type;
+    int type;
     int ID;
     Rectangle rec;
     bool enabled;
     int spawnChance;
   public:
     static int powerupCount;
-    static Texture2D texPowerup;
 
     cPowerup();
-    eActivePowerups getType() const{
+    int getType() const {
         return type;
     }
-    void setType(eActivePowerups newType) {
+    void setType(int newType) {
         type = newType;
     }
     Vector2 getPosition() {
@@ -33,12 +32,13 @@ class cPowerup {
         rec.x = newPosition.x;
         rec.y = newPosition.y;
     }
-    bool getEnabled() const{
+    bool getEnabled() const {
         return enabled;
     }
     void setEnabled(bool newEnabled) {
         enabled = newEnabled;
     }
+    void triggerEffect();
     bool spawnPowerup(cBricks *brick);
     inline float getX() const;
     inline float getY() const;

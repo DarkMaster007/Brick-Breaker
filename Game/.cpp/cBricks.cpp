@@ -1,8 +1,9 @@
 #include "cBricks.h"
 #include "cPowerup.h"
 
-Texture2D cBricks::texture[5];
+extern int activePowerups;
 
+Texture2D cBricks::texture[5];
 int cBricks::brickCount = 0;
 
 cBricks::cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, int loadedType, int newAnimBallIndex) {
@@ -46,16 +47,10 @@ cBricks::cBricks(int loadedX, int loadedY, int loadedWidth, int loadedHeight, in
     type = loadedType;
     enabled = true;
     brickCount++;
-    #ifdef _DEBUG
-    printf("Constructor called for brick ID: %i\n", ID);
-    #endif // _DEBUG
 }
 
 cBricks::~cBricks() {
     brickCount--;
-    #ifdef _DEBUG
-    printf("Destructor called for brick ID: %i\n", ID);
-    #endif // _DEBUG
 }
 
 Color cBricks::getColor() {
@@ -91,35 +86,40 @@ void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
     Rectangle brick_collision;
     brick_collision = {x, y, brickWidth, brickHeight};
     if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && enabled) {
-        if(ball->getX() <= x) {
-            if(ball->getDirection() == UPRIGHT) {
-                ball->setDirection(UPLEFT);
-            } else {
-                ball->setDirection(DOWNLEFT);
+        if(!(activePowerups & (1 << 0))) {
+            if(ball->getX() <= x) {
+                if(ball->getDirection() == UPRIGHT) {
+                    ball->setDirection(UPLEFT);
+                } else {
+                    ball->setDirection(DOWNLEFT);
+                }
+            } else if(ball->getX() >= x + brickWidth) {
+                if(ball->getDirection() == UPLEFT) {
+                    ball->setDirection(UPRIGHT);
+                } else {
+                    ball->setDirection(DOWNRIGHT);
+                }
+            } else if(ball->getY() <= y) {
+                if(ball->getDirection() == DOWNLEFT) {
+                    ball->setDirection(UPLEFT);
+                } else {
+                    ball->setDirection(UPRIGHT);
+                }
+            } else if(ball->getY() >= y + brickHeight) {
+                if(ball->getDirection() == UPRIGHT) {
+                    ball->setDirection(DOWNRIGHT);
+                } else {
+                    ball->setDirection(DOWNLEFT);
+                }
             }
-        } else if(ball->getX() >= x + brickWidth) {
-            if(ball->getDirection() == UPLEFT) {
-                ball->setDirection(UPRIGHT);
-            } else {
-                ball->setDirection(DOWNRIGHT);
+
+            if(type > 0 && type < 4) { //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
+                type -= 1;
             }
-        } else if(ball->getY() <= y) {
-            if(ball->getDirection() == DOWNLEFT) {
-                ball->setDirection(UPLEFT);
-            } else {
-                ball->setDirection(UPRIGHT);
+            if(type == 0 || type == 4) {
+                enabled = 0;
             }
-        } else if(ball->getY() >= y + brickHeight) {
-            if(ball->getDirection() == UPRIGHT) {
-                ball->setDirection(DOWNRIGHT);
-            } else {
-                ball->setDirection(DOWNLEFT);
-            }
-        }
-        if(type > 0 && type < 4) { //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
-            type -= 1;
-        }
-        if(type == 0 || type == 4) {
+        } else {
             enabled = 0;
         }
         if(enabled == 0) {

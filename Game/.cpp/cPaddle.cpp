@@ -88,17 +88,8 @@ void cPaddle::Logic(cBall *ball, bool autoMove, Sound soundBouncePaddle) {
 }
 void cPaddle::Input(bool autoMove, bool isPaused) {
     //Paddle movement
-    if(!autoMove && !isPaused) {
-        if(getX() - getSpeed() >= 10) {
-            if(getX() + getDimensions().x + getSpeed() <= GetScreenWidth() - 10) {
-                if(GetMouseDelta().x < 0 || IsKeyDown('A')) {
-                    moveLeft();
-                }
-                if(GetMouseDelta().x > 0 || IsKeyDown('D')) {
-                    moveRight();
-                }
-            } else moveLeft(1);
-        } else moveRight(1);
-    }
-    //
+    if(autoMove || isPaused) return;
+    if(GetMouseX() - getSpeed() <= 10) return;
+    if(GetMouseX() + getDimensions().x / 2 + getSpeed() >= GetScreenWidth() - 10) return;
+    setX(GetMouseX());
 }

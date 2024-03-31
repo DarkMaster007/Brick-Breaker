@@ -4,13 +4,15 @@
 extern int frame;
 extern int activePowerups;
 
-RenderTexture2D texPowerup[13];
+Texture2D texPowerup[13];
 int cPowerup::powerupCount = 0;
 
 cPowerup::cPowerup() {
     ID = powerupCount;
     powerupCount++;
     spawnChance = 35;
+    enabled = 0;
+    type = -1;
 }
 
 bool cPowerup::spawnPowerup(cBricks *brick) {
@@ -20,15 +22,15 @@ bool cPowerup::spawnPowerup(cBricks *brick) {
         rec.x = brick->getX();
         rec.y = brick->getY();
 #ifdef _DEBUG
-        printf("Powerup enabled!");
-        printf(" Type: %i\n", type);
+        printf("Powerup enabled! X: %f, Y: %f\n", rec.x, rec.y);
+        printf("Type: %i\n", type);
 #endif // _DEBUG
         return 1;
     }
     return 0;
 }
 void cPowerup::triggerEffect() {
-    //|Pierce|+1 Life|Explode|FireBall|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (13 bits)
+    //|Pierce|+1 Life|Explode|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (12 bits)
     activePowerups = activePowerups | 1 << type;
     if(type == 0) {
         printf("Pierce enabled.\n");

@@ -39,7 +39,7 @@ class cAnimBall {
     void Move();
     void Reset();
     void Logic(double &startTimer, bool isPaused);
-    static void Draw(cAnimBall *ball);
+    static void Draw(cAnimBall *ball, Color ballColor);
     void Input();
 };
 

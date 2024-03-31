@@ -56,14 +56,13 @@ void EditorDraw() {
                 Rectangle brickRec = editorBricks[i].getDimensionsRec();
                 switch(editorBricks[i].getType()) {
                 case 4:
-                    DrawBricksBounce(brickRec, &animationBalls[editorBricks[i].animBallIndex]);
+                    DrawBricksBounce(brickRec, &animationBalls[editorBricks[i].animBallIndex], {255,237,191,240});
                     break;
                 case 5:
-                    DrawRectangleRec(brickRec, editorBricks[i].getColor());
-                    DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
+                    DrawBricksUnbreakable(brickRec, editorBricks[i].getColor());
                     break;
                 default:
-                    DrawBricksPulse(brickRec, animationFrame, editorBricks[i].getType());
+                    DrawBricksPulse(brickRec, animationFrame, editorBricks[i].getType(), editorBricks[i].getColor());
                     break;
                 }
 #ifdef _DEBUG
@@ -73,7 +72,7 @@ void EditorDraw() {
             } else {
                 if(editorBricks[i].getType() == 4) {
                     for(int j = editorBricks[i].animBallIndex; j < editorBricks[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; j++) {
-                        if(animationBalls[j].getDirection() != STOP) cAnimBall::Draw(&animationBalls[j]);
+                        if(animationBalls[j].getDirection() != STOP) cAnimBall::Draw(&animationBalls[j], ORANGE);
                     }
                 }
             }

@@ -72,8 +72,8 @@ void cAnimBall::Logic(double &startTimer, bool isPaused) {
         Move();
     }
 }
-void cAnimBall::Draw(cAnimBall *ball) {
-    DrawCircle(ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), ball->getSize(), WHITE);
+void cAnimBall::Draw(cAnimBall *ball, Color ballColor) {
+    DrawCircle(ball->getX() - ball->getSize(), ball->getY() - ball->getSize(), ball->getSize(), ballColor);
 }
 void cAnimBall::Input() {
     //

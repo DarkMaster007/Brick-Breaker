@@ -1,23 +1,31 @@
 #include "DrawFunctions.h"
 
-extern RenderTexture2D texPowerup[13];
+extern Texture2D texPowerup[13];
+extern int activePowerups;
 
 void GeneratePowerupTextures() {
-    //|Pierce|+1 Life|Explode|FireBall|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (13 bits)
-    float powerupSize = 20.0f;
-    float sqrt2 = 1.4142f;
-    Rectangle textureRec = {(powerupSize * sqrt2) / 2, (powerupSize * sqrt2) / 2, powerupSize * sqrt2, powerupSize * sqrt2};
-    texPowerup[0] = LoadRenderTexture(powerupSize * 2, powerupSize * 2);
-    BeginTextureMode(texPowerup[0]);
-    DrawCircle(texPowerup[0].texture.width / 2, texPowerup[0].texture.height / 2, powerupSize, (Color) {
-        124, 221, 255, 200
-    });
-    DrawRectangle(textureRec.width / 4, textureRec.height / 2 - powerupSize / 4, textureRec.width / 2, -powerupSize / 2, DARKGRAY);
-    //DrawTriangle
-    EndTextureMode();
+    //|Pierce|+1 Life|Explode|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (12 bits)
+    Image tmp;
+    tmp = LoadImage(TEX_POWERUP_PIERCE);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[0] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_HP);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[1] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    texPowerup[2] = LoadTexture(TEX_POWERUP_MAGNET_PADDLE);
+    for(int i = 0; i < 13; i++) {
+        if(texPowerup[i].id == 0) {
+            tmp = LoadImage(TEX_POWERUP);
+            ImageResize(&tmp, 50, 50);
+            texPowerup[i] = LoadTextureFromImage(tmp);
+            UnloadImage(tmp);
+        }
+    }
 }
 
-void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int pulseAmount) {
+void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int pulseAmount, Color recColor) {
     Rectangle rec;
     //Calculate ratios used to make time to shrink similar between width and height
     float calcHoriz = brickRec.height / brickRec.width;
@@ -41,25 +49,27 @@ void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int pulseAmo
         rec.width = brickRec.width - offsetX * 2;
         rec.height = brickRec.height - offsetY * 2;
 
-        DrawRectangleLinesEx(rec, 1.5, ORANGE);
+        DrawRectangleLinesEx(rec, 1.5, recColor);
     }
 
     //Draw first rectangle
     DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
 }
 
-void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[]) {
+void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[], Color ballColor) {
     //Calculate x and y
     for(int kk = 0; kk < STANDARD_ANIM_BALL_COUNT; kk++) {
         //DrawCircle
-        cAnimBall::Draw(&animationBalls[kk]);
+        cAnimBall::Draw(&animationBalls[kk], ballColor);
     }
     //Draw first rectangle
     DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
 }
 
-void DrawBricksUnbreakable() {
+void DrawBricksUnbreakable(Rectangle brickRec, Color recColor) {
     // Implementation of DrawBricksUnbreakable
+    DrawRectangleRec(brickRec, recColor);
+    DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
 }
 
 void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL, Texture2D edgeTextureR, Texture2D bodyTexture) {
@@ -74,4 +84,9 @@ void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL,
     Source = {0, 0, (float)bodyTexture.width, (float)bodyTexture.height};
     Destination = {paddle.x + reverseAreaSize, paddle.y, paddle.width - 2 * reverseAreaSize, paddle.height};
     DrawTexturePro(bodyTexture, Source, Destination, { 0, 0 }, 0, WHITE);
+    if(activePowerups & (1 << 3)){
+        Source = {0, 0, texPowerup[2].width, texPowerup[2].height};
+        Destination = {paddle.x, paddle.y - texPowerup[2].height, paddle.width, texPowerup[2].height};
+        DrawTexturePro(texPowerup[2], Source, Destination, { 0, 0 }, 0, SKYBLUE);
+    }
 }

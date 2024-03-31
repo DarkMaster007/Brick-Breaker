@@ -2,6 +2,9 @@
 #include "cPowerup.h"
 
 extern int activePowerups;
+#ifdef _DEBUG
+extern bool isPaused;
+#endif // _DEBUG
 
 Texture2D cBricks::texture[5];
 int cBricks::brickCount = 0;
@@ -80,12 +83,10 @@ int cBricks::callOnCollision() {
     return type;
 }
 
-void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
+void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounce) {
     //Brick Collision
     Vector2 ball_collision = {ball->getX(), ball->getY()};
-    Rectangle brick_collision;
-    brick_collision = {x, y, brickWidth, brickHeight};
-    if(CheckCollisionCircleRec(ball_collision, ball->getSize(), brick_collision) && enabled) {
+    if(CheckCollisionCircleRec(ball_collision, ball->getSize(), getDimensionsRec()) && enabled) {
         if(!(activePowerups & (1 << 0))) {
             if(ball->getX() <= x) {
                 if(ball->getDirection() == UPRIGHT) {
@@ -112,7 +113,6 @@ void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
                     ball->setDirection(DOWNLEFT);
                 }
             }
-
             if(type > 0 && type < 4) { //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
                 type -= 1;
             }
@@ -125,13 +125,16 @@ void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounceGeneral) {
         if(enabled == 0) {
             for(int j = 0; j < MAX_POWERUPS; j++) {
                 if(!powerup[j].getEnabled()) {
+#ifdef _DEBUG
+                    printf("Inside Brick Coord: %f %f\n", getX(), getY());
+#endif // _DEBUG
                     powerup[j].spawnPowerup(this);
                     break;
                 }
             }
         }
 
-        PlaySound(soundBounceGeneral);
+        PlaySound(soundBounce);
         ball->randomizeMovement();
     }
 }

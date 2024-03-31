@@ -7,10 +7,10 @@ class cBall {
   private:
     float x, y;
     float originalX, originalY;
-    int current_size;
+    int currentSize;
     int originalSize;
-    float speed;
-    float originalSpeed;
+    float speedX, speedY;
+    float originalSpeedX, originalSpeedY;
     float acceleration;
     eDir direction;
     float randomMovementOffset[2] {};
@@ -37,7 +37,6 @@ class cBall {
     void randomizeMovement();
     void Move();
     void Reset();
-    void Logic(double &startTimer);
 };
 
 void cBall::setDirection(eDir d) {
@@ -61,11 +60,11 @@ void cBall::setY(float newY) {
 eDir cBall::getDirection() const {
     return direction;
 }
-void cBall::setSize(int ball_size) {
-    current_size = ball_size;
+void cBall::setSize(int ballSize) {
+    currentSize = ballSize;
 }
 int cBall::getSize() const {
-    return current_size;
+    return currentSize;
 }
 int cBall::getAcceleration() const {
     return acceleration;

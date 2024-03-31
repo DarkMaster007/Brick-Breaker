@@ -5,9 +5,9 @@
 #include "cAnimBall.h"
 
 void GeneratePowerupTextures();
-void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int lineAmount);
-void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[]);
-void DrawBricksUnbreakable();
+void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int lineAmount, Color recColor);
+void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[], Color ballColor);
+void DrawBricksUnbreakable(Rectangle brickRec, Color recColor);
 
 void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL, Texture2D edgeTextureR, Texture2D bodyTexture);
 

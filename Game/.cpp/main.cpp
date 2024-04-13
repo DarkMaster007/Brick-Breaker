@@ -158,6 +158,9 @@ int MainMenu() {
     //Draw
     char msg_error[95] = "settings.txt file failed to load and was recreated. \nPlease Press \'Esc\' to quit and relaunch.";
     int textsize;
+    int newScreenWidth, newScreenHeight;
+    newScreenWidth = GetScreenWidth();
+    newScreenHeight = GetScreenHeight();
 
     while(!WindowShouldClose()) {
         //Main screen
@@ -200,7 +203,7 @@ int MainMenu() {
                 }
             }
             if(currentScreen == 1)
-                drawSettings(currentScreen);
+                drawSettings(currentScreen, newScreenWidth, newScreenHeight);
         } else {
             textsize = MeasureText(msg_error,25);
             DrawText(msg_error, (float)(GetScreenWidth() / 2 - textsize / 2), (float)(GetScreenHeight() / 2), 25, BLACK);

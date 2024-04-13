@@ -28,8 +28,7 @@ bool settingsOutput() { //1 - FAIL, 0 - SUCCESS
     return 0;
 }
 
-void drawSettings(int &currentScreen) {
-    int newScreenWidth, newScreenHeight;
+void drawSettings(int &currentScreen, int &newScreenWidth,  int &newScreenHeight) {
     if(!isError) {
         //Settings screen width box text box
         Rectangle screenWidthBox = { (float)(GetScreenWidth() / 2 - 190), (float)(GetScreenHeight() / 2 - 80), 180, 50 };

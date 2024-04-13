@@ -4,6 +4,6 @@
 #include "defines.h"
 
 bool settingsOutput();
-void drawSettings(int &currentScreen);
+void drawSettings(int &currentScreen, int &newScreenWidth,  int &newScreenHeight);
 
 #endif

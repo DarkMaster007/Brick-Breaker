@@ -12,7 +12,7 @@ cBall::cBall(int posX, int posY, int ballSize, float ballSpeed) {
     setDirection(STOP);
     setSize(ballSize);
     originalSize = getSize();
-    float angle = 45;
+    angle = 45.0f;
     speedX = abs(ballSpeed * cos(angle));
     speedY = abs(ballSpeed * sin(angle));
     originalSpeedX = speedX;
@@ -39,30 +39,33 @@ void cBall::randomizeMovement() {
 void cBall::Move() {
     float frameTime = fmod(GetFrameTime(), 1.0f);
     if(direction != STOP) {
+        float speedLimit = 1000;
+        if(speedY < abs(speedLimit * sin(angle))) {
             speedY += speedY * acceleration * frameTime;
+        } else speedY += abs(speedLimit * sin(angle)) * frameTime;
+        if(speedX < abs(speedLimit * cos(angle))) {
             speedX += speedX * acceleration * frameTime;
-    }
-    switch (direction) {
-    case STOP:
-        break;
-    case UPLEFT:
-        x-=(speedX + randomMovementOffset[0]) * frameTime;
-        y-=(speedY + randomMovementOffset[1]) * frameTime;
-        break;
-    case DOWNLEFT:
-        x-=(speedX + randomMovementOffset[0]) * frameTime;
-        y+=(speedY + randomMovementOffset[1]) * frameTime;
-        break;
-    case UPRIGHT:
-        x+=(speedX + randomMovementOffset[0]) * frameTime;
-        y-=(speedY + randomMovementOffset[1]) * frameTime;
-        break;
-    case DOWNRIGHT:
-        x+=(speedX + randomMovementOffset[0]) * frameTime;
-        y+=(speedY + randomMovementOffset[1]) * frameTime;
-        break;
-    default:
-        direction = STOP;
-        break;
+        } else speedX += abs(speedLimit * cos(angle))* frameTime;
+        switch (direction) {
+        case UPLEFT:
+            x-=(speedX + randomMovementOffset[0]) * frameTime;
+            y-=(speedY + randomMovementOffset[1]) * frameTime;
+            break;
+        case DOWNLEFT:
+            x-=(speedX + randomMovementOffset[0]) * frameTime;
+            y+=(speedY + randomMovementOffset[1]) * frameTime;
+            break;
+        case UPRIGHT:
+            x+=(speedX + randomMovementOffset[0]) * frameTime;
+            y-=(speedY + randomMovementOffset[1]) * frameTime;
+            break;
+        case DOWNRIGHT:
+            x+=(speedX + randomMovementOffset[0]) * frameTime;
+            y+=(speedY + randomMovementOffset[1]) * frameTime;
+            break;
+        default:
+            direction = STOP;
+            break;
+        }
     }
 }

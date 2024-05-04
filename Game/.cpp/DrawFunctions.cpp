@@ -1,6 +1,6 @@
 #include "DrawFunctions.h"
 
-extern Texture2D texPowerup[13];
+extern Texture2D texPowerup[14];
 extern int activePowerups;
 
 void GeneratePowerupTextures() {
@@ -14,7 +14,11 @@ void GeneratePowerupTextures() {
     ImageResize(&tmp, 50, 50);
     texPowerup[1] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    texPowerup[2] = LoadTexture(TEX_POWERUP_MAGNET_PADDLE);
+    tmp = LoadImage(TEX_POWERUP_MAGNET);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[2] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    texPowerup[13] = LoadTexture(TEX_POWERUP_MAGNET_PADDLE);
     for(int i = 0; i < 13; i++) {
         if(texPowerup[i].id == 0) {
             tmp = LoadImage(TEX_POWERUP);
@@ -85,8 +89,8 @@ void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL,
     Destination = {paddle.x + reverseAreaSize, paddle.y, paddle.width - 2 * reverseAreaSize, paddle.height};
     DrawTexturePro(bodyTexture, Source, Destination, { 0, 0 }, 0, WHITE);
     if(activePowerups & (1 << 3)){
-        Source = {0, 0, texPowerup[2].width, texPowerup[2].height};
-        Destination = {paddle.x, paddle.y - texPowerup[2].height, paddle.width, texPowerup[2].height};
-        DrawTexturePro(texPowerup[2], Source, Destination, { 0, 0 }, 0, SKYBLUE);
+        Source = {0, 0, texPowerup[13].width, texPowerup[13].height};
+        Destination = {paddle.x, paddle.y - texPowerup[13].height, paddle.width, texPowerup[13].height};
+        DrawTexturePro(texPowerup[13], Source, Destination, { 0, 0 }, 0, SKYBLUE);
     }
 }

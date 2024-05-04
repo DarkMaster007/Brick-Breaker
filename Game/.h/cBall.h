@@ -9,6 +9,7 @@ class cBall {
     float originalX, originalY;
     int currentSize;
     int originalSize;
+    float angle;
     float speedX, speedY;
     float originalSpeedX, originalSpeedY;
     float acceleration;
@@ -34,6 +35,8 @@ class cBall {
     inline int getSize() const;
     inline int getAcceleration() const;
     inline void setAcceleration(float newAccel);
+    inline void setSpeed(float newSpeed);
+    inline void resetSize();
     void randomizeMovement();
     void Move();
     void Reset();
@@ -61,7 +64,7 @@ eDir cBall::getDirection() const {
     return direction;
 }
 void cBall::setSize(int ballSize) {
-    currentSize = ballSize;
+    currentSize = ballSize >= 5 ? ballSize : 5;
 }
 int cBall::getSize() const {
     return currentSize;
@@ -71,6 +74,13 @@ int cBall::getAcceleration() const {
 }
 void cBall::setAcceleration(float newAccel = 0.017) {
     acceleration = newAccel;
+}
+void cBall::setSpeed(float newSpeed){
+    speedX = abs(newSpeed * cos(angle));
+    speedY = abs(newSpeed * sin(angle));
+}
+void cBall::resetSize(){
+    currentSize = originalSize;
 }
 
 #endif // CBALL_H

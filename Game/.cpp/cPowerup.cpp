@@ -4,7 +4,7 @@
 extern int frame;
 extern int activePowerups;
 
-Texture2D texPowerup[13];
+Texture2D texPowerup[14];
 int cPowerup::powerupCount = 0;
 
 cPowerup::cPowerup() {

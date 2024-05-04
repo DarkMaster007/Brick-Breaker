@@ -51,6 +51,7 @@ double updateInterval; //50 ms
 int animationFrame;
 bool configLoadError;
 int lives = 3;
+float timerShrinkBall = 0.0f;
 
 void OpenWindow();
 int MainMenu();
@@ -471,7 +472,8 @@ void Input() {
     //Trigger dev stuff
 #ifdef _DEBUG
     if(IsKeyPressed(KEY_SPACE)) {
-        activePowerups = activePowerups | (1 << 3);
+        activePowerups = activePowerups | (1 << 6);
+        activePowerups = activePowerups | (1 << 5);
     }
 #endif // _DEBUG
 
@@ -489,7 +491,7 @@ void Input() {
         SetMasterVolume(soundVolume * !soundMute);
     }
 
-    if(GetMouseX() > 10 && GetMouseX() < GetScreenWidth() - 10){
+    if(GetMouseX() > 10 && GetMouseX() < GetScreenWidth() - 10) {
         float oldPaddleX = paddle[0].getX();
         paddle->Input(autoMove, isPaused);
         magnetPowerupDiff = paddle[0].getX() -  oldPaddleX; //For magnet powerup to update ball pos
@@ -520,7 +522,7 @@ void Logic() {
     // Click to start the ball movement thing
     if(ball[0].getDirection() == STOP) {
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            if(timer == 0.0f){
+            if(timer == 0.0f) {
                 activePowerups = 0;
             }
             if(ball[0].getX() < paddle[0].getX() + paddle[0].getDimensions().x / 2) {
@@ -535,11 +537,10 @@ void Logic() {
     ball[0].Move();
 
     //Paddle
-    if(activePowerups & (1 << 3)){
-       paddle->Logic(ball, autoMove, soundBounceMagnet);
-    }
-    else
-    paddle->Logic(ball, autoMove, soundBouncePaddle);
+    if(activePowerups & (1 << 3)) {
+        paddle->Logic(ball, autoMove, soundBounceMagnet);
+    } else
+        paddle->Logic(ball, autoMove, soundBouncePaddle);
 
     for(int i = 0; i < cAnimBall::ballCount; i++) {
         if(animationBalls[i].getX() < 0 || animationBalls[i].getX() > GetScreenWidth() - borderRight.width || animationBalls[i].getY() < 0 || animationBalls[i].getY() > GetScreenHeight() * 0.8) {
@@ -647,20 +648,32 @@ void Logic() {
                 ball[0].setY(ball[0].getY() - ball[0].getSize() - 1);
                 ball[0].setDirection(STOP);
             }
-        }else{
+        } else {
             ball[0].setX(ball[0].getX() + magnetPowerupDiff);
         }
     }
-    /*if(activePowerups & (1 << 4)){  //Death
-
+    if(activePowerups & (1 << 4)) { //Death
+        reset();
     }
-    if(activePowerups & (1 << 5)){  //ShrinkBall
-
+    if(activePowerups & (1 << 5)) { //ShrinkBall
+        if(timerShrinkBall == 0.0f) {
+            timerShrinkBall = timer;
+            activePowerups |= (1 << 5);
+            ball->setSize(0);
+        }
+        else{
+            if(timer - timerShrinkBall > 20.0f){
+                timerShrinkBall = 0.0f;
+                activePowerups &= ~(1 << 5);
+                ball->resetSize();
+            }
+        }
     }
     if(activePowerups & (1 << 6)){  //FastBall
-
+        ball->setAcceleration(0.035f);
+        ball->setSpeed(800);
     }
-    if(activePowerups & (1 << 7)){  //SuperShrinkPaddle
+    /*if(activePowerups & (1 << 7)){  //SuperShrinkPaddle
 
     }
     if(activePowerups & (1 << 8)){  //FallingBricks
@@ -768,6 +781,7 @@ void reset() {
             powerup[i].setEnabled(0);
         }
         activePowerups = 0;
+        timerShrinkBall = 0.0f;
         lives--;
     }
 }

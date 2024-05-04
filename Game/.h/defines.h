@@ -30,6 +30,7 @@
 #define TEX_POWERUP_PIERCE "..//resources//textures//pierce.png"
 #define TEX_POWERUP_HP "..//resources//textures//+1.png"
 #define TEX_POWERUP_MAGNET_PADDLE "..//resources//textures//magnetPaddle.png"
+#define TEX_POWERUP_MAGNET "..//resources//textures//magnet.png"
 
 enum eDir { STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
 

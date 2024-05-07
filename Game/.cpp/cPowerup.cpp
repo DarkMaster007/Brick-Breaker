@@ -13,6 +13,8 @@ cPowerup::cPowerup() {
     spawnChance = 35;
     enabled = 0;
     type = -1;
+    rec.width = 50;
+    rec.height = 50;
 }
 
 bool cPowerup::spawnPowerup(cBricks *brick) {

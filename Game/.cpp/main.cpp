@@ -386,7 +386,10 @@ void Draw() {
     //Draw Powerups
     for(int i = 0; i < 6; i++) {
         if(powerup[i].getEnabled()) {
-            DrawTexture(texPowerup[powerup[i].getType()], powerup[i].getPosition().x - 50, powerup[i].getPosition().y - 25, WHITE);
+            #ifdef _DEBUG
+            DrawRectangleRec(powerup[i].getDimensionsRec(), (Color){255,255,255,25});
+            #endif // _DEBUG
+            DrawTexture(texPowerup[powerup[i].getType()], powerup[i].getPosition().x, powerup[i].getPosition().y, WHITE);
         }
     }
     //

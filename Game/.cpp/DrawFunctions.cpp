@@ -14,10 +14,48 @@ void GeneratePowerupTextures() {
     ImageResize(&tmp, 50, 50);
     texPowerup[1] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_MAGNET);
+    tmp = LoadImage(TEX_POWERUP_EXPLODE);
     ImageResize(&tmp, 50, 50);
     texPowerup[2] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_MAGNET);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[3] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_DEATH);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[4] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_SHRINKBALL);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[5] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_FASTSPEED);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[6] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    /*
+    tmp = LoadImage(TEX_POWERUP_HP);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[7] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_HP);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[8] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_HP);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[9] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_HP);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[10] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    tmp = LoadImage(TEX_POWERUP_HP);
+    ImageResize(&tmp, 50, 50);
+    texPowerup[11] = LoadTextureFromImage(tmp);
+    UnloadImage(tmp);
+    */
     texPowerup[13] = LoadTexture(TEX_POWERUP_MAGNET_PADDLE);
     for(int i = 0; i < 13; i++) {
         if(texPowerup[i].id == 0) {
@@ -57,7 +95,7 @@ void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int pulseAmo
     }
 
     //Draw first rectangle
-    DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
+    DrawRectangleRoundedLinesEx(brickRec, 0.2, 10, 3, ORANGE);
 }
 
 void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[], Color ballColor) {
@@ -67,13 +105,13 @@ void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[], Color ball
         cAnimBall::Draw(&animationBalls[kk], ballColor);
     }
     //Draw first rectangle
-    DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
+    DrawRectangleRoundedLinesEx(brickRec, 0.2, 10, 3, ORANGE);
 }
 
 void DrawBricksUnbreakable(Rectangle brickRec, Color recColor) {
     // Implementation of DrawBricksUnbreakable
     DrawRectangleRec(brickRec, recColor);
-    DrawRectangleRoundedLines(brickRec, 0.2, 10, 3, ORANGE);
+    DrawRectangleRoundedLinesEx(brickRec, 0.2, 10, 3, ORANGE);
 }
 
 void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL, Texture2D edgeTextureR, Texture2D bodyTexture) {

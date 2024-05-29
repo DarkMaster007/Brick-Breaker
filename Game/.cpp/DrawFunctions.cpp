@@ -2,64 +2,65 @@
 
 extern Texture2D texPowerup[14];
 extern int activePowerups;
+extern char rootPath[2048];
 
 void GeneratePowerupTextures() {
     //|Pierce|+1 Life|Explode|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (12 bits)
     Image tmp;
-    tmp = LoadImage(TEX_POWERUP_PIERCE);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_PIERCE));
     ImageResize(&tmp, 50, 50);
     texPowerup[0] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_HP);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
     ImageResize(&tmp, 50, 50);
     texPowerup[1] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_EXPLODE);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_EXPLODE));
     ImageResize(&tmp, 50, 50);
     texPowerup[2] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_MAGNET);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_MAGNET));
     ImageResize(&tmp, 50, 50);
     texPowerup[3] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_DEATH);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_DEATH));
     ImageResize(&tmp, 50, 50);
     texPowerup[4] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_SHRINKBALL);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_SHRINKBALL));
     ImageResize(&tmp, 50, 50);
     texPowerup[5] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_FASTSPEED);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_FASTSPEED));
     ImageResize(&tmp, 50, 50);
     texPowerup[6] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
     /*
-    tmp = LoadImage(TEX_POWERUP_HP);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
     ImageResize(&tmp, 50, 50);
     texPowerup[7] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_HP);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
     ImageResize(&tmp, 50, 50);
     texPowerup[8] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_HP);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
     ImageResize(&tmp, 50, 50);
     texPowerup[9] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_HP);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
     ImageResize(&tmp, 50, 50);
     texPowerup[10] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TEX_POWERUP_HP);
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
     ImageResize(&tmp, 50, 50);
     texPowerup[11] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
     */
-    texPowerup[13] = LoadTexture(TEX_POWERUP_MAGNET_PADDLE);
+    texPowerup[13] = LoadTexture(TextFormat("%s%s", rootPath, TEX_POWERUP_MAGNET_PADDLE));
     for(int i = 0; i < 13; i++) {
         if(texPowerup[i].id == 0) {
-            tmp = LoadImage(TEX_POWERUP);
+            tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP));
             ImageResize(&tmp, 50, 50);
             texPowerup[i] = LoadTextureFromImage(tmp);
             UnloadImage(tmp);
@@ -126,7 +127,7 @@ void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL,
     Source = {0, 0, (float)bodyTexture.width, (float)bodyTexture.height};
     Destination = {paddle.x + reverseAreaSize, paddle.y, paddle.width - 2 * reverseAreaSize, paddle.height};
     DrawTexturePro(bodyTexture, Source, Destination, { 0, 0 }, 0, WHITE);
-    if(activePowerups & (1 << 3)){
+    if(activePowerups & (1 << 3)) {
         Source = {0, 0, texPowerup[13].width, texPowerup[13].height};
         Destination = {paddle.x, paddle.y - texPowerup[13].height, paddle.width, texPowerup[13].height};
         DrawTexturePro(texPowerup[13], Source, Destination, { 0, 0 }, 0, SKYBLUE);

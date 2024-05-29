@@ -49,13 +49,13 @@ void cAnimBall::setDirection(eDir d) {
 void cAnimBall::randomDirection() {
     direction = (eDir)(randomNrDirection(marsenneTwister));
 }
-float cAnimBall::getX() const{
+float cAnimBall::getX() const {
     return x;
 }
-float cAnimBall::getY() const{
+float cAnimBall::getY() const {
     return y;
 }
-Vector2 cAnimBall::getV() const{
+Vector2 cAnimBall::getV() const {
     return {x, y};
 }
 void cAnimBall::setX(float newX) {
@@ -64,16 +64,16 @@ void cAnimBall::setX(float newX) {
 void cAnimBall::setY(float newY) {
     y = newY;
 }
-eDir cAnimBall::getDirection() const{
+eDir cAnimBall::getDirection() const {
     return direction;
 }
 void cAnimBall::setSize(int ball_size) {
     current_size = ball_size;
 }
-int cAnimBall::getSize() const{
+int cAnimBall::getSize() const {
     return current_size;
 }
-int cAnimBall::getAcceleration() const{
+int cAnimBall::getAcceleration() const {
     return acceleration;
 }
 void cAnimBall::setAcceleration(float newAccel = 0.017) {

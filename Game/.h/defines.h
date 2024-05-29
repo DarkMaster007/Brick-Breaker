@@ -20,21 +20,20 @@
 #define STANDARD_ANIM_BALL_COUNT 20
 #define MAX_ANIM_BALL_COUNT STANDARD_ANIM_BALL_COUNT * MAX_BRICKS
 
-#define MAX_INPUT_CHARS   9
-#define MAX_INPUT_INT     4
-
-#define TEX_PADDLE_BODY "..//resources//Breakout-Paddle_middle.png"
-#define TEX_PADDLE_EDGE_L "..//resources//Breakout-Paddle_L.png"
-#define TEX_PADDLE_EDGE_R "..//resources//Breakout-Paddle_R.png"
-#define TEX_POWERUP "..//resources//powerup_placeholder.png"
-#define TEX_POWERUP_PIERCE "..//resources//textures//pierce.png"
-#define TEX_POWERUP_HP "..//resources//textures//+1.png"
-#define TEX_POWERUP_EXPLODE "..//resources//textures//explode.png"
-#define TEX_POWERUP_MAGNET_PADDLE "..//resources//textures//magnetPaddle.png"
-#define TEX_POWERUP_MAGNET "..//resources//textures//magnet.png"
-#define TEX_POWERUP_DEATH "..//resources//textures//death.png"
-#define TEX_POWERUP_SHRINKBALL "..//resources//textures//shrinkBall.png"
-#define TEX_POWERUP_FASTSPEED "..//resources//textures//fastSpeed.png"
+//Add these to rootPath variable like so: rootPath+TEX_SOMETHING
+#define TEX_TITLE_SCREEN "\\Release\\resources\\title_main.png"
+#define TEX_PADDLE_BODY "\\Release\\resources\\Breakout-Paddle_middle.png"
+#define TEX_PADDLE_EDGE_L "\\Release\\resources\\Breakout-Paddle_L.png"
+#define TEX_PADDLE_EDGE_R "\\Release\\resources\\Breakout-Paddle_R.png"
+#define TEX_POWERUP "\\Release\\resources\\powerup_placeholder.png"
+#define TEX_POWERUP_PIERCE "\\Release\\resources\\textures\\pierce.png"
+#define TEX_POWERUP_HP "\\Release\\resources\\textures\\+1.png"
+#define TEX_POWERUP_EXPLODE "\\Release\\resources\\textures\\explode.png"
+#define TEX_POWERUP_MAGNET_PADDLE "\\Release\\resources\\textures\\magnetPaddle.png"
+#define TEX_POWERUP_MAGNET "\\Release\\resources\\textures\\magnet.png"
+#define TEX_POWERUP_DEATH "\\Release\\resources\\textures\\death.png"
+#define TEX_POWERUP_SHRINKBALL "\\Release\\resources\\textures\\shrinkBall.png"
+#define TEX_POWERUP_FASTSPEED "\\Release\\resources\\textures\\fastSpeed.png"
 
 enum eDir { STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
 

@@ -6,11 +6,12 @@ bool spinnerWidthEnable = 0;
 bool spinnerHeightEnable = 0;
 bool isError = 0;
 extern bool quit;
+extern char rootPath[2048];
 
 bool settingsOutput() { //1 - FAIL, 0 - SUCCESS
     FILE *fp;
-    char path[255];
-    sprintf(path, "%s\\config\\settings.txt", GetPrevDirectoryPath(GetWorkingDirectory()));
+    char path[255] = {0};
+    sprintf(path, "%s\\Release\\config\\settings.txt", rootPath);
     fp = fopen(path, "w"); //Open settings.txt file
     if(fp == nullptr) {
         fclose(fp);

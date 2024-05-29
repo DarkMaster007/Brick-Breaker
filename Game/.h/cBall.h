@@ -75,11 +75,11 @@ int cBall::getAcceleration() const {
 void cBall::setAcceleration(float newAccel = 0.017) {
     acceleration = newAccel;
 }
-void cBall::setSpeed(float newSpeed){
+void cBall::setSpeed(float newSpeed) {
     speedX = abs(newSpeed * cos(angle));
     speedY = abs(newSpeed * sin(angle));
 }
-void cBall::resetSize(){
+void cBall::resetSize() {
     currentSize = originalSize;
 }
 

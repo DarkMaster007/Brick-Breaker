@@ -85,33 +85,37 @@ int cBricks::callOnCollision() {
 
 void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounce) {
     //Brick Collision
-    Vector2 ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision, ball->getSize(), getDimensionsRec()) && enabled) {
+    Vector2 ball_collision = {ball[0].getX(), ball[0].getY()};
+    if(CheckCollisionCircleRec(ball_collision, ball[0].getSize(), getDimensionsRec()) && enabled) {
         if(!(activePowerups & (1 << 0))) {
-            if(ball->getX() <= x) {
-                if(ball->getDirection() == UPRIGHT) {
-                    ball->setDirection(UPLEFT);
+            if(ball[0].getX() <= x) {     //Left wall
+                if(ball[0].getDirection() == UPRIGHT) {
+                    ball[0].setDirection(UPLEFT);
                 } else {
-                    ball->setDirection(DOWNLEFT);
+                    ball[0].setDirection(DOWNLEFT);
                 }
-            } else if(ball->getX() >= x + brickWidth) {
-                if(ball->getDirection() == UPLEFT) {
-                    ball->setDirection(UPRIGHT);
+                ball[0].setX(x - ball[0].getSize() - 1);
+            } else if(ball[0].getX() >= x + brickWidth) {     //Right wall
+                if(ball[0].getDirection() == UPLEFT) {
+                    ball[0].setDirection(UPRIGHT);
                 } else {
-                    ball->setDirection(DOWNRIGHT);
+                    ball[0].setDirection(DOWNRIGHT);
                 }
-            } else if(ball->getY() <= y) {
-                if(ball->getDirection() == DOWNLEFT) {
-                    ball->setDirection(UPLEFT);
+                ball[0].setX(x + brickWidth + ball[0].getSize() + 1);
+            } else if(ball[0].getY() <= y) {      //Top wall
+                if(ball[0].getDirection() == DOWNLEFT) {
+                    ball[0].setDirection(UPLEFT);
                 } else {
-                    ball->setDirection(UPRIGHT);
+                    ball[0].setDirection(UPRIGHT);
                 }
-            } else if(ball->getY() >= y + brickHeight) {
-                if(ball->getDirection() == UPRIGHT) {
-                    ball->setDirection(DOWNRIGHT);
+                ball[0].setY(y - ball[0].getSize() - 1);
+            } else if(ball[0].getY() >= y + brickHeight) {       //Bottom wall
+                if(ball[0].getDirection() == UPRIGHT) {
+                    ball[0].setDirection(DOWNRIGHT);
                 } else {
-                    ball->setDirection(DOWNLEFT);
+                    ball[0].setDirection(DOWNLEFT);
                 }
+                ball[0].setY(y + brickHeight + ball[0].getSize() + 1);
             }
             if(type > 0 && type < 4) { //1 - Normal, 2 - 2HP, 3 - 3HP, 4 - Explosive, 5 - Gold(Unbreakable)
                 type -= 1;
@@ -135,6 +139,6 @@ void cBricks::Logic(cBall *ball, cPowerup *powerup, Sound soundBounce) {
         }
 
         PlaySound(soundBounce);
-        ball->randomizeMovement();
+        ball[0].randomizeMovement();
     }
 }

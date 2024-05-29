@@ -7,14 +7,15 @@
 #include "cPaddle.h"
 #include "cPowerup.h"
 #include "cSettings.h"
+#include <string>
 
 cBricks *brick;
 cAnimBall *animationBalls;
 cBall *ball;                    // ball object
 cPaddle *paddle;                // paddle object
 cPowerup *powerup;              // Handles powerups
-Texture texBackground;
 int activePowerups;             //|Pierce|+1 Life|Explode|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (12 bits)
+char rootPath[2048] = {0};
 
 Rectangle borderLeft;           // left border rectangle, for collision and drawing
 Rectangle borderRight;          // right border rectangle, for collision and drawing
@@ -67,8 +68,32 @@ void checkWin();
 int Run();
 void Unload();
 
+std::string GetParentDirectory(const std::string& path) {
+    size_t found = path.find_first_of("/\\", path.find_first_of("/\\", path.find_first_of("/\\") + 1) + 1);
+    if (found == std::string::npos) {
+        return path;
+    }
+    // Find the last occurrence of a slash
+    size_t last_slash = path.find_last_of("/\\");
+    // If the last character is a slash, find the slash before it
+    if (last_slash == path.length() - 1) {
+        last_slash = path.find_last_of("/\\", last_slash - 1);
+    }
+
+    return path.substr(0, last_slash);
+}
+
 int main() {
     int exitCode = 0;
+#ifdef _DEBUG
+    printf("\nWorking Directory:\n");
+    printf("Current App Directory: %s\n", GetApplicationDirectory());
+    printf("Current Working Directory: %s\n", GetWorkingDirectory());
+    printf("\n");
+#endif // _DEBUG
+    std::string appPath = GetApplicationDirectory();
+    appPath = GetParentDirectory(GetParentDirectory(appPath));
+    sprintf(rootPath, "%s", appPath.c_str());
     OpenWindow();
     int state = MainMenu();
     if(state == 3) {
@@ -98,9 +123,11 @@ int main() {
         };
         while(!WindowShouldClose() && !win && !quit) {
             Input();
-            if(!isPaused) Logic();
+            if(!isPaused) {
+                Logic();
+            }
             checkWin();
-            if(ball->getDirection() != STOP && !isPaused) timer += GetFrameTime();
+            if(ball[0].getDirection() != STOP && !isPaused) timer += GetFrameTime();
             double currentTime = GetTime();
             if(currentTime - previousTime >= updateInterval) {
                 if(animationFrame >= 100) animationFrame = 0;
@@ -120,8 +147,8 @@ int main() {
 void OpenWindow() {
     FILE *fp;
     int width, height;
-    char path[255];
-    sprintf(path, "%s\\config\\settings.txt", GetPrevDirectoryPath(GetWorkingDirectory()));
+    char path[255] = {0};
+    sprintf(path, "%s\\Release\\config\\settings.txt", rootPath);
     fp = fopen(path, "r"); //Open settings.txt file
     if(fp == nullptr) {
         fclose(fp);
@@ -155,7 +182,7 @@ int MainMenu() {
     int currentScreen = 0;
 
     //Load Textures
-    Texture title = LoadTexture("..//resources//title_main.png");
+    Texture title = LoadTexture(TextFormat("%s%s", rootPath, TEX_TITLE_SCREEN));
     //Draw
     char msg_error[95] = "settings.txt file failed to load and was recreated. \nPlease Press \'Esc\' to quit and relaunch.";
     int textsize;
@@ -217,7 +244,7 @@ int MainMenu() {
 
 void Init() {
     GeneratePowerupTextures();
-    HideCursor();
+    //DisableCursor();
     //Initialize all vars with their proper values
     activePowerups = (1 << 3);
     quit = 0;
@@ -236,7 +263,6 @@ void Init() {
     animationBalls = (cAnimBall *)MemAlloc(MAX_ANIM_BALL_COUNT*sizeof(cAnimBall));
     brick = (cBricks *)MemAlloc(MAX_BRICKS*sizeof(cBricks));  //MemAlloc() is equivalent to malloc();
     powerup = new cPowerup[6];
-    texBackground = LoadTexture("..//resources//background.png");
 
     //Load sound from .h files
     waveDeath.channels = WAVEDEATH_CHANNELS;
@@ -298,14 +324,16 @@ int LoadLevel() {
     float brickWidth, brickHeight;
     int brickType;
     Rectangle progressBarRec = {GetScreenWidth() * 0.12f, GetScreenHeight() / 2 - 50.0f, GetScreenWidth() - GetScreenWidth() * 0.24f, 100};
-
-    fp = fopen(TextFormat("..\\config\\level%i.txt", levelCounter), "r");
+    char levelLocation[2048] = {0};
+    sprintf(levelLocation, "%s\\Release\\config\\level%i.txt", rootPath, levelCounter);
+    fp = fopen(levelLocation, "r");
     if(!fp) {
         if(levelCounter == 0) {
             return -1;
         } else {
             levelCounter--;
-            fp = fopen(TextFormat("..\\config\\level%i.txt", levelCounter), "r");
+            sprintf(levelLocation, "%s\\Release\\config\\level%i.txt", rootPath, levelCounter);
+            fp = fopen(levelLocation, "r");
             if(!fp) return -1;
         }
     }
@@ -377,18 +405,26 @@ void Draw() {
 
     //Draw Paddle
     DrawPaddle(paddle->getDimensionsRec(), paddle->getBounceReverseArea(), paddle->textureEdge_L, paddle->textureEdge_R, paddle->textureBody);
+#ifdef _DEBUG
+    DrawLine(paddle->getX(), paddle->getY() + paddle->getDimensions().y, paddle->getX(), paddle->getY() - 20, RED);
+    DrawText(TextFormat("X"), paddle->getX() - 10, paddle->getY() - 25, 12, RED);
+    DrawLine(paddle->getX() - 20, paddle->getY(), paddle->getX() + paddle->getDimensions().x, paddle->getY(), GREEN);
+    DrawText(TextFormat("Y"), paddle->getX() - 12, paddle->getY() + paddle->getDimensions().y * 0.5, 12, GREEN);
+#endif // _DEBUG
     //
 
     //Draw Ball
-    DrawCircle(ball->getX(), ball->getY(), ball->getSize(), WHITE);
+    DrawCircle(ball[0].getX(), ball[0].getY(), ball[0].getSize(), WHITE);
     //
 
     //Draw Powerups
     for(int i = 0; i < 6; i++) {
         if(powerup[i].getEnabled()) {
-            #ifdef _DEBUG
-            DrawRectangleRec(powerup[i].getDimensionsRec(), (Color){255,255,255,25});
-            #endif // _DEBUG
+#ifdef _DEBUG
+            DrawRectangleRec(powerup[i].getDimensionsRec(), (Color) {
+                255,255,255,25
+            });
+#endif // _DEBUG
             DrawTexture(texPowerup[powerup[i].getType()], powerup[i].getPosition().x, powerup[i].getPosition().y, WHITE);
         }
     }
@@ -475,14 +511,15 @@ void Input() {
     //Trigger dev stuff
 #ifdef _DEBUG
     if(IsKeyPressed(KEY_SPACE)) {
-        activePowerups = activePowerups | (1 << 6);
-        activePowerups = activePowerups | (1 << 5);
+        //Add a cheat here for debugging
     }
 #endif // _DEBUG
 
     //Pause the game
     if(IsKeyPressed('P')) {
         isPaused = !isPaused;
+        if(isPaused) EnableCursor();
+        else DisableCursor();
     }
 
     if(IsKeyPressed('F')) {
@@ -494,16 +531,14 @@ void Input() {
         SetMasterVolume(soundVolume * !soundMute);
     }
 
-    if(GetMouseX() > 10 && GetMouseX() < GetScreenWidth() - 10) {
-        float oldPaddleX = paddle[0].getX();
-        paddle->Input(autoMove, isPaused);
-        magnetPowerupDiff = paddle[0].getX() -  oldPaddleX; //For magnet powerup to update ball pos
-    }
+    float oldPaddleX = paddle->getX();
+    paddle->Input(autoMove, isPaused);
+    magnetPowerupDiff = paddle->getX() - oldPaddleX; //For magnet powerup to update ball pos
 }
 
 void Logic() {
     //Update title
-    char title[256];
+    char title[256] = {0};
     sprintf(title, "RayBreaker");
     if(activePowerups & (1 << 0)) { //Pierce
         sprintf(title, "%s|Pierce", title);
@@ -528,13 +563,10 @@ void Logic() {
             if(timer == 0.0f) {
                 activePowerups = 0;
             }
-            if(ball[0].getX() < paddle[0].getX() + paddle[0].getDimensions().x / 2) {
+            if(ball[0].getX() < paddle->getX() + paddle->getDimensions().x / 2) {
                 ball[0].setDirection(UPLEFT);
             } else
                 ball[0].setDirection(UPRIGHT);
-        } else {
-            if(timer == 0.0f)
-                ball[0].setX(GetMouseX() + paddle[0].getDimensions().x / 2);
         }
     }
     ball[0].Move();
@@ -647,12 +679,14 @@ void Logic() {
     }
     if(activePowerups & (1 << 3)) { //Magnet
         if(ball[0].getDirection() != STOP) {
-            if(CheckCollisionCircleRec({ball[0].getX(), ball[0].getY()}, ball[0].getSize(), paddle[0].getDimensionsRec())) {
+            if(CheckCollisionCircleRec({ball[0].getX(), ball[0].getY()}, ball[0].getSize(), paddle->getDimensionsRec())) {
                 ball[0].setY(ball[0].getY() - ball[0].getSize() - 1);
                 ball[0].setDirection(STOP);
             }
         } else {
+            float x = ball[0].getX() - ball[0].getSize();
             ball[0].setX(ball[0].getX() + magnetPowerupDiff);
+            magnetPowerupDiff = 0;
         }
     }
     if(activePowerups & (1 << 4)) { //Death
@@ -662,86 +696,92 @@ void Logic() {
         if(timerShrinkBall == 0.0f) {
             timerShrinkBall = timer;
             activePowerups |= (1 << 5);
-            ball->setSize(0);
-        }
-        else{
-            if(timer - timerShrinkBall > 20.0f){
+            ball[0].setSize(0);
+        } else {
+            if(timer - timerShrinkBall > 20.0f) {
                 timerShrinkBall = 0.0f;
                 activePowerups &= ~(1 << 5);
-                ball->resetSize();
+                ball[0].resetSize();
             }
         }
     }
-    if(activePowerups & (1 << 6)){  //FastBall
-        ball->setAcceleration(0.035f);
-        ball->setSpeed(800);
+    if(activePowerups & (1 << 6)) { //FastBall
+        ball[0].setAcceleration(0.035f);
+        ball[0].setSpeed(800);
     }
-    /*if(activePowerups & (1 << 7)){  //SuperShrinkPaddle
-
+    if(activePowerups & (1 << 7)) { //SuperShrinkPaddle
+        //#error TODO (Administrator#1#05/13/24): Add texture for powerup
+        paddle->setPaddleSize(0);
+        activePowerups &= ~(1 << 7);
     }
-    if(activePowerups & (1 << 8)){  //FallingBricks
-
+    if(activePowerups & (1 << 9)) { //ExpandPaddle
+        //#error TODO (Administrator#1#05/13/24): Add texture for powerup
+        paddle->setPaddleSize(paddle->getDimensions().x + 20);
+        activePowerups &= ~(1 << 9);
     }
-    if(activePowerups & (1 << 9)){ //ExpandPaddle
-
+    if(activePowerups & (1 << 10)) { //ShrinkPaddle
+        //#error TODO (Administrator#1#05/13/24): Add texture for powerup
+        paddle->setPaddleSize(paddle->getDimensions().x - 20);
     }
-    if(activePowerups & (1 << 10)){ //ShrinkPaddle
-
-    }
-    if(activePowerups & (1 << 11)){ //SplitBall
-
+    /*if(activePowerups & (1 << 11)){ //SplitBall
+        // TODO (Administrator#9#05/13/24): Powerups
     }*/
 
     //Make bricks fall after 60 seconds
-    if(ball->getDirection() != STOP && !isPaused) {
-        if(timer > 60.0f) {
+    if(ball[0].getDirection() != STOP && !isPaused) {
+        if(timer > 60.0f || (activePowerups & (1 << 8))) {
             if(fmod(timer, 10.0) < 0.10) {
                 for(int i = 0; i < cBricks::brickCount; i++) {
                     brick[i].setY(brick[i].getY() + 5);
+                    if(brick[i].getType() == 4) {
+                        for(int index = brick[i].animBallIndex; index < brick[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; index++) {
+                            animationBalls[index].setY(animationBalls[index].getY() + 5);
+                        }
+                    }
                 }
             }
         }
     }
 
     //Left wall collision
-    Vector2 ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(), borderLeft)) {
-        if(ball->getDirection() == UPLEFT) {
-            ball->setDirection(UPRIGHT);
+    Vector2 ball_collision = {ball[0].getX(), ball[0].getY()};
+    if(CheckCollisionCircleRec(ball_collision,ball[0].getSize(), borderLeft)) {
+        if(ball[0].getDirection() == UPLEFT) {
+            ball[0].setDirection(UPRIGHT);
         }
-        if(ball->getDirection() == DOWNLEFT) {
-            ball->setDirection(DOWNRIGHT);
+        if(ball[0].getDirection() == DOWNLEFT) {
+            ball[0].setDirection(DOWNRIGHT);
         }
         PlaySound(soundBounceGeneral);
     }
 
     //Right wall collision
-    ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderRight)) {
-        if(ball->getDirection() == UPRIGHT) {
-            ball->setDirection(UPLEFT);
+    ball_collision = {ball[0].getX(), ball[0].getY()};
+    if(CheckCollisionCircleRec(ball_collision,ball[0].getSize(),borderRight)) {
+        if(ball[0].getDirection() == UPRIGHT) {
+            ball[0].setDirection(UPLEFT);
         }
-        if(ball->getDirection() == DOWNRIGHT) {
-            ball->setDirection(DOWNLEFT);
+        if(ball[0].getDirection() == DOWNRIGHT) {
+            ball[0].setDirection(DOWNLEFT);
         }
         PlaySound(soundBounceGeneral);
     }
 
     //Top wall collision
-    ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderTop)) {
-        if(ball->getDirection() == UPRIGHT) {
-            ball->setDirection(DOWNRIGHT);
+    ball_collision = {ball[0].getX(), ball[0].getY()};
+    if(CheckCollisionCircleRec(ball_collision,ball[0].getSize(),borderTop)) {
+        if(ball[0].getDirection() == UPRIGHT) {
+            ball[0].setDirection(DOWNRIGHT);
         }
-        if(ball->getDirection() == UPLEFT) {
-            ball->setDirection(DOWNLEFT);
+        if(ball[0].getDirection() == UPLEFT) {
+            ball[0].setDirection(DOWNLEFT);
         }
         PlaySound(soundBounceGeneral);
     }
 
     //Bottom wall collision
-    ball_collision = {ball->getX(), ball->getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball->getSize(),borderBottom)) {
+    ball_collision = {ball[0].getX(), ball[0].getY()};
+    if(CheckCollisionCircleRec(ball_collision,ball[0].getSize(),borderBottom)) {
         PlaySound(soundDeath);
         reset();
     }
@@ -760,7 +800,7 @@ void gameReset() {
         animationBalls[i].~cAnimBall();
     }
     paddle->Reset();
-    ball->Reset();
+    ball[0].Reset();
     for(int i = 0; i < 6; i++) {
         powerup[i].setEnabled(0);
     }
@@ -779,7 +819,7 @@ void reset() {
                 }
         }
         paddle->Reset();
-        ball->Reset();
+        ball[0].Reset();
         for(int i = 0; i < 6; i++) {
             powerup[i].setEnabled(0);
         }

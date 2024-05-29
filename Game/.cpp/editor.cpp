@@ -15,6 +15,7 @@ Color ghostBrickColor = WHITE;
 int ghostBrickType = 1;
 int ballAnimIndex = 0;
 int selectedAxis = 0; //0 - X, 1 - Y
+extern char rootPath[2048];
 
 
 void Editor_Init() { // load the brick variable with only ones (meaning all bricks are visible and active)
@@ -221,9 +222,9 @@ int searchString(char *arrayToParseIn, char stringToSearchFor[], char stringToRe
     int arraySize = strlen(arrayToParseIn);
     int searchSize = strlen(stringToSearchFor);
 
-    char temp_compare[searchSize + 1];
-    char temp_arrayhead[arraySize + 1];
-    char temp_arraybottom[arraySize + 1];
+    char temp_compare[searchSize + 1] = {0};
+    char temp_arrayhead[arraySize + 1] = {0};
+    char temp_arraybottom[arraySize + 1] = {0};
     memset(temp_compare, 0, searchSize*sizeof(char));
     memset(temp_arrayhead, 0, arraySize*sizeof(char));
     memset(temp_arraybottom, 0, arraySize*sizeof(char));
@@ -248,9 +249,9 @@ int searchString(char *arrayToParseIn, char stringToSearchFor[], char stringToRe
 
 void EditorOutput() { //output the current brick layout to the level.txt file
     int i;
-    char text[255];
+    char text[255] = {0};
     for(i = 0; i < 100; i++) {
-        sprintf(text, "..//config//level%i.txt",i);
+        sprintf(text, "%s\\Release\\config\\level%i.txt", rootPath, i);
         if(!FileExists(text)) {
             break;
         }

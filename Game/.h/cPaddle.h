@@ -10,6 +10,7 @@ class cPaddle {
     float speed;
     float originalX, originalY;
     float paddleWidth, paddleHeight;
+    float originalPaddleWidth, minPaddleWidth;
     float bounceReverseArea;           // How big the area is where the ball goes back instead of forward
     bool isColliding;
   public:
@@ -24,6 +25,7 @@ class cPaddle {
     inline void setY(float newY);
     inline Vector2 getPosition() const;
     inline Vector2 getDimensions() const;
+    inline void setPaddleSize(float newPaddleWidth);
     inline Rectangle getDimensionsRec() const;
     inline float getSpeed() const;
     inline float getBounceReverseArea() const;
@@ -55,6 +57,14 @@ Vector2 cPaddle::getPosition() const {
 }
 Vector2 cPaddle::getDimensions() const {
     return {paddleWidth, paddleHeight};
+}
+void cPaddle::setPaddleSize(float newPaddleWidth) {
+    if(newPaddleWidth < minPaddleWidth)
+        paddleWidth = minPaddleWidth;
+    else if(newPaddleWidth > (GetScreenWidth() - 20) * 0.9)
+        paddleWidth = (GetScreenWidth() - 20) * 0.9;
+    else
+        paddleWidth = newPaddleWidth;
 }
 Rectangle cPaddle::getDimensionsRec() const {
     return {getX(), getY(), getDimensions().x, getDimensions().y};

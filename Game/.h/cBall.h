@@ -2,9 +2,11 @@
 #define CBALL_H
 
 #include "defines.h"
+#include <chrono>
+#include <random>
 
 class cBall {
-  private:
+private:
     float x, y;
     float originalX, originalY;
     int currentSize;
@@ -18,12 +20,19 @@ class cBall {
     std::mt19937 marsenneTwister{static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count())};
     std::uniform_int_distribution<> randomNrDistribution{1, 4};
     std::uniform_int_distribution<> randomNrDirection{1, 4};
-  public:
+
+public:
     static int ballCount;
     static Texture2D texBall;
 
+    cBall(int posX, int posY, int ball_size, float ballSpeed, eDir direction);
     cBall(int posX, int posY, int ball_size, float ballSpeed);
+    cBall(const cBall& other);
+    cBall(cBall&& other) noexcept;
+    cBall& operator=(const cBall&) = delete;
+    cBall& operator=(cBall&& other) noexcept;
     ~cBall();
+
     inline void setDirection(eDir d);
     inline void randomDirection();
     inline float getX() const;
@@ -33,7 +42,7 @@ class cBall {
     inline eDir getDirection() const;
     inline void setSize(int ball_size);
     inline int getSize() const;
-    inline int getAcceleration() const;
+    inline float getAcceleration() const;
     inline void setAcceleration(float newAccel);
     inline void setSpeed(float newSpeed);
     inline void resetSize();
@@ -45,40 +54,52 @@ class cBall {
 void cBall::setDirection(eDir d) {
     direction = d;
 }
+
 void cBall::randomDirection() {
     direction = (eDir)(randomNrDirection(marsenneTwister));
 }
+
 float cBall::getX() const {
     return x;
 }
+
 float cBall::getY() const {
     return y;
 }
+
 void cBall::setX(float newX) {
     x = newX;
 }
+
 void cBall::setY(float newY) {
     y = newY;
 }
+
 eDir cBall::getDirection() const {
     return direction;
 }
+
 void cBall::setSize(int ballSize) {
     currentSize = ballSize >= 5 ? ballSize : 5;
 }
+
 int cBall::getSize() const {
     return currentSize;
 }
-int cBall::getAcceleration() const {
+
+float cBall::getAcceleration() const {
     return acceleration;
 }
-void cBall::setAcceleration(float newAccel = 0.017) {
+
+void cBall::setAcceleration(float newAccel) {
     acceleration = newAccel;
 }
+
 void cBall::setSpeed(float newSpeed) {
-    speedX = abs(newSpeed * cos(angle));
-    speedY = abs(newSpeed * sin(angle));
+    speedX = std::abs(newSpeed * std::cos(angle));
+    speedY = std::abs(newSpeed * std::sin(angle));
 }
+
 void cBall::resetSize() {
     currentSize = originalSize;
 }

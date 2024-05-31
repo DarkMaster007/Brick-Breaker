@@ -49,7 +49,7 @@ void cPaddle::moveRight(float step) {
 void cPaddle::Logic(cBall *ball, bool autoMove, Sound soundBouncePaddle) {
     //Paddle Collision
     Vector2 ball_collision = {ball[0].getX(), ball[0].getY()};
-    bool collisionStatus = CheckCollisionCircleRec(ball_collision,ball[0].getSize(), getDimensionsRec());
+    bool collisionStatus = CheckCollisionCircleRec(ball_collision, ball[0].getSize(), getDimensionsRec());
     if(collisionStatus) {
         if(getDimensions().x > 30) {
             if(ball[0].getX() < getX() + getBounceReverseArea()) {
@@ -94,7 +94,7 @@ void cPaddle::Input(bool autoMove, bool isPaused) {
     //Paddle movement
     float newPosX = GetMouseX();
 #ifdef _DEBUG
-    if(GetMouseDelta().x != 0)
+    if((int)GetMouseDelta().x != 0)
         printf("Mouse XPos: %f\n", newPosX);
 #endif // _DEBUG
     if(autoMove || isPaused) return;

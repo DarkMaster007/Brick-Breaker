@@ -11,7 +11,7 @@
 
 cBricks *brick;
 cAnimBall *animationBalls;
-cBall *ball;                    // ball object
+std::vector<cBall> balls;       // ball object
 cPaddle *paddle;                // paddle object
 cPowerup *powerup;              // Handles powerups
 int activePowerups;             //|Pierce|+1 Life|Explode|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (12 bits)
@@ -127,7 +127,9 @@ int main() {
                 Logic();
             }
             checkWin();
-            if(ball[0].getDirection() != STOP && !isPaused) timer += GetFrameTime();
+            for(int i = 0; i < cBall::ballCount; i++) {
+                if(balls[i].getDirection() != STOP && !isPaused) timer += GetFrameTime();
+            }
             double currentTime = GetTime();
             if(currentTime - previousTime >= updateInterval) {
                 if(animationFrame >= 100) animationFrame = 0;
@@ -258,7 +260,8 @@ void Init() {
     timer = 0;
     //
 
-    ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250);
+    //ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250);
+    balls.emplace_back(cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250));
     paddle = new cPaddle(GetScreenWidth() / 2 - 50, GetScreenHeight() - 35, 100, 10);
     animationBalls = (cAnimBall *)MemAlloc(MAX_ANIM_BALL_COUNT*sizeof(cAnimBall));
     brick = (cBricks *)MemAlloc(MAX_BRICKS*sizeof(cBricks));  //MemAlloc() is equivalent to malloc();
@@ -414,7 +417,9 @@ void Draw() {
     //
 
     //Draw Ball
-    DrawCircle(ball[0].getX(), ball[0].getY(), ball[0].getSize(), WHITE);
+    for(int i = 0; i < cBall::ballCount; i++) {
+        DrawCircle(balls[i].getX(), balls[i].getY(), balls[i].getSize(), WHITE);
+    }
     //
 
     //Draw Powerups
@@ -429,62 +434,63 @@ void Draw() {
         }
     }
     //
-
-    //Draw Borders
-    int distance = 0;
-    int ballSize;
-    // Define a maximum size for the ball and a factor for size decrease
-    int maxSize = ball[0].getSize() * 3;
-    int minSize = ball[0].getSize() + 4;
-    //DRAW BORDER TOP
-    DrawRectangleRec(borderTop, BLACK);
-    DrawRectangleLinesEx(borderTop, 1.5, BLUE);
-    if(CheckCollisionCircleRec({ball[0].getX(),ball[0].getY()}, ball[0].getSize(), borderTop)) {
-        distance = ball[0].getY() - borderTop.y - borderTop.height;
-        // Calculate the ball size based on the distance
-        ballSize = maxSize * (distance / 10.0f);
-        // Ensure the ball size does not go below the minimum size
-        if (ballSize > minSize) {
-            ballSize = minSize;
+    for(int i = 0; i < cBall::ballCount; i++) {
+        //Draw Borders
+        int distance = 0;
+        int ballSize;
+        // Define a maximum size for the ball and a factor for size decrease
+        int maxSize = balls[i].getSize() * 3;
+        int minSize = balls[i].getSize() + 4;
+        //DRAW BORDER TOP
+        DrawRectangleRec(borderTop, BLACK);
+        DrawRectangleLinesEx(borderTop, 1.5, BLUE);
+        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, balls[i].getSize(), borderTop)) {
+            distance = balls[i].getY() - borderTop.y - borderTop.height;
+            // Calculate the ball size based on the distance
+            ballSize = maxSize * (distance / 10.0f);
+            // Ensure the ball size does not go below the minimum size
+            if (ballSize > minSize) {
+                ballSize = minSize;
+            }
+            BeginScissorMode(borderTop.x, borderTop.y, borderTop.width, borderTop.height);
+            DrawCircle(balls[i].getX(), balls[i].getY(), ballSize, SKYBLUE);
+            DrawCircle(balls[i].getX(), balls[i].getY(), ballSize - 2, BLACK);
+            EndScissorMode();
         }
-        BeginScissorMode(borderTop.x, borderTop.y, borderTop.width, borderTop.height);
-        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize, SKYBLUE);
-        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize - 2, BLACK);
-        EndScissorMode();
-    }
-    //
-    DrawRectangleRec(borderLeft, BLACK);
-    DrawRectangleLinesEx(borderLeft, 1.5, BLUE);
-    if(CheckCollisionCircleRec({ball[0].getX(),ball[0].getY()}, ball[0].getSize(), borderLeft)) {
-        distance = ball[0].getX() - borderLeft.x - borderLeft.width;
-        // Calculate the ball size based on the distance
-        ballSize = maxSize * (distance / 10.0f);
-        // Ensure the ball size does not go below the minimum size
-        if (ballSize > minSize) {
-            ballSize = minSize;
+        //
+        DrawRectangleRec(borderLeft, BLACK);
+        DrawRectangleLinesEx(borderLeft, 1.5, BLUE);
+        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, balls[i].getSize(), borderLeft)) {
+            distance = balls[i].getX() - borderLeft.x - borderLeft.width;
+            // Calculate the ball size based on the distance
+            ballSize = maxSize * (distance / 10.0f);
+            // Ensure the ball size does not go below the minimum size
+            if (ballSize > minSize) {
+                ballSize = minSize;
+            }
+            BeginScissorMode(borderLeft.x, borderLeft.y, borderLeft.width, borderLeft.height);
+            DrawCircle(balls[i].getX(), balls[i].getY(), ballSize, SKYBLUE);
+            DrawCircle(balls[i].getX(), balls[i].getY(), ballSize - 2, BLACK);
+            EndScissorMode();
         }
-        BeginScissorMode(borderLeft.x, borderLeft.y, borderLeft.width, borderLeft.height);
-        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize, SKYBLUE);
-        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize - 2, BLACK);
-        EndScissorMode();
-    }
-    //
-    DrawRectangleRec(borderRight, BLACK);
-    DrawRectangleLinesEx(borderRight, 1.5, BLUE);
-    if(CheckCollisionCircleRec({ball[0].getX(),ball[0].getY()}, ball[0].getSize(), borderRight)) {
-        distance = borderRight.x - ball[0].getX();
-        // Calculate the ball size based on the distance
-        ballSize = maxSize * (distance / 10.0f);
-        // Ensure the ball size does not go below the minimum size
-        if (ballSize > minSize) {
-            ballSize = minSize;
+        //
+        DrawRectangleRec(borderRight, BLACK);
+        DrawRectangleLinesEx(borderRight, 1.5, BLUE);
+        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, balls[i].getSize(), borderRight)) {
+            distance = borderRight.x - balls[i].getX();
+            // Calculate the ball size based on the distance
+            ballSize = maxSize * (distance / 10.0f);
+            // Ensure the ball size does not go below the minimum size
+            if (ballSize > minSize) {
+                ballSize = minSize;
+            }
+            BeginScissorMode(borderRight.x, borderRight.y, borderRight.width, borderRight.height);
+            DrawCircle(balls[i].getX(), balls[i].getY(), ballSize, SKYBLUE);
+            DrawCircle(balls[i].getX(), balls[i].getY(), ballSize - 2, BLACK);
+            EndScissorMode();
         }
-        BeginScissorMode(borderRight.x, borderRight.y, borderRight.width, borderRight.height);
-        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize, SKYBLUE);
-        DrawCircle(ball[0].getX(), ball[0].getY(), ballSize - 2, BLACK);
-        EndScissorMode();
+        //
     }
-    //
 
     //Debug Red Bottom Border:
 #ifdef _DEBUG
@@ -512,6 +518,8 @@ void Input() {
 #ifdef _DEBUG
     if(IsKeyPressed(KEY_SPACE)) {
         //Add a cheat here for debugging
+        activePowerups |= (1 << 11);
+        printf("Cheat activated!\n");
     }
 #endif // _DEBUG
 
@@ -558,25 +566,34 @@ void Logic() {
     SetWindowTitle(title);
 
     // Click to start the ball movement thing
-    if(ball[0].getDirection() == STOP) {
-        if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            if(timer == 0.0f) {
-                activePowerups = 0;
+    for(int i = 0; i < cBall::ballCount; i++) {
+        if(i == 0 || activePowerups & (1 << 3)) {
+            if(balls[i].getDirection() == STOP) {
+                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    if(timer == 0.0f) {
+                        activePowerups = 0;
+                    }
+                    if(balls[i].getX() < paddle->getX() + paddle->getDimensions().x / 2) {
+                        balls[i].setDirection(UPLEFT);
+                    } else
+                        balls[i].setDirection(UPRIGHT);
+                }
             }
-            if(ball[0].getX() < paddle->getX() + paddle->getDimensions().x / 2) {
-                ball[0].setDirection(UPLEFT);
-            } else
-                ball[0].setDirection(UPRIGHT);
         }
+        balls[i].Move();
     }
-    ball[0].Move();
+
 
     //Paddle
-    if(activePowerups & (1 << 3)) {
-        paddle->Logic(ball, autoMove, soundBounceMagnet);
-    } else
-        paddle->Logic(ball, autoMove, soundBouncePaddle);
+    for(int i = 0; i < cBall::ballCount; i++) {
+        if(activePowerups & (1 << 3)) {
+            paddle->Logic(&balls[i], autoMove, soundBounceMagnet);
+        } else {
+            paddle->Logic(&balls[i], autoMove, soundBouncePaddle);
+        }
+    }
 
+    //Animation balls
     for(int i = 0; i < cAnimBall::ballCount; i++) {
         if(animationBalls[i].getX() < 0 || animationBalls[i].getX() > GetScreenWidth() - borderRight.width || animationBalls[i].getY() < 0 || animationBalls[i].getY() > GetScreenHeight() * 0.8) {
             animationBalls[i].setDirection(STOP);
@@ -584,7 +601,9 @@ void Logic() {
     }
     for(int i = 0; i < cBricks::brickCount; i++) {
         //Brick logic
-        brick[i].Logic(ball, powerup, soundBounceGeneral);
+        for(int j = 0; j < cBall::ballCount; j++) {
+            brick[i].Logic(&balls[j], powerup, soundBounceGeneral);
+        }
         //Animation ball collision
         int brickEnabled = brick[i].getEnabled();
         Rectangle brickRec = brick[i].getDimensionsRec();
@@ -678,16 +697,18 @@ void Logic() {
         activePowerups = activePowerups & ~(1 << 2);
     }
     if(activePowerups & (1 << 3)) { //Magnet
-        if(ball[0].getDirection() != STOP) {
-            if(CheckCollisionCircleRec({ball[0].getX(), ball[0].getY()}, ball[0].getSize(), paddle->getDimensionsRec())) {
-                ball[0].setY(ball[0].getY() - ball[0].getSize() - 1);
-                ball[0].setDirection(STOP);
+        for(int i = 0; i < cBall::ballCount; i++) {
+            if(balls[i].getDirection() != STOP) {
+                if(CheckCollisionCircleRec({balls[i].getX(), balls[i].getY()}, balls[i].getSize(), paddle->getDimensionsRec())) {
+                    balls[i].setY(balls[i].getY() - balls[i].getSize() - 1);
+                    balls[i].setDirection(STOP);
+                }
+            } else {
+                float x = balls[i].getX() - balls[i].getSize();
+                balls[i].setX(balls[i].getX() + magnetPowerupDiff);
             }
-        } else {
-            float x = ball[0].getX() - ball[0].getSize();
-            ball[0].setX(ball[0].getX() + magnetPowerupDiff);
-            magnetPowerupDiff = 0;
         }
+        magnetPowerupDiff = 0;
     }
     if(activePowerups & (1 << 4)) { //Death
         reset();
@@ -696,18 +717,24 @@ void Logic() {
         if(timerShrinkBall == 0.0f) {
             timerShrinkBall = timer;
             activePowerups |= (1 << 5);
-            ball[0].setSize(0);
+            for(int i = 0; i < cBall::ballCount; i++) {
+                balls[i].setSize(0);
+            }
         } else {
             if(timer - timerShrinkBall > 20.0f) {
                 timerShrinkBall = 0.0f;
                 activePowerups &= ~(1 << 5);
-                ball[0].resetSize();
+                for(int i = 0; i < cBall::ballCount; i++) {
+                    balls[i].resetSize();
+                }
             }
         }
     }
     if(activePowerups & (1 << 6)) { //FastBall
-        ball[0].setAcceleration(0.035f);
-        ball[0].setSpeed(800);
+        for(int i = 0; i < cBall::ballCount; i++) {
+            balls[i].setAcceleration(0.035f);
+            balls[i].setSpeed(800);
+        }
     }
     if(activePowerups & (1 << 7)) { //SuperShrinkPaddle
         //#error TODO (Administrator#1#05/13/24): Add texture for powerup
@@ -723,12 +750,52 @@ void Logic() {
         //#error TODO (Administrator#1#05/13/24): Add texture for powerup
         paddle->setPaddleSize(paddle->getDimensions().x - 20);
     }
-    /*if(activePowerups & (1 << 11)){ //SplitBall
-        // TODO (Administrator#9#05/13/24): Powerups
-    }*/
+    if (activePowerups & (1 << 11)) { // SplitBall
+        int lim = cBall::ballCount;
+        eDir newDirection = STOP;
+        std::vector<cBall> newBalls;
+
+        for (int i = 0; i < lim; i++) {
+            // Create a new ball by copying the existing one
+            cBall newBall = balls[i];
+
+            // Determine the new direction
+            switch (balls[i].getDirection()) {
+            case DOWNLEFT:
+                newDirection = DOWNRIGHT;
+                break;
+            case DOWNRIGHT:
+                newDirection = DOWNLEFT;
+                break;
+            case UPLEFT:
+                newDirection = UPRIGHT;
+                break;
+            case UPRIGHT:
+                newDirection = UPLEFT;
+                break;
+            default:
+                newDirection = STOP;
+                break;
+            }
+
+            // Set the new direction for the new ball
+            newBall.setDirection(newDirection);
+
+            // Add the new ball to the temporary vector
+            newBalls.emplace_back(std::move(newBall));
+        }
+
+        // Add all new balls to the original vector
+        balls.insert(balls.end(), std::make_move_iterator(newBalls.begin()), std::make_move_iterator(newBalls.end()));
+
+        // Update the active powerups to remove the SplitBall powerup
+        activePowerups &= ~(1 << 11);
+        printf("Split done!\n");
+    }
+
 
     //Make bricks fall after 60 seconds
-    if(ball[0].getDirection() != STOP && !isPaused) {
+    if(!isPaused) {
         if(timer > 60.0f || (activePowerups & (1 << 8))) {
             if(fmod(timer, 10.0) < 0.10) {
                 for(int i = 0; i < cBricks::brickCount; i++) {
@@ -743,47 +810,53 @@ void Logic() {
         }
     }
 
-    //Left wall collision
-    Vector2 ball_collision = {ball[0].getX(), ball[0].getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball[0].getSize(), borderLeft)) {
-        if(ball[0].getDirection() == UPLEFT) {
-            ball[0].setDirection(UPRIGHT);
+    for(int i = 0; i < cBall::ballCount; i++) {
+        if(cBall::ballCount > 1 && (balls[i].getY() - balls[i].getSize() < 0 || balls[i].getY() + balls[i].getSize() > GetScreenHeight() || balls[i].getX() - balls[i].getSize() < 0 || balls[i].getX() + balls[i].getSize() > GetScreenWidth())) {
+            balls.erase(balls.begin() + i);
         }
-        if(ball[0].getDirection() == DOWNLEFT) {
-            ball[0].setDirection(DOWNRIGHT);
+        //Left wall collision
+        Vector2 ball_collision = {balls[i].getX(), balls[i].getY()};
+        if(CheckCollisionCircleRec(ball_collision,balls[i].getSize(), borderLeft)) {
+            if(balls[i].getDirection() == UPLEFT) {
+                balls[i].setDirection(UPRIGHT);
+            }
+            if(balls[i].getDirection() == DOWNLEFT) {
+                balls[i].setDirection(DOWNRIGHT);
+            }
+            PlaySound(soundBounceGeneral);
         }
-        PlaySound(soundBounceGeneral);
-    }
 
-    //Right wall collision
-    ball_collision = {ball[0].getX(), ball[0].getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball[0].getSize(),borderRight)) {
-        if(ball[0].getDirection() == UPRIGHT) {
-            ball[0].setDirection(UPLEFT);
+        //Right wall collision
+        ball_collision = {balls[i].getX(), balls[i].getY()};
+        if(CheckCollisionCircleRec(ball_collision,balls[i].getSize(),borderRight)) {
+            if(balls[i].getDirection() == UPRIGHT) {
+                balls[i].setDirection(UPLEFT);
+            }
+            if(balls[i].getDirection() == DOWNRIGHT) {
+                balls[i].setDirection(DOWNLEFT);
+            }
+            PlaySound(soundBounceGeneral);
         }
-        if(ball[0].getDirection() == DOWNRIGHT) {
-            ball[0].setDirection(DOWNLEFT);
-        }
-        PlaySound(soundBounceGeneral);
-    }
 
-    //Top wall collision
-    ball_collision = {ball[0].getX(), ball[0].getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball[0].getSize(),borderTop)) {
-        if(ball[0].getDirection() == UPRIGHT) {
-            ball[0].setDirection(DOWNRIGHT);
+        //Top wall collision
+        ball_collision = {balls[i].getX(), balls[i].getY()};
+        if(CheckCollisionCircleRec(ball_collision,balls[i].getSize(),borderTop)) {
+            if(balls[i].getDirection() == UPRIGHT) {
+                balls[i].setDirection(DOWNRIGHT);
+            }
+            if(balls[i].getDirection() == UPLEFT) {
+                balls[i].setDirection(DOWNLEFT);
+            }
+            PlaySound(soundBounceGeneral);
         }
-        if(ball[0].getDirection() == UPLEFT) {
-            ball[0].setDirection(DOWNLEFT);
-        }
-        PlaySound(soundBounceGeneral);
-    }
 
-    //Bottom wall collision
-    ball_collision = {ball[0].getX(), ball[0].getY()};
-    if(CheckCollisionCircleRec(ball_collision,ball[0].getSize(),borderBottom)) {
-        PlaySound(soundDeath);
-        reset();
+        //Bottom wall collision
+        ball_collision = {balls[i].getX(), balls[i].getY()};
+        if(CheckCollisionCircleRec(ball_collision,balls[i].getSize(),borderBottom)) {
+            PlaySound(soundDeath);
+            if(cBall::ballCount == 1)
+                reset();
+        }
     }
 }
 
@@ -800,7 +873,11 @@ void gameReset() {
         animationBalls[i].~cAnimBall();
     }
     paddle->Reset();
-    ball[0].Reset();
+    if (balls.size() > 1) {
+        // Erase all balls except the first one
+        balls.erase(balls.begin() + 1, balls.end());
+    }
+    balls[0].Reset();
     for(int i = 0; i < 6; i++) {
         powerup[i].setEnabled(0);
     }
@@ -819,7 +896,11 @@ void reset() {
                 }
         }
         paddle->Reset();
-        ball[0].Reset();
+        if (balls.size() > 1) {
+            // Erase all balls except the first one
+            balls.erase(balls.begin() + 1, balls.end());
+        }
+        balls[0].Reset();
         for(int i = 0; i < 6; i++) {
             powerup[i].setEnabled(0);
         }
@@ -854,7 +935,6 @@ void Unload() {
     MemFree(animationBalls);
     MemFree(brick);
     delete[] powerup;
-    delete ball;
     delete paddle;
 #ifdef _DEBUG
     printf("Destructor finished.\n");

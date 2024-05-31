@@ -34,6 +34,11 @@
 #define TEX_POWERUP_DEATH "\\Release\\resources\\textures\\death.png"
 #define TEX_POWERUP_SHRINKBALL "\\Release\\resources\\textures\\shrinkBall.png"
 #define TEX_POWERUP_FASTSPEED "\\Release\\resources\\textures\\fastSpeed.png"
+#define TEX_POWERUP_SUPERSHRINKPADDLE "\\Release\\resources\\textures\\superShrinkPaddle.png"
+#define TEX_POWERUP_FALLINGBRICKS "\\Release\\resources\\textures\\fallingBricks.png"//
+#define TEX_POWERUP_EXPANDPADDLE "\\Release\\resources\\textures\\expandPaddle.png"
+#define TEX_POWERUP_SHRINKPADDLE "\\Release\\resources\\textures\\shrinkPaddle.png"
+#define TEX_POWERUP_SplitBall "\\Release\\resources\\textures\\splitBall.png"
 
 enum eDir { STOP = 0, UPLEFT = 1, DOWNLEFT = 2, UPRIGHT = 3, DOWNRIGHT = 4};
 

@@ -6,7 +6,7 @@
 #include <random>
 
 class cBall {
-private:
+  private:
     float x, y;
     float originalX, originalY;
     int currentSize;
@@ -21,7 +21,7 @@ private:
     std::uniform_int_distribution<> randomNrDistribution{1, 4};
     std::uniform_int_distribution<> randomNrDirection{1, 4};
 
-public:
+  public:
     static int ballCount;
     static Texture2D texBall;
 
@@ -68,11 +68,28 @@ float cBall::getY() const {
 }
 
 void cBall::setX(float newX) {
-    x = newX;
+    if(newX <= 10 + currentSize) {
+        x = 11 + currentSize;
+    } else {
+        if(newX >= GetScreenWidth() - 10 - currentSize) {
+            x = GetScreenWidth() - 11 - currentSize;
+        } else {
+            x = newX;
+        }
+    }
 }
 
 void cBall::setY(float newY) {
     y = newY;
+    if(newY <= 10 + currentSize) {
+        y = 11 + currentSize;
+    } else {
+        if(newY >= GetScreenHeight() - 10 - currentSize) {
+            y = GetScreenHeight() - 11 - currentSize;
+        } else {
+            y = newY;
+        }
+    }
 }
 
 eDir cBall::getDirection() const {

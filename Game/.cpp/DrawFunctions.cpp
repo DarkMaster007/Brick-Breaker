@@ -1,6 +1,6 @@
 #include "DrawFunctions.h"
 
-extern Texture2D texPowerup[14];
+extern Texture2D texPowerup[13];
 extern int activePowerups;
 extern char rootPath[2048];
 
@@ -35,37 +35,27 @@ void GeneratePowerupTextures() {
     ImageResize(&tmp, 50, 50);
     texPowerup[6] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    /*
-    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_SUPERSHRINKPADDLE));
     ImageResize(&tmp, 50, 50);
     texPowerup[7] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_FALLINGBRICKS));
     ImageResize(&tmp, 50, 50);
     texPowerup[8] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_EXPANDPADDLE));
     ImageResize(&tmp, 50, 50);
     texPowerup[9] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_SHRINKPADDLE));
     ImageResize(&tmp, 50, 50);
     texPowerup[10] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_HP));
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_SplitBall));
     ImageResize(&tmp, 50, 50);
     texPowerup[11] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    */
-    texPowerup[13] = LoadTexture(TextFormat("%s%s", rootPath, TEX_POWERUP_MAGNET_PADDLE));
-    for(int i = 0; i < 13; i++) {
-        if(texPowerup[i].id == 0) {
-            tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP));
-            ImageResize(&tmp, 50, 50);
-            texPowerup[i] = LoadTextureFromImage(tmp);
-            UnloadImage(tmp);
-        }
-    }
+    texPowerup[12] = LoadTexture(TextFormat("%s%s", rootPath, TEX_POWERUP_MAGNET_PADDLE));
 }
 
 void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int pulseAmount, Color recColor) {
@@ -128,8 +118,8 @@ void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL,
     Destination = {paddle.x + reverseAreaSize, paddle.y, paddle.width - 2 * reverseAreaSize, paddle.height};
     DrawTexturePro(bodyTexture, Source, Destination, { 0, 0 }, 0, WHITE);
     if(activePowerups & (1 << 3)) {
-        Source = {0, 0, texPowerup[13].width, texPowerup[13].height};
-        Destination = {paddle.x, paddle.y - texPowerup[13].height, paddle.width, texPowerup[13].height};
-        DrawTexturePro(texPowerup[13], Source, Destination, { 0, 0 }, 0, SKYBLUE);
+        Source = {0, 0, texPowerup[12].width, texPowerup[12].height};
+        Destination = {paddle.x, paddle.y - texPowerup[12].height, paddle.width, texPowerup[12].height};
+        DrawTexturePro(texPowerup[12], Source, Destination, { 0, 0 }, 0, SKYBLUE);
     }
 }

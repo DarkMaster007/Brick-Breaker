@@ -53,6 +53,7 @@ int animationFrame;
 bool configLoadError;
 int lives = 3;
 float timerShrinkBall = 0.0f;
+bool isTempMagnetOn = false;
 
 void OpenWindow();
 int MainMenu();
@@ -258,6 +259,7 @@ void Init() {
     updateInterval = 0.05; //50 ms
     animationFrame = 0;
     timer = 0;
+    isTempMagnetOn = true;
     //
 
     //ball = new cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250);
@@ -566,17 +568,20 @@ void Logic() {
     SetWindowTitle(title);
 
     // Click to start the ball movement thing
+    bool mouseClicked = false;
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        mouseClicked = true;
+    }
     for(int i = 0; i < cBall::ballCount; i++) {
-        if(i == 0 || activePowerups & (1 << 3)) {
-            if(balls[i].getDirection() == STOP) {
-                if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                    if(timer == 0.0f) {
-                        activePowerups = 0;
-                    }
-                    if(balls[i].getX() < paddle->getX() + paddle->getDimensions().x / 2) {
-                        balls[i].setDirection(UPLEFT);
-                    } else
-                        balls[i].setDirection(UPRIGHT);
+        if(isTempMagnetOn == true || activePowerups & (1 << 3)) {
+            if(balls[i].getDirection() == STOP && mouseClicked) {
+                if(balls[i].getX() < paddle->getX() + paddle->getDimensions().x / 2) {
+                    balls[i].setDirection(UPLEFT);
+                } else
+                    balls[i].setDirection(UPRIGHT);
+                if(i == cBall::ballCount - 1) {
+                    activePowerups = 0;
+                    isTempMagnetOn = false;
                 }
             }
         }
@@ -704,7 +709,6 @@ void Logic() {
                     balls[i].setDirection(STOP);
                 }
             } else {
-                float x = balls[i].getX() - balls[i].getSize();
                 balls[i].setX(balls[i].getX() + magnetPowerupDiff);
             }
         }
@@ -774,7 +778,7 @@ void Logic() {
                 newDirection = UPLEFT;
                 break;
             default:
-                newDirection = STOP;
+                newDirection = UPRIGHT;
                 break;
             }
 
@@ -863,7 +867,8 @@ void Logic() {
 void gameReset() {
     lives = 3;
     timer = 0;
-    activePowerups = 0;
+    isTempMagnetOn = true;
+    activePowerups = (1 << 3);
     int totalBrickCount = cBricks::brickCount;
     for(int i = 0; i < totalBrickCount; i++) {
         brick[i].~cBricks();
@@ -904,8 +909,9 @@ void reset() {
         for(int i = 0; i < 6; i++) {
             powerup[i].setEnabled(0);
         }
-        activePowerups = 0;
+        activePowerups = (1 << 3);
         timerShrinkBall = 0.0f;
+        isTempMagnetOn = true;
         lives--;
     }
 }

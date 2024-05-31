@@ -4,14 +4,13 @@ int cBall::ballCount = 0;
 Texture2D cBall::texBall;
 extern int frame;
 
-cBall::cBall(int posX, int posY, int ballSize, float ballSpeed) {
+cBall::cBall(int posX, int posY, int ballSize, float ballSpeed):direction(STOP) {
+    setSize(ballSize);
+    originalSize = getSize();
     setX(posX);
     setY(posY);
     originalX = x;
     originalY = y;
-    setDirection(STOP);
-    setSize(ballSize);
-    originalSize = getSize();
     angle = 45.0f;
     speedX = std::abs(ballSpeed * std::cos(angle));
     speedY = std::abs(ballSpeed * std::sin(angle));
@@ -22,14 +21,8 @@ cBall::cBall(int posX, int posY, int ballSize, float ballSpeed) {
     ballCount++;
 }
 
-cBall::cBall(int posX, int posY, int ball_size, float ballSpeed, eDir newDirection): x(posX), y(posY), originalX(posX), originalY(posY), currentSize(ball_size), originalSize(ball_size),
-    angle(45.0f), acceleration(0.017f), direction(newDirection) {
-    randomizeMovement();
-    speedX = std::abs(ballSpeed * std::cos(angle));
-    speedY = std::abs(ballSpeed * std::sin(angle));
-    originalSpeedX = speedX;
-    originalSpeedY = speedY;
-    ballCount++;
+cBall::cBall(int posX, int posY, int ballSize, float ballSpeed, eDir newDirection):cBall(posX, posY, ballSize, ballSpeed) {
+    direction = newDirection;
 }
 
 cBall::cBall(const cBall& other)

@@ -4,7 +4,7 @@
 extern int frame;
 extern int activePowerups;
 
-Texture2D texPowerup[14];
+Texture2D texPowerup[13];
 int cPowerup::powerupCount = 0;
 
 cPowerup::cPowerup() {
@@ -20,7 +20,7 @@ cPowerup::cPowerup() {
 bool cPowerup::spawnPowerup(cBricks *brick) {
     if(GetRandomValue(0, 99) < spawnChance) {
         setEnabled(1);
-        type = GetRandomValue(0, 12);      // TODO (DarkMaster#7#10/13/22): Implement and actual method to get powerups. Next level should be low chance.
+        type = GetRandomValue(0, 11);      // TODO (DarkMaster#7#10/13/22): Implement and actual method to get powerups. Next level should be low chance.
         rec.x = brick->getX();
         rec.y = brick->getY();
 #ifdef _DEBUG

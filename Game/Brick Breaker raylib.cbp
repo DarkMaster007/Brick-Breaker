@@ -2,50 +2,99 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Brick Breaker raylib" />
+		<Option title="Brick Breaker" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../Release/bin/Game" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../Release/bin/" />
+				<Option output="../Release/bin/Game_dev" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../Release/bin" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-pg -no-pie -fno-builtin" />
+					<Add option="-Og" />
 					<Add option="-g" />
-				</Compiler>
-			</Target>
-			<Target title="Release">
-				<Option output="bin/Release/Brick Breaker raylib" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Release/" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-				<Compiler>
-					<Add option="-O2" />
+					<Add option="-O0" />
+					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Linker>
+					<Add option="-pg -lgmon" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="../Release/bin/Game" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../Release/bin" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-flto" />
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-flto" />
 					<Add option="-s" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Wshadow" />
+			<Add option="-Wredundant-decls" />
+			<Add option="-Wfloat-equal" />
+			<Add option="-Winline" />
+			<Add option="-Wunreachable-code" />
 			<Add option="-Wall" />
 			<Add option="-fpermissive" />
-			<Add directory="include" />
+			<Add option="-Wnarrowing" />
+			<Add directory="../../Raylib Library/raylib/src" />
+			<Add directory="../../Raylib Library/raygui/src" />
+			<Add directory=".h" />
 		</Compiler>
 		<Linker>
+			<Add option="-static-libstdc++" />
+			<Add option="-static-libgcc" />
 			<Add option="-static" />
 			<Add library="raylib" />
 			<Add library="opengl32" />
 			<Add library="gdi32" />
 			<Add library="winmm" />
-			<Add directory="lib" />
+			<Add directory="../../Raylib Library/raylib/src" />
+			<Add directory="../../Raylib Library/raygui/src" />
 		</Linker>
+		<Unit filename=".cpp/DrawFunctions.cpp" />
+		<Unit filename=".cpp/cAnimBall.cpp" />
+		<Unit filename=".cpp/cBall.cpp" />
+		<Unit filename=".cpp/cBricks.cpp" />
+		<Unit filename=".cpp/cPaddle.cpp" />
+		<Unit filename=".cpp/cPowerup.cpp" />
+		<Unit filename=".cpp/cSettings.cpp" />
+		<Unit filename=".cpp/editor.cpp" />
+		<Unit filename=".cpp/main.cpp" />
+		<Unit filename=".h/DrawFunctions.h" />
+		<Unit filename=".h/cAnimBall.h" />
+		<Unit filename=".h/cBall.h" />
+		<Unit filename=".h/cBricks.h" />
+		<Unit filename=".h/cPaddle.h" />
+		<Unit filename=".h/cPowerup.h" />
+		<Unit filename=".h/cSettings.h" />
+		<Unit filename=".h/defines.h" />
+		<Unit filename=".h/editor.h" />
+		<Unit filename=".h/soundBounceGeneral.h" />
+		<Unit filename=".h/soundBouncePaddle.h" />
+		<Unit filename=".h/soundDeath.h" />
+		<Unit filename=".h/soundSelect.h" />
 		<Unit filename="icon.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
-		<Unit filename="main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

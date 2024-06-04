@@ -1,0 +1,6 @@
+
+*.save
+*.out
+*.layout
+*.depend
+*.o

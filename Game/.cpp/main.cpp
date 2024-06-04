@@ -128,9 +128,7 @@ int main() {
                 Logic();
             }
             checkWin();
-            for(int i = 0; i < cBall::ballCount; i++) {
-                if(balls[i].getDirection() != STOP && !isPaused) timer += GetFrameTime();
-            }
+            if(!isTempMagnetOn) timer += GetFrameTime();
             double currentTime = GetTime();
             if(currentTime - previousTime >= updateInterval) {
                 if(animationFrame >= 100) animationFrame = 0;
@@ -175,7 +173,7 @@ void OpenWindow() {
     SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(width,height,"RayBreaker");
     InitAudioDevice();
-    SetTargetFPS(120); // TODO (Administrator#7#): Make everything use deltaTime so you can remove the FPS limit
+    //SetTargetFPS(120); // TODO (Administrator#7#): Make everything use deltaTime so you can remove the FPS limit
     if(fullscreen == 1) {
         ToggleFullscreen();
     }
@@ -579,7 +577,7 @@ void Logic() {
                     balls[i].setDirection(UPLEFT);
                 } else
                     balls[i].setDirection(UPRIGHT);
-                if(i == cBall::ballCount - 1) {
+                if(i == cBall::ballCount - 1 && isTempMagnetOn == true) {
                     activePowerups = 0;
                     isTempMagnetOn = false;
                 }
@@ -718,7 +716,8 @@ void Logic() {
         reset();
     }
     if(activePowerups & (1 << 5)) { //ShrinkBall
-        if(timerShrinkBall == 0.0f) {
+        const float EPSILON = 1e-5; // Define a small threshold for comparison
+        if (fabs(timerShrinkBall - 0.0f) < EPSILON) {
             timerShrinkBall = timer;
             activePowerups |= (1 << 5);
             for(int i = 0; i < cBall::ballCount; i++) {
@@ -741,62 +740,62 @@ void Logic() {
         }
     }
     if(activePowerups & (1 << 7)) { //SuperShrinkPaddle
-        //#error TODO (Administrator#1#05/13/24): Add texture for powerup
         paddle->setPaddleSize(0);
         activePowerups &= ~(1 << 7);
     }
     if(activePowerups & (1 << 9)) { //ExpandPaddle
-        //#error TODO (Administrator#1#05/13/24): Add texture for powerup
         paddle->setPaddleSize(paddle->getDimensions().x + 20);
         activePowerups &= ~(1 << 9);
     }
     if(activePowerups & (1 << 10)) { //ShrinkPaddle
-        //#error TODO (Administrator#1#05/13/24): Add texture for powerup
         paddle->setPaddleSize(paddle->getDimensions().x - 20);
     }
     if (activePowerups & (1 << 11)) { // SplitBall
-        int lim = cBall::ballCount;
-        eDir newDirection = STOP;
-        std::vector<cBall> newBalls;
+        if (balls.size() < MAX_BALLS) {
+            int lim = cBall::ballCount;
+            eDir newDirection = STOP;
+            std::vector<cBall> newBalls;
 
-        for (int i = 0; i < lim; i++) {
-            // Create a new ball by copying the existing one
-            cBall newBall = balls[i];
+            for (int i = 0; i < lim; i++) {
+                if (balls.size() + newBalls.size() >= MAX_BALLS) {
+                    break; // Stop if adding another ball would exceed MAX_BALLS
+                }
 
-            // Determine the new direction
-            switch (balls[i].getDirection()) {
-            case DOWNLEFT:
-                newDirection = DOWNRIGHT;
-                break;
-            case DOWNRIGHT:
-                newDirection = DOWNLEFT;
-                break;
-            case UPLEFT:
-                newDirection = UPRIGHT;
-                break;
-            case UPRIGHT:
-                newDirection = UPLEFT;
-                break;
-            default:
-                newDirection = UPRIGHT;
-                break;
+                // Create a new ball by copying the existing one
+                cBall newBall = balls[i];
+
+                // Determine the new direction
+                switch (balls[i].getDirection()) {
+                case DOWNLEFT:
+                    newDirection = DOWNRIGHT;
+                    break;
+                case DOWNRIGHT:
+                    newDirection = DOWNLEFT;
+                    break;
+                case UPLEFT:
+                    newDirection = UPRIGHT;
+                    break;
+                case UPRIGHT:
+                    newDirection = UPLEFT;
+                    break;
+                default:
+                    newDirection = UPRIGHT;
+                    break;
+                }
+
+                // Set the new direction for the new ball
+                newBall.setDirection(newDirection);
+
+                // Add the new ball to the temporary vector
+                newBalls.emplace_back(std::move(newBall));
             }
 
-            // Set the new direction for the new ball
-            newBall.setDirection(newDirection);
-
-            // Add the new ball to the temporary vector
-            newBalls.emplace_back(std::move(newBall));
+            // Add all new balls to the original vector
+            balls.insert(balls.end(), std::make_move_iterator(newBalls.begin()), std::make_move_iterator(newBalls.end()));
         }
-
-        // Add all new balls to the original vector
-        balls.insert(balls.end(), std::make_move_iterator(newBalls.begin()), std::make_move_iterator(newBalls.end()));
-
         // Update the active powerups to remove the SplitBall powerup
         activePowerups &= ~(1 << 11);
-        printf("Split done!\n");
     }
-
 
     //Make bricks fall after 60 seconds
     if(!isPaused) {
@@ -858,10 +857,10 @@ void Logic() {
         ball_collision = {balls[i].getX(), balls[i].getY()};
         if(CheckCollisionCircleRec(ball_collision,balls[i].getSize(),borderBottom)) {
             PlaySound(soundDeath);
-            if(cBall::ballCount == 1)
-                reset();
+            balls.erase(balls.begin() + i);
         }
     }
+    if(cBall::ballCount == 0) reset();
 }
 
 void gameReset() {
@@ -878,11 +877,9 @@ void gameReset() {
         animationBalls[i].~cAnimBall();
     }
     paddle->Reset();
-    if (balls.size() > 1) {
-        // Erase all balls except the first one
-        balls.erase(balls.begin() + 1, balls.end());
-    }
-    balls[0].Reset();
+    // Erase all balls except the first one
+    balls.erase(balls.begin(), balls.end());
+    balls.emplace_back(cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250));
     for(int i = 0; i < 6; i++) {
         powerup[i].setEnabled(0);
     }
@@ -901,11 +898,9 @@ void reset() {
                 }
         }
         paddle->Reset();
-        if (balls.size() > 1) {
-            // Erase all balls except the first one
-            balls.erase(balls.begin() + 1, balls.end());
-        }
-        balls[0].Reset();
+        // Erase all balls except the first one
+        balls.erase(balls.begin(), balls.end());
+        balls.emplace_back(cBall(GetScreenWidth() / 2,GetScreenHeight() - 50, 10, 250));
         for(int i = 0; i < 6; i++) {
             powerup[i].setEnabled(0);
         }

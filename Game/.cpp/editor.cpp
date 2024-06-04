@@ -43,7 +43,6 @@ void Editor_Info() { //the info menu
     }
 }
 
-// TODO (Administrator#8#02/10/24): Add the rest of the editor functions
 void EditorDraw() {
     BeginDrawing();
     ClearBackground(BLACK);

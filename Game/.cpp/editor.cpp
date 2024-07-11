@@ -25,7 +25,7 @@ void Editor_Init() { // load the brick variable with only ones (meaning all bric
 }
 
 void Editor_Info() { //the info menu
-    while(1) {
+    while(!WindowShouldClose() && !quit) {
         BeginDrawing();
         ClearBackground(BLACK);
         // The actual message you see on screen from here on:
@@ -69,15 +69,16 @@ void EditorDraw() {
                 //Draw brick number on bricks if DEBUG:
                 DrawText(TextFormat("%d", i+1), brickRec.x + brickRec.width / 2 - 2.5, brickRec.y + brickRec.height / 2 - 5, 5, RED);
 #endif // _DEBUG
-            } else {
-                if(editorBricks[i].getType() == 4) {
-                    for(int j = editorBricks[i].animBallIndex; j < editorBricks[i].animBallIndex + STANDARD_ANIM_BALL_COUNT; j++) {
-                        if(animationBalls[j].getDirection() != STOP) cAnimBall::Draw(&animationBalls[j], ORANGE);
-                    }
-                }
             }
         }
-        //
+//
+    }
+    if(GuiButton({GetScreenWidth() / 2.0f - 250, GetScreenHeight() - 160.0f, 200, 80}, "Save and Quit")) {
+        EditorOutput();
+        quit = 1;
+    }
+    if(GuiButton({GetScreenWidth() / 2.0f + 50, GetScreenHeight() - 160.0f, 200, 80}, "Quit")) {
+        quit = 1;
     }
     EndDrawing();
 }
@@ -191,13 +192,6 @@ void EditorLogic() {
                 }
             }
         }
-    }
-    if(GuiButton({GetScreenWidth() / 2.0f - 250, GetScreenHeight() - 160.0f, 200, 80}, "Save and Quit")) {
-        EditorOutput();
-        quit = 1;
-    }
-    if(GuiButton({GetScreenWidth() / 2.0f + 50, GetScreenHeight() - 160.0f, 200, 80}, "Quit")) {
-        quit = 1;
     }
 }
 

@@ -4,7 +4,7 @@
 #include "defines.h"
 #include "cAnimBall.h"
 
-void GeneratePowerupTextures();
+void LoadPowerupTextures();
 void DrawBricksPulse(Rectangle brickRec, int currentAnimationFrame, int lineAmount, Color recColor);
 void DrawBricksBounce(Rectangle brickRec, cAnimBall animationBalls[], Color ballColor);
 void DrawBricksUnbreakable(Rectangle brickRec, Color recColor);

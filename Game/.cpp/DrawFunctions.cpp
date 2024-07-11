@@ -4,7 +4,7 @@ extern Texture2D texPowerup[13];
 extern int activePowerups;
 extern char rootPath[2048];
 
-void GeneratePowerupTextures() {
+void LoadPowerupTextures() {
     //|Pierce|+1 Life|Explode|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (12 bits)
     Image tmp;
     tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_PIERCE));
@@ -51,7 +51,7 @@ void GeneratePowerupTextures() {
     ImageResize(&tmp, 50, 50);
     texPowerup[10] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
-    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_SplitBall));
+    tmp = LoadImage(TextFormat("%s%s", rootPath, TEX_POWERUP_SPLITBALL));
     ImageResize(&tmp, 50, 50);
     texPowerup[11] = LoadTextureFromImage(tmp);
     UnloadImage(tmp);
@@ -118,8 +118,8 @@ void DrawPaddle(Rectangle paddle, float reverseAreaSize, Texture2D edgeTextureL,
     Destination = {paddle.x + reverseAreaSize, paddle.y, paddle.width - 2 * reverseAreaSize, paddle.height};
     DrawTexturePro(bodyTexture, Source, Destination, { 0, 0 }, 0, WHITE);
     if(activePowerups & (1 << 3)) {
-        Source = {0, 0, texPowerup[12].width, texPowerup[12].height};
-        Destination = {paddle.x, paddle.y - texPowerup[12].height, paddle.width, texPowerup[12].height};
+        Source = {0, 0, (float)texPowerup[12].width, (float)texPowerup[12].height};
+        Destination = {paddle.x, paddle.y - texPowerup[12].height, paddle.width, (float)texPowerup[12].height};
         DrawTexturePro(texPowerup[12], Source, Destination, { 0, 0 }, 0, SKYBLUE);
     }
 }

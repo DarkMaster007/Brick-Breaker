@@ -103,10 +103,9 @@ int main() {
         Editor_Info();
         while(!WindowShouldClose() && !quit) {
             EditorLogic();
-            timer += GetFrameTime();
             double currentTime = GetTime();
             if(currentTime - previousTime >= updateInterval) {
-                if(animationFrame >= 100) animationFrame = 0;
+                if(animationFrame >= 25) animationFrame = 0;
                 if(!isPaused) {
                     animationFrame++;
                 }
@@ -128,10 +127,10 @@ int main() {
                 Logic();
             }
             checkWin();
-            if(!isTempMagnetOn) timer += GetFrameTime();
+            if(!isTempMagnetOn && !isPaused) timer += GetFrameTime();
             double currentTime = GetTime();
             if(currentTime - previousTime >= updateInterval) {
-                if(animationFrame >= 100) animationFrame = 0;
+                if(animationFrame >= 25) animationFrame = 0;
                 if(!isPaused) {
                     animationFrame++;
                 }
@@ -170,10 +169,10 @@ void OpenWindow() {
 #endif // _DEBUG
 
     SetRandomSeed(time(NULL)); //Set seed for random values with current time
-    SetConfigFlags(FLAG_VSYNC_HINT);
+    //SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(width,height,"RayBreaker");
     InitAudioDevice();
-    //SetTargetFPS(120); // TODO (Administrator#7#): Make everything use deltaTime so you can remove the FPS limit
+    SetTargetFPS(75); // TODO (Administrator#7#): Make everything use deltaTime so you can remove the FPS limit
     if(fullscreen == 1) {
         ToggleFullscreen();
     }
@@ -191,7 +190,7 @@ int MainMenu() {
     newScreenWidth = GetScreenWidth();
     newScreenHeight = GetScreenHeight();
 
-    while(!WindowShouldClose()) {
+    while(!WindowShouldClose() && !quit) {
         //Main screen
         int box_width = 180;
         int box_height = 60;
@@ -244,7 +243,7 @@ int MainMenu() {
 }
 
 void Init() {
-    GeneratePowerupTextures();
+    LoadPowerupTextures();
     //DisableCursor();
     //Initialize all vars with their proper values
     activePowerups = (1 << 3);
@@ -444,7 +443,7 @@ void Draw() {
         //DRAW BORDER TOP
         DrawRectangleRec(borderTop, BLACK);
         DrawRectangleLinesEx(borderTop, 1.5, BLUE);
-        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, balls[i].getSize(), borderTop)) {
+        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, maxSize, borderTop)) {
             distance = balls[i].getY() - borderTop.y - borderTop.height;
             // Calculate the ball size based on the distance
             ballSize = maxSize * (distance / 10.0f);
@@ -460,7 +459,7 @@ void Draw() {
         //
         DrawRectangleRec(borderLeft, BLACK);
         DrawRectangleLinesEx(borderLeft, 1.5, BLUE);
-        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, balls[i].getSize(), borderLeft)) {
+        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, maxSize, borderLeft)) {
             distance = balls[i].getX() - borderLeft.x - borderLeft.width;
             // Calculate the ball size based on the distance
             ballSize = maxSize * (distance / 10.0f);
@@ -476,7 +475,7 @@ void Draw() {
         //
         DrawRectangleRec(borderRight, BLACK);
         DrawRectangleLinesEx(borderRight, 1.5, BLUE);
-        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, balls[i].getSize(), borderRight)) {
+        if(CheckCollisionCircleRec({balls[i].getX(),balls[i].getY()}, maxSize, borderRight)) {
             distance = borderRight.x - balls[i].getX();
             // Calculate the ball size based on the distance
             ballSize = maxSize * (distance / 10.0f);
@@ -516,9 +515,10 @@ void Input() {
 
     //Trigger dev stuff
 #ifdef _DEBUG
+    //|Pierce|+1 Life|Explode|Magnet|Death|ShrinkBall|FastBall|SuperShrinkPaddle|FallingBricks|ExpandPaddle|ShrinkPaddle|SplitBall| (12 bits)
     if(IsKeyPressed(KEY_SPACE)) {
         //Add a cheat here for debugging
-        activePowerups |= (1 << 11);
+        activePowerups |= (1 << 10);
         printf("Cheat activated!\n");
     }
 #endif // _DEBUG
@@ -604,8 +604,10 @@ void Logic() {
     }
     for(int i = 0; i < cBricks::brickCount; i++) {
         //Brick logic
-        for(int j = 0; j < cBall::ballCount; j++) {
-            brick[i].Logic(&balls[j], powerup, soundBounceGeneral);
+        if(brick[i].getEnabled()) {
+            for(int j = 0; j < cBall::ballCount; j++) {
+                brick[i].Logic(&balls[j], powerup, soundBounceGeneral);
+            }
         }
         //Animation ball collision
         int brickEnabled = brick[i].getEnabled();
@@ -749,6 +751,7 @@ void Logic() {
     }
     if(activePowerups & (1 << 10)) { //ShrinkPaddle
         paddle->setPaddleSize(paddle->getDimensions().x - 20);
+        activePowerups &= ~(1 << 10);
     }
     if (activePowerups & (1 << 11)) { // SplitBall
         if (balls.size() < MAX_BALLS) {
